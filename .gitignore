@@ -1,0 +1,43 @@
+# 의존성 패키지 (Dependencies)
+node_modules/
+
+# 빌드 결과물 (Build output)
+dist/
+build/
+
+# 환경 변수 (Environment variables)
+# .env.example 파일을 통해 어떤 변수들이 필요한지 공유
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+
+# IDE 및 에디터 설정 (IDE & Editor specific)
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# 운영체제 파일 (OS generated files)
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# 로그 파일 (Log files)
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# 테스트 커버리지 (Test coverage)
+coverage/
+
+# Vite 캐시 (Vite specific cache)
+.vite/
