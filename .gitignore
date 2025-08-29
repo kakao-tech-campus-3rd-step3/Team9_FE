@@ -17,7 +17,6 @@ build/
 
 # IDE 및 에디터 설정 (IDE & Editor specific)
 .idea/
-.vscode/
 .cursor/
 *.suo
 *.ntvs*
