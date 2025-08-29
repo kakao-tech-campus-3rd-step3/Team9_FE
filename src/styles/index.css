@@ -1,5 +1,6 @@
-/* Tailwind CSS 기본 설정 및 전역 스타일 */
+/* Tailwind CSS v4 기본 설정 및 전역 스타일 */
 
+@import './fonts.css';
 @import 'tailwindcss';
 @import './theme.css';
 

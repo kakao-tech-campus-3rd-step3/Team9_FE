@@ -1,5 +1,7 @@
+import AppRouter from './routes';
+
 function App() {
-  return <div>프로젝트 시작</div>;
+  return <AppRouter />;
 }
 
 export default App;
