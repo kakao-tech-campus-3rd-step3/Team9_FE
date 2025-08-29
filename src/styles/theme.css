@@ -1,4 +1,4 @@
-/* Tailwind CSS v4 커스텀 테마 토큰 정의 - #3B6AE8 기반 색상 팔레트 */
+/* Tailwind CSS v4 커스텀 테마 토큰 정의 - #3B82F6 기반 색상 팔레트 */
 
 /* 기본 토큰 정의 */
 :root {
@@ -6,11 +6,11 @@
   --background: #fafbfc; /* 페이지 전체 배경색 (매우 연한 회색빛 흰색) */
   --foreground: #1a202c; /* 기본 텍스트 색상 (진한 회색) */
 
-  /* 주요 액션 색상 - #3B6AE8 기반 */
-  --primary: #3b6ae8; /* 주요 버튼, 링크, CTA 요소 배경색 */
+  /* 주요 액션 색상 - #3B82F6 기반 */
+  --primary: #3b82f6; /* 주요 버튼, 링크, CTA 요소 배경색 */
   --primary-foreground: #ffffff; /* 주요 액션 요소의 텍스트 색상 */
-  --primary-hover: #2d5bd6; /* 주요 액션 호버 상태 */
-  --primary-light: #e8f0ff; /* 주요 액션 연한 배경 */
+  --primary-hover: #2563eb; /* 주요 액션 호버 상태 */
+  --primary-light: #eff6ff; /* 주요 액션 연한 배경 */
 
   /* 보조 액션 색상 */
   --secondary: #f1f5f9; /* 보조 버튼, 태그, 배지 배경색 */
@@ -39,8 +39,8 @@
   /* 테두리/입력/포커스 색상 */
   --border: #e2e8f0; /* 테두리, 구분선 색상 */
   --input: #e2e8f0; /* 입력창 테두리 색상 */
-  --ring: #3b6ae8; /* 포커스 링 색상 (focus:ring-2 등) */
-  --ring-light: #e8f0ff; /* 포커스 링 연한 색상 */
+  --ring: #3b82f6; /* 포커스 링 색상 (focus:ring-2 등) */
+  --ring-light: #eff6ff; /* 포커스 링 연한 색상 */
 }
 
 /* Tailwind 유틸리티 클래스 연결 */
