@@ -1,0 +1,110 @@
+/* Tailwind CSS v4 커스텀 테마 토큰 정의 - #3B6AE8 기반 색상 팔레트 */
+
+/* 기본 토큰 정의 */
+:root {
+  /* 기본 색상 - 발게 흰 계열 */
+  --background: #fafbfc; /* 페이지 전체 배경색 (매우 연한 회색빛 흰색) */
+  --foreground: #1a202c; /* 기본 텍스트 색상 (진한 회색) */
+
+  /* 주요 액션 색상 - #3B6AE8 기반 */
+  --primary: #3b6ae8; /* 주요 버튼, 링크, CTA 요소 배경색 */
+  --primary-foreground: #ffffff; /* 주요 액션 요소의 텍스트 색상 */
+  --primary-hover: #2d5bd6; /* 주요 액션 호버 상태 */
+  --primary-light: #e8f0ff; /* 주요 액션 연한 배경 */
+
+  /* 보조 액션 색상 */
+  --secondary: #f1f5f9; /* 보조 버튼, 태그, 배지 배경색 */
+  --secondary-foreground: #475569; /* 보조 액션 요소의 텍스트 색상 */
+  --secondary-hover: #e2e8f0; /* 보조 액션 호버 상태 */
+
+  /* 비활성/서브 텍스트 색상 */
+  --muted: #f8fafc; /* 비활성 상태 배경색 (disabled 버튼 등) */
+  --muted-foreground: #64748b; /* 서브 텍스트, 설명, placeholder 색상 */
+
+  /* 강조 색상 */
+  --accent: #f1f5f9; /* 호버, 선택 상태 배경색 */
+  --accent-foreground: #475569; /* 강조 상태 텍스트 색상 */
+  --accent-hover: #e2e8f0; /* 강조 상태 호버 */
+
+  /* 경고/에러 색상 */
+  --destructive: #ef4444; /* 에러 메시지, 경고 배경색 */
+  --destructive-foreground: #ffffff; /* 에러/경고 텍스트 색상 */
+  --destructive-light: #fef2f2; /* 에러 연한 배경 */
+
+  /* 성공 색상 */
+  --success: #10b981; /* 성공 메시지, 완료 상태 */
+  --success-foreground: #ffffff; /* 성공 텍스트 색상 */
+  --success-light: #f0fdf4; /* 성공 연한 배경 */
+
+  /* 테두리/입력/포커스 색상 */
+  --border: #e2e8f0; /* 테두리, 구분선 색상 */
+  --input: #e2e8f0; /* 입력창 테두리 색상 */
+  --ring: #3b6ae8; /* 포커스 링 색상 (focus:ring-2 등) */
+  --ring-light: #e8f0ff; /* 포커스 링 연한 색상 */
+}
+
+/* Tailwind 유틸리티 클래스 연결 */
+@theme inline {
+  /* 색상 클래스 */
+  --color-background: var(--background); /* 사용법: bg-background */
+  --color-foreground: var(--foreground); /* 사용법: text-foreground */
+
+  /* 주요 액션 색상 */
+  --color-primary: var(--primary); /* 사용법: bg-primary, border-primary */
+  --color-primary-foreground: var(
+    --primary-foreground
+  ); /* 사용법: text-primary-foreground */
+  --color-primary-hover: var(
+    --primary-hover
+  ); /* 사용법: hover:bg-primary-hover */
+  --color-primary-light: var(--primary-light); /* 사용법: bg-primary-light */
+
+  /* 보조 액션 색상 */
+  --color-secondary: var(--secondary); /* 사용법: bg-secondary */
+  --color-secondary-foreground: var(
+    --secondary-foreground
+  ); /* 사용법: text-secondary-foreground */
+  --color-secondary-hover: var(
+    --secondary-hover
+  ); /* 사용법: hover:bg-secondary-hover */
+
+  /* 비활성/서브 텍스트 색상 */
+  --color-muted: var(--muted); /* 사용법: bg-muted */
+  --color-muted-foreground: var(
+    --muted-foreground
+  ); /* 사용법: text-muted-foreground */
+
+  /* 강조 색상 */
+  --color-accent: var(--accent); /* 사용법: bg-accent */
+  --color-accent-foreground: var(
+    --accent-foreground
+  ); /* 사용법: text-accent-foreground */
+  --color-accent-hover: var(--accent-hover); /* 사용법: hover:bg-accent-hover */
+
+  /* 경고/에러 색상 */
+  --color-destructive: var(
+    --destructive
+  ); /* 사용법: bg-destructive, text-destructive */
+  --color-destructive-foreground: var(
+    --destructive-foreground
+  ); /* 사용법: text-destructive-foreground */
+  --color-destructive-light: var(
+    --destructive-light
+  ); /* 사용법: bg-destructive-light */
+
+  /* 성공 색상 */
+  --color-success: var(--success); /* 사용법: bg-success, text-success */
+  --color-success-foreground: var(
+    --success-foreground
+  ); /* 사용법: text-success-foreground */
+  --color-success-light: var(--success-light); /* 사용법: bg-success-light */
+
+  /* 테두리/입력/포커스 색상 */
+  --color-border: var(--border); /* 사용법: border-border */
+  --color-input: var(--input); /* 사용법: border-input */
+  --color-ring: var(--ring); /* 사용법: ring-ring */
+  --color-ring-light: var(--ring-light); /* 사용법: ring-ring-light */
+
+  /* 기본 둥글기 */
+  --radius: 0.5rem; /* 사용법: rounded, rounded-lg (기본값) */
+}
