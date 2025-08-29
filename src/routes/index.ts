@@ -1,1 +1,1 @@
-export {};
+export { default } from './index.tsx';
