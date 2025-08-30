@@ -10,7 +10,7 @@ export type LayoutType =
   | 'header-sidebar';
 
 interface LayoutProps {
-  layoutType: LayoutType;
+  layoutType?: LayoutType;
 }
 
 /**
@@ -18,7 +18,7 @@ interface LayoutProps {
  * - 다양한 레이아웃 타입을 지원 (헤더, 사이드바 조합)
  * - 반응형 레이아웃 구조 제공
  */
-const Layout: React.FC<LayoutProps> = ({ layoutType }) => {
+const Layout: React.FC<LayoutProps> = ({ layoutType = 'none' }) => {
   const renderLayout = () => {
     switch (layoutType) {
       case 'none':

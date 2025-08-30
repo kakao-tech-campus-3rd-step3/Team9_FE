@@ -4,6 +4,7 @@ import Layout from '../components/layout/Layout';
 import { HomePage } from '../pages/Home';
 import { NotFoundPage } from '../pages/NotFound';
 import { ExamplePage } from '../pages/Example';
+import { ROUTES } from '../constants';
 
 /**
  * 애플리케이션 라우터 설정
@@ -13,7 +14,7 @@ import { ExamplePage } from '../pages/Example';
 const router = createBrowserRouter([
   // 홈 페이지 (헤더만)
   {
-    path: '/',
+    path: ROUTES.HOME,
     element: <Layout layoutType='header-only' />,
     children: [
       {
@@ -25,7 +26,7 @@ const router = createBrowserRouter([
 
   // 예시 페이지 (사이드바만)
   {
-    path: '/example',
+    path: ROUTES.EXAMPLE,
     element: <Layout layoutType='sidebar-only' />,
     children: [
       {
@@ -42,8 +43,8 @@ const router = createBrowserRouter([
   },
 ]);
 
-const AppRouter: React.FC = () => {
+const Router: React.FC = () => {
   return <RouterProvider router={router} />;
 };
 
-export default AppRouter;
+export default Router;
