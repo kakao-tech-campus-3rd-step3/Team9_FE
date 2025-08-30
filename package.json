@@ -4,7 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"pnpm dev:mock\" \"pnpm dev:app\"",
+    "dev:app": "vite",
+    "dev:mock": "json-server --watch db.json --port 8080",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "format": "prettier . --write",
@@ -28,11 +30,12 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.1.12",
     "@eslint/js": "^9.33.0",
+    "@tailwindcss/vite": "^4.1.12",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
     "@vitejs/plugin-react-swc": "^4.0.0",
+    "concurrently": "^9.2.1",
     "eslint": "^9.33.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",

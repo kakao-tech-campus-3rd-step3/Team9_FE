@@ -1,0 +1,66 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "email": "chaeyeon@example.com",
+      "password": "password123",
+      "nickname": "이채연",
+      "image_url": "https://i.pravatar.cc/150?u=chaeyeon@example.com",
+      "gender": "여성",
+      "interests": ["개발", "외국어"],
+      "location": "서울"
+    },
+    {
+      "id": 2,
+      "email": "pado@example.com",
+      "password": "password123",
+      "nickname": "김파도",
+      "image_url": "",
+      "gender": "남성",
+      "interests": ["취업", "알고리즘"],
+      "location": "부산"
+    },
+    {
+      "id": 3,
+      "email": "study@example.com",
+      "password": "password123",
+      "nickname": "박스터디",
+      "image_url": "https://i.pravatar.cc/150?u=study@example.com",
+      "gender": "선택안함",
+      "interests": ["자격증", "면접"],
+      "location": "대구"
+    }
+  ],
+  "studies": [
+    {
+      "id": 101,
+      "title": "(예시) React 스터디 '파도' 1기",
+      "leaderId": 2,
+      "category": "개발",
+      "description": "함께 React를 정복할 스터디원을 모집합니다. 초보도 환영! (이 데이터는 예시용입니다)",
+      "memberIds": [2, 1]
+    },
+    {
+      "id": 102,
+      "title": "(예시) 토익 900점 목표 스터디",
+      "leaderId": 3,
+      "category": "어학",
+      "description": "매주 모의고사 풀고 리뷰하는 스터디입니다. (이 데이터는 예시용입니다)",
+      "memberIds": [3]
+    }
+  ],
+  "schedules": [
+    {
+      "id": 201,
+      "studyId": 101,
+      "title": "예시 일정: React 챕터 1~3 공부",
+      "date": "2025-09-08"
+    },
+    {
+      "id": 202,
+      "studyId": 101,
+      "title": "예시 일정: CRA 프로젝트 세팅",
+      "date": "2025-09-15"
+    }
+  ]
+}
