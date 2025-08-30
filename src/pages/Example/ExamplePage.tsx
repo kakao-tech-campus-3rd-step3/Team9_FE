@@ -1,6 +1,9 @@
 import React from 'react';
 
-// 예시페이지
+/**
+ * 예시페이지 컴포넌트
+ * - 예시 페이지 컨텐츠를 표시
+ */
 const ExamplePage: React.FC = () => {
   return (
     <div className='h-full bg-accent p-8 text-center flex flex-col justify-center items-center'>

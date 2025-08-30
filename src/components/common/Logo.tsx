@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { padoLogo } from '../../assets';
+import { padoLogo } from '@/assets';
+import { ROUTES } from '@/constants';
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
@@ -35,7 +36,7 @@ const Logo: React.FC<LogoProps> = ({
 
   return (
     <Link
-      to='/'
+      to={ROUTES.HOME}
       className={`flex items-center space-x-2 hover:opacity-80 transition-opacity ${className}`}
     >
       <img

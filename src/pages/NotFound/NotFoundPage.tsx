@@ -1,7 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { ROUTES } from '@/constants';
 
-// 404 페이지
+/**
+ * 404 페이지 컴포넌트
+ * - 페이지를 찾을 수 없을 때 표시되는 에러 페이지
+ */
 const NotFoundPage: React.FC = () => {
   return (
     <div className='min-h-screen bg-card p-8 flex items-center justify-center'>
@@ -14,7 +18,7 @@ const NotFoundPage: React.FC = () => {
           요청하신 페이지가 존재하지 않거나 이동되었을 수 있습니다.
         </p>
         <Link
-          to='/'
+          to={ROUTES.HOME}
           className='inline-flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors'
         >
           홈으로 돌아가기

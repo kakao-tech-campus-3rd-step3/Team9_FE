@@ -1,6 +1,9 @@
 import React from 'react';
 
-// 홈페이지
+/**
+ * 홈페이지 컴포넌트
+ * - 메인 페이지 컨텐츠를 표시
+ */
 const HomePage: React.FC = () => {
   return (
     <div className='h-full bg-accent p-8 text-center flex flex-col justify-center items-center'>

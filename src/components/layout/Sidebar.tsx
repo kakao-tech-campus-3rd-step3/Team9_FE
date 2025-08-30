@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Logo } from '../common';
+import { Logo } from '@/components/common';
+import { ROUTES } from '@/constants';
 
 /**
  * 사이드바 컴포넌트
@@ -12,8 +13,8 @@ const Sidebar: React.FC = () => {
 
   // 사이드바 네비게이션 메뉴 항목
   const navItems = [
-    { to: '/', label: '홈으로' },
-    { to: '/example', label: '예시 페이지' },
+    { to: ROUTES.HOME, label: '홈으로' },
+    { to: ROUTES.EXAMPLE, label: '예시 페이지' },
   ];
 
   return (

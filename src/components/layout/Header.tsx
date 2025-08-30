@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Logo } from '../common';
+import { Logo } from '@/components/common';
+import { ROUTES } from '@/constants';
 
 /**
  * 헤더 컴포넌트
@@ -12,8 +13,8 @@ const Header: React.FC = () => {
 
   // 네비게이션 메뉴 항목
   const navItems = [
-    { to: '/', label: '홈' },
-    { to: '/example', label: '예시' },
+    { to: ROUTES.HOME, label: '홈' },
+    { to: ROUTES.EXAMPLE, label: '예시' },
   ];
 
   return (
