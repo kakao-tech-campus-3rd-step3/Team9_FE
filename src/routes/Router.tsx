@@ -1,9 +1,14 @@
 import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { ExamplePage, HomePage, NotFoundPage } from '@/pages';
+import {
+  ExamplePage,
+  HomePage,
+  LoginPage,
+  NotFoundPage,
+  SignupPage,
+} from '@/pages';
 import { ROUTES } from '@/constants';
 import { Layout } from '@/components';
-import { LoginPage, SignupPage } from '@/pages/(auth)';
 
 /**
  * 애플리케이션 라우터 설정
