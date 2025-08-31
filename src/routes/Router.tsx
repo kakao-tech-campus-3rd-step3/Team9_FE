@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { ExamplePage, HomePage, NotFoundPage } from '@/pages';
 import { ROUTES } from '@/constants';
 import { Layout } from '@/components';
+import { LoginPage, SignupPage } from '@/pages/(auth)';
 
 /**
  * 애플리케이션 라우터 설정
@@ -30,6 +31,30 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <ExamplePage />,
+      },
+    ],
+  },
+
+  // 로그인 페이지 (레이아웃 없음)
+  {
+    path: ROUTES.LOGIN,
+    element: <Layout layoutType='none' />,
+    children: [
+      {
+        index: true,
+        element: <LoginPage />,
+      },
+    ],
+  },
+
+  // 회원가입 페이지 (레이아웃 없음)
+  {
+    path: ROUTES.SIGNUP,
+    element: <Layout layoutType='none' />,
+    children: [
+      {
+        index: true,
+        element: <SignupPage />,
       },
     ],
   },
