@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { X } from 'lucide-react';
 import { ROUTES } from '@/constants';
 import { Logo } from '@/components';
 import { Input } from '../components';
@@ -38,6 +39,11 @@ const SignupPage: React.FC = () => {
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [selectedGender, setSelectedGender] = useState<Gender | ''>('');
   const [selectedRegion, setSelectedRegion] = useState<Region | ''>('');
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [profileImagePreview, setProfileImagePreview] = useState<string>('');
+
+  // 파일 input ref
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 관심 분야 토글 핸들러
   const handleInterestToggle = (interest: string) => {
@@ -51,6 +57,37 @@ const SignupPage: React.FC = () => {
   // 단계 이동 핸들러
   const handleStepChange = (step: number) => {
     setCurrentStep(step);
+  };
+
+  // 프로필 이미지 업로드 핸들러
+  const handleProfileImageChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setProfileImage(file);
+
+      // 미리보기 생성
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setProfileImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // 프로필 이미지 제거 핸들러
+  const handleRemoveProfileImage = () => {
+    setProfileImage(null);
+    setProfileImagePreview('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  // 프로필 이미지 클릭 핸들러
+  const handleProfileImageClick = () => {
+    fileInputRef.current?.click();
   };
 
   // 관심 분야 옵션 메모이제이션
@@ -144,18 +181,58 @@ const SignupPage: React.FC = () => {
         <label className='block text-sm font-medium text-foreground'>
           프로필 이미지
         </label>
-        <div className='relative'>
+        <div className='flex flex-col items-center gap-2'>
+          {/* 숨겨진 파일 input */}
           <input
+            ref={fileInputRef}
             type='file'
             id='profileImage'
             name='profileImage'
             accept='image/*'
-            className='absolute inset-0 w-full h-full opacity-0 cursor-pointer'
+            onChange={handleProfileImageChange}
+            className='hidden'
             aria-label='프로필 이미지 업로드'
           />
-          <div className='flex items-center justify-center w-20 h-20 mx-auto border-2 border-dashed border-input rounded-full hover:border-primary transition-colors cursor-pointer'>
-            <span className='text-muted-foreground text-sm'>+</span>
+
+          {/* 이미지 미리보기 또는 업로드 버튼 */}
+          <div className='relative'>
+            <div
+              onClick={handleProfileImageClick}
+              className='w-20 h-20 border-2 border-dashed border-input rounded-full hover:border-primary transition-colors cursor-pointer overflow-hidden'
+            >
+              {profileImagePreview ? (
+                <img
+                  src={profileImagePreview}
+                  alt='프로필 이미지 미리보기'
+                  className='w-full h-full object-cover'
+                />
+              ) : (
+                <div className='flex items-center justify-center w-full h-full'>
+                  <span className='text-muted-foreground text-sm'>+</span>
+                </div>
+              )}
+            </div>
+
+            {/* 제거 버튼 - 원형 밖으로 배치 */}
+            {profileImagePreview && (
+              <button
+                type='button'
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemoveProfileImage();
+                }}
+                className='absolute -top-2 -right-2 w-6 h-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center hover:bg-destructive-hover transition-colors shadow-sm cursor-pointer'
+                aria-label='프로필 이미지 제거'
+              >
+                <X className='w-3 h-3' />
+              </button>
+            )}
           </div>
+
+          {/* 안내 텍스트 */}
+          <p className='text-xs text-muted-foreground text-center'>
+            {profileImage ? '클릭하여 이미지 변경' : '클릭하여 이미지 업로드'}
+          </p>
         </div>
       </div>
 
