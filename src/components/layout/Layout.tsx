@@ -21,9 +21,6 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ layoutType = 'none' }) => {
   const renderLayout = () => {
     switch (layoutType) {
-      case 'none':
-        return <Outlet />;
-
       case 'header-only':
         return (
           <div className='min-h-screen bg-background'>
@@ -57,8 +54,13 @@ const Layout: React.FC<LayoutProps> = ({ layoutType = 'none' }) => {
           </div>
         );
 
+      case 'none':
       default:
-        return <Outlet />;
+        return (
+          <div className='min-h-screen bg-background'>
+            <Outlet />
+          </div>
+        );
     }
   };
 
