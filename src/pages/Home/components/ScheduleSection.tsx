@@ -27,6 +27,11 @@ const ScheduleSection = ({ schedules }: ScheduleSectionProps) => {
       <div className='text-lg font-medium'>{formatDayOfTheWeek(now.day())}</div>
       <div className='text-4xl font-bold'>{now.format('DD')}</div>
       <div className='flex flex-col p-3 gap-4'>
+        {todaySchedules.length === 0 && (
+          <div className='text-gray-500 text-xl font-bold'>
+            예정된 일정이 없습니다.
+          </div>
+        )}
         {todaySchedules.map((schedule) => (
           <ScheduleItem
             key={`${schedule.title}-${schedule.start_time}`}
@@ -35,7 +40,9 @@ const ScheduleSection = ({ schedules }: ScheduleSectionProps) => {
             color={schedule.color}
           />
         ))}
-        <div className='text-lg font-medium'>이후 일정</div>
+        {afterSchedules.length > 0 && (
+          <div className='text-lg font-medium'>이후 일정</div>
+        )}
         {afterSchedules.map((schedule) => (
           <ScheduleItem
             key={`${schedule.title}-${schedule.start_time}`}

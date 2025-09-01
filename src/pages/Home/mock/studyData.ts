@@ -1,4 +1,20 @@
-export const mainDashboard = [
+type Schedule = {
+  title: string;
+  start_time: string;
+  end_time: string;
+};
+
+type Study = {
+  study_id: number;
+  title: string;
+  schedule: Schedule[];
+};
+
+type Dashboard = {
+  studies: Study[];
+};
+
+export const mainDashboard: Dashboard[] = [
   {
     studies: [
       {
@@ -35,4 +51,4 @@ export const mainDashboard = [
       },
     ],
   },
-];
+] as const;
