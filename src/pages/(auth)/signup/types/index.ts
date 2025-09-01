@@ -1,8 +1,4 @@
-import { AUTH_TEXTS } from '../../constants';
-
-// 기본 타입 정의
-export type Gender = 'male' | 'female';
-export type Region = keyof typeof AUTH_TEXTS.SIGNUP.STEP2.REGIONS;
+import type { GenderKey, RegionKey } from '@/constants';
 
 // 폼 데이터 타입
 export interface SignupFormData {
@@ -13,9 +9,9 @@ export interface SignupFormData {
   confirmPassword: string;
   // 2단계 데이터
   nickname: string;
-  gender: Gender | '';
+  gender: GenderKey | '';
   interests: string[];
-  region: Region | '';
+  region: RegionKey | '';
   profileImage: File | null;
 }
 
@@ -29,11 +25,11 @@ export interface InterestOption {
 }
 
 export interface GenderOption {
-  value: Gender;
+  value: GenderKey;
   label: string;
 }
 
 export interface RegionOption {
-  value: Region;
+  value: RegionKey;
   label: string;
 }

@@ -1,3 +1,5 @@
+import { GENDERS, INTERESTS, REGIONS } from '@/constants';
+
 /**
  * 인증 페이지 텍스트 상수
  */
@@ -29,38 +31,11 @@ export const AUTH_TEXTS = {
       NICKNAME_PLACEHOLDER: '닉네임 (2~10자)',
       NICKNAME_CHECK_BUTTON: '중복 확인',
       GENDER_TITLE: '성별',
-      GENDER_MALE: '남성',
-      GENDER_FEMALE: '여성',
+      GENDERS,
       INTEREST_TITLE: '관심 분야 (1개 이상 선택)',
-      INTERESTS: {
-        LANGUAGE: '어학',
-        EMPLOYMENT: '취업',
-        EXAM: '고시/공무원',
-        PROGRAMMING: '프로그래밍',
-        HOBBY: '취미/교양',
-        ETC: '자율/기타',
-      },
+      INTERESTS,
       REGION_TITLE: '지역',
-      REGIONS: {
-        ONLINE: '온라인',
-        SEOUL: '서울',
-        GYEONGGI: '경기',
-        INCHEON: '인천',
-        GANGWON: '강원',
-        DAEJEON: '대전',
-        SEJONG: '세종',
-        CHUNGNAM: '충남',
-        CHUNGBUK: '충북',
-        GWANGJU: '광주',
-        JEONNAM: '전남',
-        JEONBUK: '전북',
-        DAEGU: '대구',
-        GYEONGBUK: '경북',
-        BUSAN: '부산',
-        ULSAN: '울산',
-        GYEONGNAM: '경남',
-        JEJU: '제주',
-      },
+      REGIONS,
       COMPLETE_BUTTON: '회원가입 완료',
     },
     LOGIN_LINK: '이미 계정이 있으신가요?',
