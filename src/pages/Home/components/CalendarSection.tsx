@@ -1,5 +1,6 @@
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
+import dayjs from 'dayjs';
 
 type CalendarSectionProps = {
   schedules: {
@@ -25,7 +26,7 @@ const CalendarSection = ({ schedules }: CalendarSectionProps) => {
         dayMaxEventRows={2}
         events={schedules.map((schedule) => ({
           title: schedule.title,
-          date: schedule.start_time.split('T')[0],
+          date: dayjs(schedule.start_time).format('YYYY-MM-DD'),
           backgroundColor: schedule.color,
           borderColor: schedule.color,
         }))}
