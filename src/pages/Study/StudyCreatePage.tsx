@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Camera, X } from 'lucide-react';
+import Toast from '@/components/common/Toast';
 
 interface StudyFormData {
   title: string;
@@ -40,6 +41,15 @@ const StudyCreatePage: React.FC = () => {
   });
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [toast, setToast] = useState<{
+    isVisible: boolean;
+    type: 'success' | 'error' | 'info';
+    message: string;
+  }>({
+    isVisible: false,
+    type: 'success',
+    message: '',
+  });
 
   const handleInputChange = (
     field: keyof StudyFormData,
@@ -68,13 +78,38 @@ const StudyCreatePage: React.FC = () => {
     }
   };
 
+  const showToast = (type: 'success' | 'error' | 'info', message: string) => {
+    setToast({
+      isVisible: true,
+      type,
+      message,
+    });
+  };
+
+  const hideToast = () => {
+    setToast((prev) => ({ ...prev, isVisible: false }));
+  };
+
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     console.log('스터디 생성 데이터:', {
       ...formData,
       categories: selectedCategories,
     });
-    // TODO: API 호출 로직 추가
+
+    // 성공 토스트 표시
+    showToast('success', '스터디 생성이 완료되었습니다.');
+
+    // 폼 초기화
+    setFormData({
+      title: '',
+      shortDescription: '',
+      description: '',
+      category: '',
+      maxMembers: 2,
+    });
+    setSelectedCategories([]);
+    setImagePreview(null);
   };
 
   return (
@@ -297,6 +332,14 @@ const StudyCreatePage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* 토스트 알림 */}
+      <Toast
+        type={toast.type}
+        message={toast.message}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
     </div>
   );
 };

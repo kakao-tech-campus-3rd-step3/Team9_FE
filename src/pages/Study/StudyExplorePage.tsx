@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Users, Plus } from 'lucide-react';
+import StudyApplyModal from '@/components/Study/StudyApplyModal';
+import Toast from '@/components/common/Toast';
 
 interface Study {
   id: string;
@@ -64,6 +66,17 @@ const categories = [
 const StudyExplorePage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('어학');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedStudy, setSelectedStudy] = useState<Study | null>(null);
+  const [toast, setToast] = useState<{
+    isVisible: boolean;
+    type: 'success' | 'error' | 'info';
+    message: string;
+  }>({
+    isVisible: false,
+    type: 'success',
+    message: '',
+  });
 
   const filteredStudies = mockStudies.filter((study) => {
     if (selectedCategory !== '전체' && study.category !== selectedCategory) {
@@ -77,6 +90,20 @@ const StudyExplorePage: React.FC = () => {
     }
     return true;
   });
+
+  const handleApplyClick = (study: Study) => {
+    setSelectedStudy(study);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedStudy(null);
+  };
+
+  const hideToast = () => {
+    setToast((prev) => ({ ...prev, isVisible: false }));
+  };
 
   return (
     <div className='min-h-screen bg-gray-50'>
@@ -177,7 +204,10 @@ const StudyExplorePage: React.FC = () => {
                         </span>
                       </div>
                     </div>
-                    <button className='w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors'>
+                    <button
+                      onClick={() => handleApplyClick(study)}
+                      className='w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors'
+                    >
                       참여하기
                     </button>
                   </div>
@@ -198,6 +228,21 @@ const StudyExplorePage: React.FC = () => {
       <button className='fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center'>
         <Plus className='h-6 w-6' />
       </button>
+
+      {/* 스터디 신청 모달 */}
+      <StudyApplyModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        studyTitle={selectedStudy?.title || ''}
+      />
+
+      {/* 토스트 알림 */}
+      <Toast
+        type={toast.type}
+        message={toast.message}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
     </div>
   );
 };
