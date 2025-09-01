@@ -1,6 +1,6 @@
 import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { ExamplePage, HomePage, NotFoundPage } from '@/pages';
+import { ExamplePage, HomePage, NotFoundPage, StudyExplorePage } from '@/pages';
 import { ROUTES } from '@/constants';
 import { Layout } from '@/components';
 
@@ -32,6 +32,12 @@ const router = createBrowserRouter([
         element: <ExamplePage />,
       },
     ],
+  },
+
+  // 스터디 탐색 페이지 (레이아웃 없음 - 자체 헤더 포함)
+  {
+    path: ROUTES.STUDY.EXPLORE,
+    element: <StudyExplorePage />,
   },
 
   // 404 페이지 (레이아웃 없음)
