@@ -23,7 +23,6 @@ const Toast: React.FC<ToastProps> = ({
       const timer = setTimeout(() => {
         onClose();
       }, duration);
-
       return () => clearTimeout(timer);
     }
   }, [isVisible, duration, onClose]);
@@ -33,26 +32,26 @@ const Toast: React.FC<ToastProps> = ({
   const getIcon = () => {
     switch (type) {
       case 'success':
-        return <CheckCircle className='h-5 w-5 text-green-600' />;
+        return <CheckCircle className='h-5 w-5 text-success' />;
       case 'error':
-        return <XCircle className='h-5 w-5 text-red-600' />;
+        return <XCircle className='h-5 w-5 text-destructive' />;
       case 'info':
-        return <Info className='h-5 w-5 text-blue-600' />;
+        return <Info className='h-5 w-5 text-primary' />;
       default:
-        return null;
+        return <CheckCircle className='h-5 w-5 text-success' />;
     }
   };
 
   const getBackgroundColor = () => {
     switch (type) {
       case 'success':
-        return 'bg-green-50 border-green-200';
+        return 'bg-success-light border-success text-foreground';
       case 'error':
-        return 'bg-red-50 border-red-200';
+        return 'bg-destructive-light border-destructive text-foreground';
       case 'info':
-        return 'bg-blue-50 border-blue-200';
+        return 'bg-primary-light border-primary text-foreground';
       default:
-        return 'bg-gray-50 border-gray-200';
+        return 'bg-success-light border-success text-foreground';
     }
   };
 
@@ -63,11 +62,11 @@ const Toast: React.FC<ToastProps> = ({
       >
         <div className='flex-shrink-0 mr-3'>{getIcon()}</div>
         <div className='flex-1'>
-          <p className='text-sm font-medium text-gray-900'>{message}</p>
+          <p className='text-sm font-medium text-foreground'>{message}</p>
         </div>
         <button
           onClick={onClose}
-          className='flex-shrink-0 ml-3 text-gray-400 hover:text-gray-600 transition-colors'
+          className='flex-shrink-0 ml-3 text-muted-foreground hover:text-foreground transition-colors'
         >
           <X className='h-4 w-4' />
         </button>
