@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Search, Users, Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import StudyApplyModal from '@/components/Study/StudyApplyModal';
 import Toast from '@/components/common/Toast';
+import { ROUTES } from '@/constants';
 
 interface Study {
   id: string;
@@ -64,6 +66,7 @@ const categories = [
 ];
 
 const StudyExplorePage: React.FC = () => {
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('어학');
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -99,6 +102,10 @@ const StudyExplorePage: React.FC = () => {
   const handleModalClose = () => {
     setIsModalOpen(false);
     setSelectedStudy(null);
+  };
+
+  const handleCreateStudy = () => {
+    navigate(ROUTES.STUDY.CREATE);
   };
 
   const hideToast = () => {
@@ -225,7 +232,10 @@ const StudyExplorePage: React.FC = () => {
       </div>
 
       {/* 플로팅 액션 버튼 */}
-      <button className='fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center'>
+      <button
+        onClick={handleCreateStudy}
+        className='fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center'
+      >
         <Plus className='h-6 w-6' />
       </button>
 

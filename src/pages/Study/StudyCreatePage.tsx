@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Search, Camera, X } from 'lucide-react';
+import { Search, Camera, X, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import Toast from '@/components/common/Toast';
 
 interface StudyFormData {
@@ -32,6 +33,7 @@ const memberOptions = [
 ];
 
 const StudyCreatePage: React.FC = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<StudyFormData>({
     title: '',
     shortDescription: '',
@@ -90,6 +92,10 @@ const StudyCreatePage: React.FC = () => {
     setToast((prev) => ({ ...prev, isVisible: false }));
   };
 
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     console.log('스터디 생성 데이터:', {
@@ -119,6 +125,12 @@ const StudyCreatePage: React.FC = () => {
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4'>
           <div className='flex items-center justify-between'>
             <div className='flex items-center space-x-4'>
+              <button
+                onClick={handleGoBack}
+                className='p-2 hover:bg-gray-100 rounded-lg transition-colors'
+              >
+                <ArrowLeft className='h-5 w-5 text-gray-600' />
+              </button>
               <div className='flex items-center space-x-2'>
                 <div className='w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center'>
                   <div className='w-4 h-4 bg-white rounded-sm'></div>
