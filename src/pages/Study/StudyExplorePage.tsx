@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Users, Plus } from 'lucide-react';
+import { Users, Plus, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import StudyApplyModal from '@/components/Study/StudyApplyModal';
 import StudyDetailModal from '@/components/Study/StudyDetailModal';
 import RegionSelectModal from '@/components/Study/RegionSelectModal';
 import Toast from '@/components/common/Toast';
+import { Logo } from '@/components/common';
 import { ROUTES } from '@/constants';
 
 // 스터디 인터페이스
@@ -23,7 +24,7 @@ interface Study {
   requirements?: string[];
 }
 
-// 목업 스터디 데이터 (기존 db.json 기반)
+// 목업 스터디 데이터
 const mockStudies: Study[] = [
   {
     id: 101,
@@ -93,6 +94,7 @@ const categories = [
 
 const StudyExplorePage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([
     '전체',
   ]);
@@ -112,14 +114,25 @@ const StudyExplorePage: React.FC = () => {
   });
 
   const filteredStudies = mockStudies.filter((study) => {
+    // 카테고리 필터
     if (
       !selectedCategories.includes('전체') &&
       !selectedCategories.includes(study.category)
     ) {
       return false;
     }
+    // 지역 필터
     if (selectedRegion !== '전체' && study.region !== selectedRegion) {
       return false;
+    }
+    // 검색어 필터
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        study.title.toLowerCase().includes(searchLower) ||
+        study.description.toLowerCase().includes(searchLower) ||
+        study.category.toLowerCase().includes(searchLower)
+      );
     }
     return true;
   });
@@ -179,7 +192,44 @@ const StudyExplorePage: React.FC = () => {
 
   return (
     <div className='min-h-screen bg-background'>
-      <div className='flex'>
+      {/* 헤더 */}
+      <header className='fixed top-0 left-0 right-0 z-50 bg-card border-b border-border shadow-sm'>
+        <div className='container mx-auto px-4 h-16 flex items-center justify-between'>
+          <Logo size='lg' className='flex-shrink-0' />
+
+          {/* 검색창 */}
+          <div className='flex-1 max-w-md mx-8'>
+            <div className='relative'>
+              <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5' />
+              <input
+                type='text'
+                placeholder='스터디 검색...'
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className='w-full pl-10 pr-4 py-2 border border-input rounded-lg focus:border-primary focus:ring-0 bg-background text-foreground'
+              />
+            </div>
+          </div>
+
+          {/* 네비게이션 */}
+          <nav className='flex items-center space-x-6'>
+            <button
+              onClick={() => navigate(ROUTES.HOME)}
+              className='text-sm font-medium text-muted-foreground hover:text-primary transition-colors'
+            >
+              홈
+            </button>
+            <button
+              onClick={() => navigate(ROUTES.STUDY.CREATE)}
+              className='text-sm font-medium text-muted-foreground hover:text-primary transition-colors'
+            >
+              스터디 생성
+            </button>
+          </nav>
+        </div>
+      </header>
+
+      <div className='flex pt-16'>
         {/* 사이드바 */}
         <div className='w-64 bg-white shadow-sm border-r border-border min-h-screen'>
           <div className='p-6'>

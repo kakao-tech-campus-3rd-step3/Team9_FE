@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { Camera, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import Toast from '@/components/common/Toast';
+import StudyCreateCompleteModal from '@/components/Study/StudyCreateCompleteModal';
+import { Logo } from '@/components/common';
+import { ROUTES } from '@/constants';
 
 // 스터디 폼 데이터 인터페이스
 interface StudyFormData {
@@ -23,6 +27,7 @@ const categories = [
 const memberOptions = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 const StudyCreatePage: React.FC = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<StudyFormData>({
     title: '',
     shortDescription: '',
@@ -32,6 +37,7 @@ const StudyCreatePage: React.FC = () => {
   });
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
   const [toast, setToast] = useState<{
     isVisible: boolean;
     type: 'success' | 'error' | 'info';
@@ -78,14 +84,9 @@ const StudyCreatePage: React.FC = () => {
     setToast((prev) => ({ ...prev, isVisible: false }));
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    console.log('스터디 생성 데이터:', {
-      ...formData,
-      categories: selectedCategories,
-    });
-    showToast('success', '스터디 생성이 완료되었습니다.');
-    // Reset form
+  const handleCompleteModalClose = () => {
+    setIsCompleteModalOpen(false);
+    // 폼 리셋
     setFormData({
       title: '',
       shortDescription: '',
@@ -95,11 +96,63 @@ const StudyCreatePage: React.FC = () => {
     });
     setSelectedCategories([]);
     setImagePreview(null);
+    // 스터디 탐색 페이지로 이동
+    navigate(ROUTES.STUDY.EXPLORE);
+  };
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (selectedCategories.length === 0) {
+      showToast('error', '최소 하나의 카테고리를 선택해주세요.');
+      return;
+    }
+
+    if (!formData.title.trim()) {
+      showToast('error', '스터디 이름을 입력해주세요.');
+      return;
+    }
+
+    if (!formData.shortDescription.trim()) {
+      showToast('error', '스터디 한 줄 소개를 입력해주세요.');
+      return;
+    }
+
+    console.log('스터디 생성 데이터:', {
+      ...formData,
+      categories: selectedCategories,
+    });
+
+    // 완료 모달 열기
+    setIsCompleteModalOpen(true);
   };
 
   return (
     <div className='min-h-screen bg-background'>
-      <div className='flex'>
+      {/* 헤더 */}
+      <header className='fixed top-0 left-0 right-0 z-50 bg-card border-b border-border shadow-sm'>
+        <div className='container mx-auto px-4 h-16 flex items-center justify-between'>
+          <Logo size='lg' className='flex-shrink-0' />
+
+          {/* 네비게이션 */}
+          <nav className='flex items-center space-x-6'>
+            <button
+              onClick={() => navigate(ROUTES.HOME)}
+              className='text-sm font-medium text-muted-foreground hover:text-primary transition-colors'
+            >
+              홈
+            </button>
+            <button
+              onClick={() => navigate(ROUTES.STUDY.EXPLORE)}
+              className='text-sm font-medium text-muted-foreground hover:text-primary transition-colors'
+            >
+              스터디 탐색
+            </button>
+          </nav>
+        </div>
+      </header>
+
+      <div className='flex pt-16'>
         {/* 사이드바 */}
         <div className='w-64 bg-white shadow-sm border-r border-border min-h-screen'>
           <div className='p-6'>
@@ -294,6 +347,13 @@ const StudyCreatePage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* 스터디 생성 완료 모달 */}
+      <StudyCreateCompleteModal
+        isOpen={isCompleteModalOpen}
+        onClose={handleCompleteModalClose}
+        studyTitle={formData.title}
+      />
 
       {/* 토스트 알림 */}
       <Toast
