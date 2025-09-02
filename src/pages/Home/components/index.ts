@@ -3,3 +3,4 @@ export { default as CalendarSection } from './CalendarSection';
 export { default as StudyListSection } from './StudyListSection';
 export { default as ScheduleItem } from './ScheduleItem';
 export { default as StudyNothing } from './StudyNothing';
+export { default as StudyList } from './StudyList';
