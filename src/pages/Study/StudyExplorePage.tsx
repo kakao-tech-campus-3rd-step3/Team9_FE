@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Search, Users, Plus } from 'lucide-react';
+import { Users, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import StudyApplyModal from '@/components/Study/StudyApplyModal';
+import RegionSelectModal from '@/components/Study/RegionSelectModal';
 import Toast from '@/components/common/Toast';
 import { ROUTES } from '@/constants';
-import { Logo } from '@/components/common';
 
 // 스터디 인터페이스
 interface Study {
@@ -14,6 +14,7 @@ interface Study {
   category: string;
   currentMembers: number;
   maxMembers: number;
+  region: string;
   imageUrl?: string;
 }
 
@@ -26,6 +27,7 @@ const mockStudies: Study[] = [
     category: '프로그래밍',
     currentMembers: 2,
     maxMembers: 8,
+    region: '서울',
   },
   {
     id: 102,
@@ -34,6 +36,7 @@ const mockStudies: Study[] = [
     category: '어학',
     currentMembers: 1,
     maxMembers: 6,
+    region: '경기',
   },
   {
     id: 103,
@@ -42,6 +45,7 @@ const mockStudies: Study[] = [
     category: '취업',
     currentMembers: 3,
     maxMembers: 5,
+    region: '대구',
   },
   {
     id: 104,
@@ -50,6 +54,7 @@ const mockStudies: Study[] = [
     category: '고시/공무원',
     currentMembers: 4,
     maxMembers: 8,
+    region: '부산',
   },
   {
     id: 105,
@@ -58,6 +63,7 @@ const mockStudies: Study[] = [
     category: '취미/교양',
     currentMembers: 2,
     maxMembers: 10,
+    region: '서울',
   },
   {
     id: 106,
@@ -66,6 +72,7 @@ const mockStudies: Study[] = [
     category: '프로그래밍',
     currentMembers: 5,
     maxMembers: 7,
+    region: '경기',
   },
 ];
 
@@ -82,8 +89,9 @@ const categories = [
 const StudyExplorePage: React.FC = () => {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('전체');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedRegion, setSelectedRegion] = useState('전체');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRegionModalOpen, setIsRegionModalOpen] = useState(false);
   const [selectedStudy, setSelectedStudy] = useState<Study | null>(null);
   const [toast, setToast] = useState<{
     isVisible: boolean;
@@ -99,10 +107,7 @@ const StudyExplorePage: React.FC = () => {
     if (selectedCategory !== '전체' && study.category !== selectedCategory) {
       return false;
     }
-    if (
-      searchTerm &&
-      !study.title.toLowerCase().includes(searchTerm.toLowerCase())
-    ) {
+    if (selectedRegion !== '전체' && study.region !== selectedRegion) {
       return false;
     }
     return true;
@@ -118,6 +123,10 @@ const StudyExplorePage: React.FC = () => {
     setSelectedStudy(null);
   };
 
+  const handleRegionSelect = (region: string) => {
+    setSelectedRegion(region);
+  };
+
   const hideToast = () => {
     setToast((prev) => ({ ...prev, isVisible: false }));
   };
@@ -128,41 +137,6 @@ const StudyExplorePage: React.FC = () => {
 
   return (
     <div className='min-h-screen bg-background'>
-      {/* 헤더 */}
-      <div className='bg-white shadow-sm border-b border-border'>
-        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4'>
-          <div className='flex items-center justify-between'>
-            <div className='flex items-center space-x-4'>
-              <Logo size='md' showText={true} />
-            </div>
-
-            <div className='flex-1 max-w-md mx-8'>
-              <div className='relative'>
-                <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5' />
-                <input
-                  type='text'
-                  placeholder='스터디 검색...'
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className='w-full pl-10 pr-4 py-2 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-foreground'
-                />
-              </div>
-            </div>
-
-            <div className='flex items-center space-x-3'>
-              <div className='w-8 h-8 bg-primary rounded-full flex items-center justify-center'>
-                <span className='text-primary-foreground text-sm font-medium'>
-                  김
-                </span>
-              </div>
-              <span className='text-sm font-medium text-foreground'>
-                김경대
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className='flex'>
         {/* 사이드바 */}
         <div className='w-64 bg-white shadow-sm border-r border-border min-h-screen'>
@@ -196,9 +170,13 @@ const StudyExplorePage: React.FC = () => {
           <div className='max-w-6xl mx-auto'>
             <div className='flex items-center justify-between mb-6'>
               <h1 className='text-xl font-semibold text-foreground'>
-                대구광역시 북구 근처 스터디
+                {selectedRegion === '전체' ? '전체 지역' : selectedRegion} 근처
+                스터디
               </h1>
-              <button className='px-4 py-2 text-sm font-medium text-secondary-foreground bg-secondary border border-border rounded-lg hover:bg-secondary-hover transition-colors'>
+              <button
+                onClick={() => setIsRegionModalOpen(true)}
+                className='px-4 py-2 text-sm font-medium text-secondary-foreground bg-secondary border border-border rounded-lg hover:bg-secondary-hover transition-colors'
+              >
                 지역 선택
               </button>
             </div>
@@ -223,6 +201,9 @@ const StudyExplorePage: React.FC = () => {
                       </h3>
                       <p className='text-sm text-muted-foreground mb-3'>
                         {study.description}
+                      </p>
+                      <p className='text-xs text-muted-foreground'>
+                        📍 {study.region}
                       </p>
                     </div>
                   </div>
@@ -267,6 +248,14 @@ const StudyExplorePage: React.FC = () => {
         isOpen={isModalOpen}
         onClose={handleModalClose}
         studyTitle={selectedStudy?.title || ''}
+      />
+
+      {/* 지역 선택 모달 */}
+      <RegionSelectModal
+        isOpen={isRegionModalOpen}
+        onClose={() => setIsRegionModalOpen(false)}
+        selectedRegion={selectedRegion}
+        onRegionSelect={handleRegionSelect}
       />
 
       {/* 토스트 알림 */}
