@@ -93,7 +93,9 @@ const categories = [
 
 const StudyExplorePage: React.FC = () => {
   const navigate = useNavigate();
-  const [selectedCategory, setSelectedCategory] = useState('전체');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([
+    '전체',
+  ]);
   const [selectedRegion, setSelectedRegion] = useState('전체');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -110,7 +112,10 @@ const StudyExplorePage: React.FC = () => {
   });
 
   const filteredStudies = mockStudies.filter((study) => {
-    if (selectedCategory !== '전체' && study.category !== selectedCategory) {
+    if (
+      !selectedCategories.includes('전체') &&
+      !selectedCategories.includes(study.category)
+    ) {
       return false;
     }
     if (selectedRegion !== '전체' && study.region !== selectedRegion) {
@@ -145,6 +150,21 @@ const StudyExplorePage: React.FC = () => {
     setIsModalOpen(true);
   };
 
+  const handleCategoryToggle = (category: string) => {
+    setSelectedCategories((prev) => {
+      if (category === '전체') {
+        return ['전체'];
+      }
+      if (prev.includes(category)) {
+        const newCategories = prev.filter((c) => c !== category);
+        return newCategories.length === 0 ? ['전체'] : newCategories;
+      } else {
+        const newCategories = [...prev.filter((c) => c !== '전체'), category];
+        return newCategories;
+      }
+    });
+  };
+
   const handleRegionSelect = (region: string) => {
     setSelectedRegion(region);
   };
@@ -163,24 +183,31 @@ const StudyExplorePage: React.FC = () => {
         {/* 사이드바 */}
         <div className='w-64 bg-white shadow-sm border-r border-border min-h-screen'>
           <div className='p-6'>
-            <h2 className='text-lg font-semibold text-foreground mb-6'>
+            <h2 className='text-xl font-semibold text-foreground mb-6'>
               스터디 탐색
             </h2>
 
-            <div className='space-y-3'>
+            <div className='space-y-4'>
               {categories.map((category) => (
                 <label
                   key={category}
                   className='flex items-center space-x-3 cursor-pointer'
                 >
                   <input
-                    type='radio'
-                    name='category'
-                    checked={selectedCategory === category}
-                    onChange={() => setSelectedCategory(category)}
+                    type='checkbox'
+                    checked={selectedCategories.includes(category)}
+                    onChange={() => handleCategoryToggle(category)}
                     className='w-4 h-4 text-primary border-border rounded focus:ring-primary'
                   />
-                  <span className='text-sm text-foreground'>{category}</span>
+                  <span
+                    className={`text-base font-medium transition-colors ${
+                      selectedCategories.includes(category)
+                        ? 'text-primary'
+                        : 'text-foreground hover:text-primary'
+                    }`}
+                  >
+                    {category}
+                  </span>
                 </label>
               ))}
             </div>

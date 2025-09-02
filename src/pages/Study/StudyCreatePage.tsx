@@ -103,11 +103,11 @@ const StudyCreatePage: React.FC = () => {
         {/* 사이드바 */}
         <div className='w-64 bg-white shadow-sm border-r border-border min-h-screen'>
           <div className='p-6'>
-            <h2 className='text-lg font-semibold text-foreground mb-6'>
+            <h2 className='text-xl font-semibold text-foreground mb-6'>
               스터디 생성
             </h2>
 
-            <div className='space-y-3'>
+            <div className='space-y-4'>
               {categories.map((category) => (
                 <label
                   key={category}
@@ -119,7 +119,15 @@ const StudyCreatePage: React.FC = () => {
                     onChange={() => handleCategoryToggle(category)}
                     className='w-4 h-4 text-primary border-border rounded focus:ring-primary'
                   />
-                  <span className='text-sm text-foreground'>{category}</span>
+                  <span
+                    className={`text-base font-medium transition-colors ${
+                      selectedCategories.includes(category)
+                        ? 'text-primary'
+                        : 'text-foreground hover:text-primary'
+                    }`}
+                  >
+                    {category}
+                  </span>
                 </label>
               ))}
             </div>
