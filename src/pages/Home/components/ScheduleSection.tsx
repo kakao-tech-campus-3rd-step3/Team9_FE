@@ -23,7 +23,7 @@ const ScheduleSection = ({ schedules }: ScheduleSectionProps) => {
     );
 
   return (
-    <section className='flex-2 flex flex-col h-full w-full max-w-lg border-2 border-primary rounded-2xl p-6 gap-2 bg-blue-50 text-left'>
+    <section className='flex-2 flex flex-col h-full w-full max-w-lg border-2 border-primary rounded-xl p-6 gap-2 bg-blue-50 text-left'>
       <div className='text-lg font-medium'>{formatDayOfTheWeek(now.day())}</div>
       <div className='text-4xl font-bold'>{now.format('DD')}</div>
       <div className='flex flex-col p-3 gap-4'>

@@ -13,7 +13,7 @@ type CalendarSectionProps = {
 
 const CalendarSection = ({ schedules }: CalendarSectionProps) => {
   return (
-    <section className='flex-3 h-full w-full max-w-3xl border-2 border-primary rounded-2xl p-4 bg-white'>
+    <section className='flex-3 h-full w-full max-w-3xl border-2 border-primary rounded-xl p-4 bg-white'>
       <FullCalendar
         plugins={[dayGridPlugin]}
         height='auto'
