@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, MapPin } from 'lucide-react';
-import { REGIONS, type RegionKey } from '@/constants/common';
+import { REGIONS, type RegionKey } from '@/constants';
 
 interface RegionSelectModalProps {
   isOpen: boolean;
@@ -55,7 +55,7 @@ const RegionSelectModal: React.FC<RegionSelectModalProps> = ({
               placeholder='지역 검색...'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='w-full px-4 py-2 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-foreground'
+              className='w-full px-4 py-2 border border-input rounded-lg focus:border-primary focus:ring-0 bg-background text-foreground'
             />
           </div>
         </div>

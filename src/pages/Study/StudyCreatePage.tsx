@@ -152,7 +152,7 @@ const StudyCreatePage: React.FC = () => {
                   value={formData.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
                   placeholder='스터디 이름'
-                  className='w-full px-4 py-2 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-foreground'
+                  className='w-full px-4 py-2 border border-input rounded-lg focus:border-primary focus:ring-0 bg-background text-foreground'
                   required
                 />
               </div>
@@ -169,7 +169,7 @@ const StudyCreatePage: React.FC = () => {
                     handleInputChange('shortDescription', e.target.value)
                   }
                   placeholder='스터디에 대한 간략한 설명'
-                  className='w-full px-4 py-2 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-foreground'
+                  className='w-full px-4 py-2 border border-input rounded-lg focus:border-primary focus:ring-0 bg-background text-foreground'
                   required
                 />
               </div>
@@ -186,7 +186,7 @@ const StudyCreatePage: React.FC = () => {
                   }
                   placeholder='스터디에 대한 상세한 설명'
                   rows={4}
-                  className='w-full px-4 py-2 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-foreground resize-none'
+                  className='w-full px-4 py-2 border border-input rounded-lg focus:border-primary focus:ring-0 bg-background text-foreground resize-none'
                   required
                 />
               </div>
@@ -224,7 +224,7 @@ const StudyCreatePage: React.FC = () => {
                   onChange={(e) =>
                     handleInputChange('maxMembers', parseInt(e.target.value))
                   }
-                  className='w-full px-4 py-2 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-foreground'
+                  className='w-full px-4 py-2 border border-input rounded-lg focus:border-primary focus:ring-0 bg-background text-foreground'
                 >
                   {memberOptions.map((num) => (
                     <option key={num} value={num}>

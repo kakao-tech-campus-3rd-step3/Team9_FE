@@ -57,7 +57,7 @@ const StudyApplyModal: React.FC<StudyApplyModalProps> = ({
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder='스터디장에게 할 말이 있다면 적어주세요.'
                   rows={4}
-                  className='w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-foreground resize-none'
+                  className='w-full px-3 py-2 border border-input rounded-lg focus:border-primary focus:ring-0 bg-background text-foreground resize-none'
                 />
               </div>
               <div className='flex justify-end space-x-3'>
