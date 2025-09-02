@@ -207,9 +207,9 @@ const StudyExplorePage: React.FC = () => {
               {filteredStudies.map((study) => (
                 <div
                   key={study.id}
-                  className='bg-white rounded-lg shadow-sm border border-border hover:shadow-md transition-shadow'
+                  className='bg-white rounded-lg shadow-sm border border-border hover:shadow-md transition-shadow flex flex-col'
                 >
-                  <div className='p-6'>
+                  <div className='p-6 flex-1'>
                     <div className='mb-4'>
                       <div className='w-full h-32 bg-primary-light rounded-lg mb-4 flex items-center justify-center'>
                         <div className='w-12 h-12 bg-primary rounded-lg flex items-center justify-center'>
@@ -224,12 +224,15 @@ const StudyExplorePage: React.FC = () => {
                       <p className='text-sm text-muted-foreground mb-3'>
                         {study.description}
                       </p>
-                      <div className='flex items-center text-sm text-muted-foreground mb-3'>
-                        <Users className='h-4 w-4 mr-1' />
-                        <span>
-                          참여자 수 {study.currentMembers}/{study.maxMembers}
-                        </span>
-                      </div>
+                    </div>
+                  </div>
+
+                  <div className='p-6 pt-0'>
+                    <div className='flex items-center text-sm text-muted-foreground mb-3'>
+                      <Users className='h-4 w-4 mr-1' />
+                      <span>
+                        참여자 수 {study.currentMembers}/{study.maxMembers}
+                      </span>
                     </div>
                     <button
                       onClick={() => handleApplyClick(study)}
