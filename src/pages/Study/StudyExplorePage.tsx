@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Users, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import StudyApplyModal from '@/components/Study/StudyApplyModal';
+import StudyDetailModal from '@/components/Study/StudyDetailModal';
 import RegionSelectModal from '@/components/Study/RegionSelectModal';
 import Toast from '@/components/common/Toast';
 import { ROUTES } from '@/constants';
@@ -16,6 +17,10 @@ interface Study {
   maxMembers: number;
   region: string;
   imageUrl?: string;
+  detailedDescription?: string;
+  schedule?: string;
+  duration?: string;
+  requirements?: string[];
 }
 
 // 목업 스터디 데이터 (기존 db.json 기반)
@@ -91,6 +96,7 @@ const StudyExplorePage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [selectedRegion, setSelectedRegion] = useState('전체');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isRegionModalOpen, setIsRegionModalOpen] = useState(false);
   const [selectedStudy, setSelectedStudy] = useState<Study | null>(null);
   const [toast, setToast] = useState<{
@@ -121,6 +127,22 @@ const StudyExplorePage: React.FC = () => {
   const handleModalClose = () => {
     setIsModalOpen(false);
     setSelectedStudy(null);
+  };
+
+  const handleCardClick = (study: Study) => {
+    setSelectedStudy(study);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleDetailModalClose = () => {
+    setIsDetailModalOpen(false);
+    setSelectedStudy(null);
+  };
+
+  const handleDetailApply = (study: Study) => {
+    setIsDetailModalOpen(false);
+    setSelectedStudy(study);
+    setIsModalOpen(true);
   };
 
   const handleRegionSelect = (region: string) => {
@@ -185,7 +207,8 @@ const StudyExplorePage: React.FC = () => {
               {filteredStudies.map((study) => (
                 <div
                   key={study.id}
-                  className='bg-white rounded-lg shadow-sm border border-border hover:shadow-md transition-shadow flex flex-col'
+                  className='bg-white rounded-lg shadow-sm border border-border hover:shadow-md transition-shadow flex flex-col cursor-pointer'
+                  onClick={() => handleCardClick(study)}
                 >
                   <div className='p-6 flex-1'>
                     <div className='mb-4'>
@@ -216,7 +239,10 @@ const StudyExplorePage: React.FC = () => {
                       </span>
                     </div>
                     <button
-                      onClick={() => handleApplyClick(study)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleApplyClick(study);
+                      }}
                       className='w-full bg-primary text-primary-foreground py-2 px-4 rounded-lg hover:bg-primary-hover transition-colors'
                     >
                       참여하기
@@ -248,6 +274,14 @@ const StudyExplorePage: React.FC = () => {
         isOpen={isModalOpen}
         onClose={handleModalClose}
         studyTitle={selectedStudy?.title || ''}
+      />
+
+      {/* 스터디 상세 모달 */}
+      <StudyDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={handleDetailModalClose}
+        study={selectedStudy}
+        onApply={handleDetailApply}
       />
 
       {/* 지역 선택 모달 */}
