@@ -26,7 +26,7 @@ const ScheduleSection = ({ schedules }: ScheduleSectionProps) => {
     <section className='flex-2 flex flex-col h-full w-full max-w-lg border-2 border-primary rounded-xl p-6 gap-2 bg-blue-50 text-left'>
       <div className='text-lg font-medium'>{formatDayOfTheWeek(now.day())}</div>
       <div className='text-4xl font-bold'>{now.format('DD')}</div>
-      <div className='flex flex-col p-3 gap-4'>
+      <div className='flex h-full flex-col p-3 gap-4'>
         {todaySchedules.length === 0 && (
           <div className='text-gray-500 text-xl font-bold'>
             예정된 일정이 없습니다.

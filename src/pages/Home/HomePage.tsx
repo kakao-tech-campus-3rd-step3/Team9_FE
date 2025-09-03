@@ -32,7 +32,7 @@ const HomePage: React.FC = () => {
       <div className='flex w-full flex-col px-8 pb-4 items-center'>
         <StudyListSection studies={studyTitles} />
       </div>
-      <div className='flex flex-1 gap-4 w-full px-8 justify-center'>
+      <div className='flex gap-4 w-full h-full px-8 justify-center'>
         <CalendarSection schedules={schedules} />
         <ScheduleSection schedules={schedules} />
       </div>
