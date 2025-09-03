@@ -65,8 +65,8 @@ export const mainDashboard: Dashboard[] = [
         title: '(예시) 토익 900점 목표 스터디',
         schedule: [
           {
-            title: '토익 스터디 1회차',
-            start_time: '2025-09-01T10:00:00Z',
+            title: '(예시) 토익 900점 목표 스터디 1회차',
+            start_time: '2025-09-06T10:00:00Z',
             end_time: '2025-09-01T12:00:00Z',
           },
         ],
