@@ -14,6 +14,10 @@
   --fc-neutral-bg-color: transparent;
 }
 
+.fc .fc-col-header-cell {
+  border-bottom: 1px solid #dbeafe;
+}
+
 .fc .fc-daygrid-day {
   border: none !important;
   background: transparent !important;
@@ -67,14 +71,18 @@
   color: #1f2937;
 }
 
-.fc-popover {
-  background: white;
-  border-radius: 1rem;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+.fc .fc-col-header-cell:first-child {
+  color: #ef4444;
 }
-.fc-popover .fc-popover-header {
-  background: white;
+
+.fc .fc-col-header-cell:nth-child(7) {
+  color: #3b82f6;
 }
-.fc-popover .fc-popover-body {
-  background: white;
+
+.fc .fc-day-sun .fc-daygrid-day-number {
+  color: #ef4444;
+}
+
+.fc .fc-day-sat .fc-daygrid-day-number {
+  color: #3b82f6;
 }

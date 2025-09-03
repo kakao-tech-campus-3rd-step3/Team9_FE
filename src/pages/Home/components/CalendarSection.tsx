@@ -3,7 +3,7 @@ import FullCalendar from '@fullcalendar/react';
 import interactionPlugin from '@fullcalendar/interaction';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import dayjs from 'dayjs';
-import '@/styles/calender.css';
+import '@/styles/calendar.css';
 import CalendarPopover from './CalendarPopover';
 
 type CalendarSectionProps = {
