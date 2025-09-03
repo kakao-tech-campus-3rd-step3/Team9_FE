@@ -25,13 +25,13 @@ const StudyList = ({
       {studies.map((study, index) => (
         <div
           key={index}
-          className='flex text-center text-lg gap-6 pl-4 pr-8 py-2 items-center bg-blue-200 rounded-xl'
+          className='flex text-center text-lg gap-4 px-4 py-2 items-center bg-blue-200 rounded-xl'
         >
           <div
-            className='w-5 h-5 rounded-full inline-block'
+            className='min-w-5 min-h-5 rounded-full inline-block'
             style={{ backgroundColor: study.color }}
           />
-          <div className='font-medium'>{study.title}</div>
+          <div className='font-medium line-clamp-1'>{study.title}</div>
         </div>
       ))}
       {canRight && (
