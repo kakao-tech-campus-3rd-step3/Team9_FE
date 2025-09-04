@@ -6,6 +6,9 @@ import {
   NotFoundPage,
   StudyExplorePage,
   StudyCreatePage,
+  LoginPage,
+  NotFoundPage,
+  SignupPage,
 } from '@/pages';
 import { ROUTES } from '@/constants';
 import { Layout } from '@/components';
@@ -59,6 +62,26 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <StudyCreatePage />,
+  // 로그인 페이지 (레이아웃 없음)
+  {
+    path: ROUTES.LOGIN,
+    element: <Layout layoutType='none' />,
+    children: [
+      {
+        index: true,
+        element: <LoginPage />,
+      },
+    ],
+  },
+
+  // 회원가입 페이지 (레이아웃 없음)
+  {
+    path: ROUTES.SIGNUP,
+    element: <Layout layoutType='none' />,
+    children: [
+      {
+        index: true,
+        element: <SignupPage />,
       },
     ],
   },

@@ -37,12 +37,12 @@ const Logo: React.FC<LogoProps> = ({
   return (
     <Link
       to={ROUTES.HOME}
-      className={`flex items-center space-x-2 hover:opacity-80 transition-opacity ${className}`}
+      className={`flex items-center space-x-2 hover:opacity-80 transition-opacity`}
     >
       <img
         src={padoLogo}
         alt='파도 로고'
-        className={`${sizeClasses[size]} rounded-lg shadow-sm`}
+        className={`${sizeClasses[size]} rounded-lg shadow-sm ${className}`}
       />
       {showText && (
         <div className='relative h-full flex items-center'>
