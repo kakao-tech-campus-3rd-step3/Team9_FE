@@ -34,4 +34,27 @@
   h4 {
     @apply text-xl;
   }
+
+  /* 상호작용 요소 기본 스타일 */
+  button,
+  a,
+  [role='button'],
+  input[type='checkbox'],
+  input[type='radio'] {
+    @apply cursor-pointer;
+  }
+
+  input,
+  textarea,
+  select {
+    @apply cursor-text;
+  }
+
+  /* 비활성 상태 */
+  button:disabled,
+  input:disabled,
+  textarea:disabled,
+  select:disabled {
+    @apply cursor-not-allowed opacity-60 pointer-events-none;
+  }
 }
