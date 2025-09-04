@@ -4,38 +4,49 @@
 
 import React from 'react';
 import { Camera, X } from 'lucide-react';
+import { useForm, Controller } from 'react-hook-form';
 import type { StudyFormData } from '../types';
 
 interface StudyCreateFormProps {
-  formData: StudyFormData;
   selectedCategories: string[];
   imagePreview: string | null;
   categories: readonly string[];
   memberOptions: readonly number[];
-  onInputChange: (field: keyof StudyFormData, value: string | number) => void;
   onCategoryToggle: (category: string) => void;
   onImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onImageRemove: () => void;
-  onSubmit: (event: React.FormEvent) => void;
+  onSubmit: (data: StudyFormData) => void;
 }
 
 const StudyCreateForm: React.FC<StudyCreateFormProps> = ({
-  formData,
   selectedCategories,
   imagePreview,
   categories,
   memberOptions,
-  onInputChange,
   onCategoryToggle,
   onImageUpload,
   onImageRemove,
   onSubmit,
 }) => {
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<StudyFormData>({
+    defaultValues: {
+      title: '',
+      shortDescription: '',
+      description: '',
+      category: '',
+      maxMembers: 2,
+    },
+  });
   return (
     <div className='max-w-4xl mx-auto'>
       <h1 className='text-2xl font-bold text-foreground mb-8'>스터디 생성</h1>
 
-      <form onSubmit={onSubmit} className='space-y-8'>
+      <form onSubmit={handleSubmit(onSubmit)} className='space-y-8'>
         {/* 스터디 이름 */}
         <div>
           <label className='block text-sm font-medium text-foreground mb-2'>
@@ -43,12 +54,21 @@ const StudyCreateForm: React.FC<StudyCreateFormProps> = ({
           </label>
           <input
             type='text'
-            value={formData.title}
-            onChange={(e) => onInputChange('title', e.target.value)}
+            {...register('title', {
+              required: '스터디 이름을 입력해주세요.',
+              minLength: {
+                value: 2,
+                message: '스터디 이름은 최소 2글자 이상이어야 합니다.',
+              },
+            })}
             placeholder='스터디 이름'
             className='w-full px-4 py-2 border border-input rounded-lg focus:border-primary focus:ring-0 bg-background text-foreground'
-            required
           />
+          {errors.title && (
+            <p className='mt-1 text-sm text-destructive'>
+              {errors.title.message}
+            </p>
+          )}
         </div>
 
         {/* 스터디 한 줄 소개 */}
@@ -58,12 +78,21 @@ const StudyCreateForm: React.FC<StudyCreateFormProps> = ({
           </label>
           <input
             type='text'
-            value={formData.shortDescription}
-            onChange={(e) => onInputChange('shortDescription', e.target.value)}
+            {...register('shortDescription', {
+              required: '스터디 한 줄 소개를 입력해주세요.',
+              minLength: {
+                value: 10,
+                message: '스터디 소개는 최소 10글자 이상이어야 합니다.',
+              },
+            })}
             placeholder='스터디에 대한 간략한 설명'
             className='w-full px-4 py-2 border border-input rounded-lg focus:border-primary focus:ring-0 bg-background text-foreground'
-            required
           />
+          {errors.shortDescription && (
+            <p className='mt-1 text-sm text-destructive'>
+              {errors.shortDescription.message}
+            </p>
+          )}
         </div>
 
         {/* 스터디 설명 */}
@@ -72,13 +101,22 @@ const StudyCreateForm: React.FC<StudyCreateFormProps> = ({
             스터디 설명
           </label>
           <textarea
-            value={formData.description}
-            onChange={(e) => onInputChange('description', e.target.value)}
+            {...register('description', {
+              required: '스터디 설명을 입력해주세요.',
+              minLength: {
+                value: 20,
+                message: '스터디 설명은 최소 20글자 이상이어야 합니다.',
+              },
+            })}
             placeholder='스터디에 대한 상세한 설명'
             rows={4}
             className='w-full px-4 py-2 border border-input rounded-lg focus:border-primary focus:ring-0 bg-background text-foreground resize-none'
-            required
           />
+          {errors.description && (
+            <p className='mt-1 text-sm text-destructive'>
+              {errors.description.message}
+            </p>
+          )}
         </div>
 
         {/* 스터디 카테고리 */}
@@ -109,19 +147,31 @@ const StudyCreateForm: React.FC<StudyCreateFormProps> = ({
           <label className='block text-sm font-medium text-foreground mb-2'>
             스터디 인원
           </label>
-          <select
-            value={formData.maxMembers}
-            onChange={(e) =>
-              onInputChange('maxMembers', parseInt(e.target.value))
-            }
-            className='w-full px-4 py-2 border border-input rounded-lg focus:border-primary focus:ring-0 bg-background text-foreground'
-          >
-            {memberOptions.map((num) => (
-              <option key={num} value={num}>
-                {num}인
-              </option>
-            ))}
-          </select>
+          <Controller
+            name='maxMembers'
+            control={control}
+            rules={{
+              required: '스터디 인원을 선택해주세요.',
+              min: { value: 2, message: '최소 2명 이상이어야 합니다.' },
+            }}
+            render={({ field }) => (
+              <select
+                {...field}
+                className='w-full px-4 py-2 border border-input rounded-lg focus:border-primary focus:ring-0 bg-background text-foreground'
+              >
+                {memberOptions.map((num) => (
+                  <option key={num} value={num}>
+                    {num}인
+                  </option>
+                ))}
+              </select>
+            )}
+          />
+          {errors.maxMembers && (
+            <p className='mt-1 text-sm text-destructive'>
+              {errors.maxMembers.message}
+            </p>
+          )}
         </div>
 
         {/* 스터디 대표 이미지 */}

@@ -6,28 +6,15 @@ import { useState } from 'react';
 import type { StudyFormData, ToastState } from '../types';
 
 export const useStudyCreate = () => {
-  const [formData, setFormData] = useState<StudyFormData>({
-    title: '',
-    shortDescription: '',
-    description: '',
-    category: '',
-    maxMembers: 2,
-  });
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
+  const [currentStudyTitle, setCurrentStudyTitle] = useState<string>('');
   const [toast, setToast] = useState<ToastState>({
     isVisible: false,
     type: 'success',
     message: '',
   });
-
-  const handleInputChange = (
-    field: keyof StudyFormData,
-    value: string | number,
-  ) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
 
   const handleCategoryToggle = (category: string) => {
     setSelectedCategories((prev) => {
@@ -61,37 +48,22 @@ export const useStudyCreate = () => {
   const handleCompleteModalClose = () => {
     setIsCompleteModalOpen(false);
     // 폼 리셋
-    setFormData({
-      title: '',
-      shortDescription: '',
-      description: '',
-      category: '',
-      maxMembers: 2,
-    });
     setSelectedCategories([]);
     setImagePreview(null);
+    setCurrentStudyTitle('');
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-
+  const handleSubmit = (data: StudyFormData) => {
     if (selectedCategories.length === 0) {
       showToast('error', '최소 하나의 카테고리를 선택해주세요.');
       return;
     }
 
-    if (!formData.title.trim()) {
-      showToast('error', '스터디 이름을 입력해주세요.');
-      return;
-    }
-
-    if (!formData.shortDescription.trim()) {
-      showToast('error', '스터디 한 줄 소개를 입력해주세요.');
-      return;
-    }
+    // 현재 스터디 제목 저장
+    setCurrentStudyTitle(data.title);
 
     console.log('스터디 생성 데이터:', {
-      ...formData,
+      ...data,
       categories: selectedCategories,
     });
 
@@ -101,14 +73,13 @@ export const useStudyCreate = () => {
 
   return {
     // 상태
-    formData,
     selectedCategories,
     imagePreview,
     isCompleteModalOpen,
+    currentStudyTitle,
     toast,
 
     // 핸들러
-    handleInputChange,
     handleCategoryToggle,
     handleImageUpload,
     showToast,

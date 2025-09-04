@@ -19,14 +19,13 @@ const StudyCreatePage: React.FC = () => {
   const navigate = useNavigate();
   const {
     // 상태
-    formData,
     selectedCategories,
     imagePreview,
     isCompleteModalOpen,
+    currentStudyTitle,
     toast,
 
     // 핸들러
-    handleInputChange,
     handleCategoryToggle,
     handleImageUpload,
     hideToast,
@@ -57,12 +56,10 @@ const StudyCreatePage: React.FC = () => {
         {/* 메인 콘텐츠 */}
         <div className='flex-1 p-6'>
           <StudyCreateForm
-            formData={formData}
             selectedCategories={selectedCategories}
             imagePreview={imagePreview}
             categories={STUDY_CREATE_CATEGORIES}
             memberOptions={MAX_MEMBER_OPTIONS}
-            onInputChange={handleInputChange}
             onCategoryToggle={handleCategoryToggle}
             onImageUpload={handleImageUpload}
             onImageRemove={() => setImagePreview(null)}
@@ -75,7 +72,7 @@ const StudyCreatePage: React.FC = () => {
       <StudyCreateCompleteModal
         isOpen={isCompleteModalOpen}
         onClose={handleCompleteModalCloseWithNavigation}
-        studyTitle={formData.title}
+        studyTitle={currentStudyTitle}
       />
 
       {/* 토스트 알림 */}
