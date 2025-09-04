@@ -31,5 +31,23 @@ export const schedules: StudySchedule = {
       start_time: '2025-09-15T10:00:00Z',
       end_time: '2025-09-15T12:00:00Z',
     },
+    {
+      schedule_id: 4,
+      title: '영어 스터디 4회차',
+      start_time: '2025-09-15T10:00:00Z',
+      end_time: '2025-09-15T12:00:00Z',
+    },
+    {
+      schedule_id: 5,
+      title: '영어 스터디 5회차',
+      start_time: '2025-09-15T10:00:00Z',
+      end_time: '2025-09-15T12:00:00Z',
+    },
+    {
+      schedule_id: 6,
+      title: '영어 스터디 6회차',
+      start_time: '2025-09-15T10:00:00Z',
+      end_time: '2025-09-15T12:00:00Z',
+    },
   ],
 } as const;

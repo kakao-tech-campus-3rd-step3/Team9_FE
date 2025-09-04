@@ -15,7 +15,8 @@ const ManagePage = () => {
     .map((schedule) => ({
       id: schedule.schedule_id,
       title: schedule.title,
-      date: dayjs(schedule.start_time).format('YYYY-MM-DD'),
+      start_time: dayjs(schedule.start_time),
+      end_time: dayjs(schedule.end_time),
       color: studyColor(schedules.study_id),
     }));
 
@@ -27,7 +28,7 @@ const ManagePage = () => {
           date={date}
           setDate={setDate}
         />
-        <ScheduleManageSection event={dateEvent} />
+        <ScheduleManageSection events={dateEvent} date={date} />
       </div>
 
       <MemberInfoSection />

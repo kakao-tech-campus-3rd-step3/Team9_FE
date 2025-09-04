@@ -78,7 +78,7 @@ const StudyCalendarSection = ({
   };
 
   return (
-    <section className='relative flex-3 border-2 border-primary rounded-xl p-4 bg-white max-w-[800px]'>
+    <section className='relative flex-3 border-2 border-primary rounded-xl p-4 bg-white max-w-3xl h-full w-full'>
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         height='550px'

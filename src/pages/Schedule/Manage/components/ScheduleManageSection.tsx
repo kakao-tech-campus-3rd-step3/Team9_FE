@@ -1,21 +1,35 @@
+import type { Dayjs } from 'dayjs';
+import ScheduleManageCard from './ScheduleManageCard';
+import dayjs from 'dayjs';
+
 type ScheduleManageSectionProps = {
-  event: {
+  events: {
     id: number;
     title: string;
-    date: string;
+    start_time: Dayjs;
+    end_time: Dayjs;
     color: string;
   }[];
+  date: string;
 };
 
-const ScheduleManageSection = ({ event }: ScheduleManageSectionProps) => {
+const ScheduleManageSection = ({
+  events,
+  date,
+}: ScheduleManageSectionProps) => {
   return (
-    <div className='flex flex-1 text-sm text-gray-500'>
-      {event.map((e) => (
-        <div key={e.id} className='flex items-center'>
-          <div className='flex-1'>{e.title}</div>
+    <section className='flex-2 flex flex-col w-full max-w-lg h-[586px] border-2 border-primary rounded-xl p-6 gap-3 bg-white text-left overflow-y-auto'>
+      <h3 className='mb-2'>{dayjs(date).format('M월 D일')}</h3>
+      {events.length === 0 ? (
+        <div className='flex flex-1 items-center justify-center h-full text-muted-foreground font-bold'>
+          스터디 일정이 없습니다.
         </div>
-      ))}
-    </div>
+      ) : (
+        events.map((event) => (
+          <ScheduleManageCard key={event.id} event={event} />
+        ))
+      )}
+    </section>
   );
 };
 
