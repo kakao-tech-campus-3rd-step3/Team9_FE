@@ -3,11 +3,15 @@
  */
 
 import React from 'react';
-import { Plus, Search } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useStudyExplore } from './hooks';
 import type { Study } from './types';
-import { StudyExploreSidebar, StudyCard } from './components';
+import {
+  StudyExploreHeader,
+  StudyExploreSidebar,
+  StudyCard,
+} from './components';
 import {
   StudyApplyModal,
   StudyDetailModal,
@@ -50,23 +54,13 @@ const StudyExplorePage: React.FC = () => {
 
   return (
     <div className='min-h-screen bg-background'>
-      {/* 검색창 */}
-      <div className='bg-white border-b border-border p-4'>
-        <div className='max-w-6xl mx-auto'>
-          <div className='relative max-w-md'>
-            <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5' />
-            <input
-              type='text'
-              placeholder='스터디 검색...'
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className='w-full pl-10 pr-4 py-2 border border-input rounded-lg focus:border-primary focus:ring-0 bg-background text-foreground'
-            />
-          </div>
-        </div>
-      </div>
+      {/* 헤더 (검색창 포함) */}
+      <StudyExploreHeader
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+      />
 
-      <div className='flex'>
+      <div className='flex pt-16'>
         {/* 사이드바 */}
         <StudyExploreSidebar
           categories={categories}
