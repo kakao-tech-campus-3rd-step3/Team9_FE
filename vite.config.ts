@@ -10,4 +10,18 @@ export default defineConfig({
       '@': '/src',
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // React 관련 라이브러리
+          'react-vendor': ['react', 'react-dom'],
+          // 라우팅 관련 라이브러리
+          'router-vendor': ['react-router-dom'],
+          // UI 아이콘 라이브러리
+          'ui-vendor': ['lucide-react'],
+        },
+      },
+    },
+  },
 });
