@@ -9,7 +9,7 @@ import SidebarProfile from './SidebarProfile';
  */
 function Sidebar() {
   return (
-    <aside className='w-64 bg-card border-r-2 border-border-primary relative z-20 flex flex-col min-h-full shadow-xl/40'>
+    <aside className='w-64 bg-gray-00 border-r-2 border-border-primary relative z-20 flex flex-col min-h-full shadow-xl/40'>
       <SidebarHeader
         studyName={mockStudy.studyName}
         studyImageUrl={mockStudy.studyImageUrl}
