@@ -40,10 +40,16 @@ const router = createBrowserRouter([
     ],
   },
 
-  // 스터디 탐색 페이지 (자체 헤더 포함)
+  // 스터디 탐색 페이지 (헤더만)
   {
     path: ROUTES.STUDY.EXPLORE,
-    element: <StudyExplorePage />,
+    element: <Layout layoutType='header-only' />,
+    children: [
+      {
+        index: true,
+        element: <StudyExplorePage />,
+      },
+    ],
   },
   // 스터디 생성 페이지 (헤더만)
   {

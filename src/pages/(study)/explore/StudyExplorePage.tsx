@@ -4,11 +4,7 @@
 
 import React from 'react';
 import { useStudyExplore } from './hooks';
-import {
-  StudyExploreHeader,
-  StudyExploreSidebar,
-  StudyExploreMainContent,
-} from './components';
+import { StudyExploreSidebar, StudyExploreMainContent } from './components';
 import {
   StudyApplyModal,
   StudyDetailModal,
@@ -19,8 +15,6 @@ import Toast from '@/components/common/Toast';
 const StudyExplorePage: React.FC = () => {
   const {
     // 상태
-    searchTerm,
-    setSearchTerm,
     selectedCategories,
     selectedRegion,
     isModalOpen,
@@ -45,12 +39,6 @@ const StudyExplorePage: React.FC = () => {
 
   return (
     <div className='min-h-screen bg-background'>
-      {/* 헤더 (검색창 포함) */}
-      <StudyExploreHeader
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-      />
-
       <div className='flex pt-16'>
         {/* 사이드바 */}
         <StudyExploreSidebar
