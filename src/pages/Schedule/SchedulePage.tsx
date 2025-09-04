@@ -1,0 +1,14 @@
+import { Outlet } from 'react-router-dom';
+import { ScheduleTab } from './components';
+
+const SchedulePage = () => {
+  return (
+    <div className='flex flex-col'>
+      <h1 className='p-4 mt-3 font-bold'>일정 관리</h1>
+      <ScheduleTab />
+      <Outlet />
+    </div>
+  );
+};
+
+export default SchedulePage;

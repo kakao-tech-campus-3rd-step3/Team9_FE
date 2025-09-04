@@ -4,3 +4,4 @@ export { ExamplePage } from './Example';
 export * from './(auth)';
 export { LoginPage } from './(auth)/login';
 export { SignupPage } from './(auth)/signup';
+export * from './Schedule';

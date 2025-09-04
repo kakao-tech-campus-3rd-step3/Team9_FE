@@ -4,4 +4,10 @@ export const ROUTES = {
   EXAMPLE: '/example',
   LOGIN: '/login',
   SIGNUP: '/signup',
+
+  SCHEDULE: {
+    ROOT: '/schedule',
+    MANAGE: 'manage',
+    TUNE: 'tune',
+  },
 } as const;

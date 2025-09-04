@@ -1,11 +1,18 @@
 import React from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+} from 'react-router-dom';
 import {
   ExamplePage,
   HomePage,
   LoginPage,
+  ManagePage,
   NotFoundPage,
+  SchedulePage,
   SignupPage,
+  TunePage,
 } from '@/pages';
 import { ROUTES } from '@/constants';
 import { Layout } from '@/components';
@@ -60,6 +67,26 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <SignupPage />,
+      },
+    ],
+  },
+
+  // 일정 페이지(사이드바만)
+  {
+    path: ROUTES.SCHEDULE.ROOT,
+    element: <Layout layoutType='sidebar-only' />,
+    children: [
+      {
+        path: '',
+        element: <SchedulePage />,
+        children: [
+          {
+            index: true,
+            element: <Navigate to={ROUTES.SCHEDULE.MANAGE} replace />,
+          },
+          { path: ROUTES.SCHEDULE.MANAGE, element: <ManagePage /> },
+          { path: ROUTES.SCHEDULE.TUNE, element: <TunePage /> },
+        ],
       },
     ],
   },
