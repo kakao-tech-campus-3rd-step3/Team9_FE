@@ -25,9 +25,11 @@ const ScheduleManageSection = ({
           스터디 일정이 없습니다.
         </div>
       ) : (
-        events.map((event) => (
-          <ScheduleManageCard key={event.id} event={event} />
-        ))
+        <div className='flex flex-col px-2 gap-4 w-full'>
+          {events.map((event) => (
+            <ScheduleManageCard key={event.id} event={event} />
+          ))}
+        </div>
       )}
     </section>
   );
