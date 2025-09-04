@@ -30,7 +30,6 @@ const ManagePage = () => {
         />
         <ScheduleManageSection events={dateEvent} date={date} />
       </div>
-
       <MemberInfoSection />
     </div>
   );
