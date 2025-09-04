@@ -19,12 +19,11 @@
 }
 
 .fc .fc-daygrid-day {
-  border: none !important;
+  box-sizing: border-box;
   background: transparent !important;
 }
 
 .fc .fc-daygrid-day-frame {
-  border: none !important;
   background: transparent !important;
 }
 
@@ -85,4 +84,14 @@
 
 .fc .fc-day-sat .fc-daygrid-day-number {
   color: #3b82f6;
+}
+
+.fc .fc-daygrid-day .fc-daygrid-day-frame {
+  border: 2px solid transparent;
+  border-radius: 8px;
+}
+
+.fc .fc-daygrid-day.selected-date .fc-daygrid-day-frame {
+  border: 1px solid #3b82f6 !important;
+  border-radius: 8px !important;
 }

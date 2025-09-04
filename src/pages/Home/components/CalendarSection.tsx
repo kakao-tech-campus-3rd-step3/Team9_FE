@@ -4,10 +4,11 @@ import interactionPlugin from '@fullcalendar/interaction';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import dayjs from 'dayjs';
 import '@/styles/calendar.css';
-import CalendarPopover from './CalendarPopover';
+import { CalendarPopover } from '@/components';
 
 type CalendarSectionProps = {
   schedules: {
+    id: number;
     title: string;
     start_time: string;
     end_time: string;

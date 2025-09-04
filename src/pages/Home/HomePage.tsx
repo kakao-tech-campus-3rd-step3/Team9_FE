@@ -14,6 +14,7 @@ import { studyColor } from '@/utils';
 const HomePage: React.FC = () => {
   const studyTitles = mainDashboard.flatMap((dashboard) =>
     dashboard.studies.map((study) => ({
+      id: study.study_id,
       title: study.title,
       color: studyColor(study.study_id),
     })),
