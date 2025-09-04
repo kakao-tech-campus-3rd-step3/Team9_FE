@@ -34,9 +34,7 @@ const StudyCard: React.FC<StudyCardProps> = ({
           <h3 className='text-lg font-semibold text-foreground mb-2'>
             {study.title}
           </h3>
-          <p className='text-sm text-muted-foreground mb-3'>
-            {study.description}
-          </p>
+          <p className='text-sm text-foreground mb-3'>{study.description}</p>
           <p className='text-xs text-muted-foreground'>📍 {study.region}</p>
         </div>
       </div>
@@ -49,6 +47,7 @@ const StudyCard: React.FC<StudyCardProps> = ({
           </span>
         </div>
         <button
+          type='button'
           onClick={(e) => {
             e.stopPropagation();
             onApplyClick(study);

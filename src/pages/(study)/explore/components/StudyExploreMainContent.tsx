@@ -56,10 +56,10 @@ const StudyExploreMainContent: React.FC<StudyExploreMainContentProps> = ({
 
         {filteredStudies.length === 0 && (
           <div className='text-center py-12'>
-            <p className='text-muted-foreground text-lg'>
+            <p className='text-foreground text-lg'>
               해당 조건에 맞는 스터디가 없습니다.
             </p>
-            <p className='text-muted-foreground text-sm mt-2'>
+            <p className='text-foreground text-sm mt-2'>
               다른 지역이나 카테고리를 선택해보세요.
             </p>
           </div>
