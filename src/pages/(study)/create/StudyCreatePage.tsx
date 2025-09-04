@@ -5,11 +5,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStudyCreate } from './hooks';
-import {
-  StudyCreateHeader,
-  StudyCreateSidebar,
-  StudyCreateForm,
-} from './components';
+import { StudyCreateSidebar, StudyCreateForm } from './components';
 import { STUDY_CREATE_CATEGORIES, MAX_MEMBER_OPTIONS } from './constants';
 import { StudyCreateCompleteModal } from '../components';
 import Toast from '@/components/common/Toast';
@@ -42,10 +38,7 @@ const StudyCreatePage: React.FC = () => {
 
   return (
     <div className='min-h-screen bg-background'>
-      {/* 헤더 */}
-      <StudyCreateHeader />
-
-      <div className='flex pt-16'>
+      <div className='flex'>
         {/* 사이드바 */}
         <StudyCreateSidebar
           categories={STUDY_CREATE_CATEGORIES}
