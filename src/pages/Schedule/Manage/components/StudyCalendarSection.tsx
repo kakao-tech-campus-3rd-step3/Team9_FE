@@ -114,6 +114,16 @@ const StudyCalendarSection = ({
             ? ['selected-date']
             : [];
         }}
+        moreLinkClick={(arg) => {
+          handleEventClick({
+            jsEvent: arg.jsEvent as MouseEvent,
+            event: {
+              start: dayjs(arg.date).startOf('day').toDate(),
+              end: dayjs(arg.date).endOf('day').toDate(),
+            },
+          });
+          return arg.view.type;
+        }}
       />
 
       <CalendarPopover
