@@ -21,8 +21,8 @@ const ManagePage = () => {
     }));
 
   return (
-    <div className='p-4'>
-      <div className='flex p-4 gap-2'>
+    <div className='flex flex-col p-4 items-center justify-center'>
+      <div className='flex p-4 gap-2 w-full justify-center'>
         <StudyCalendarSection
           schedules={schedules}
           date={date}

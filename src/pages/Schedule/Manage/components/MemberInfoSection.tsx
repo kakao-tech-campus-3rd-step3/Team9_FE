@@ -6,7 +6,7 @@ const MemberInfoSection = () => {
     attendanceData.member[0]?.attendance[0]?.schedule_date ?? [];
 
   return (
-    <section className='flex flex-col w-full p-4 gap-3 overflow-y-auto'>
+    <section className='flex flex-col w-full p-4 gap-3 max-w-7xl overflow-y-auto'>
       <div className='flex-1 flex flex-col items-center h-full px-6 py-4 border-2 border-primary rounded-xl'>
         {attendanceData.member.length > 0 ? (
           <div className='w-full overflow-x-auto'>
@@ -33,8 +33,8 @@ const MemberInfoSection = () => {
                 </tr>
               </thead>
               <tbody>
-                {attendanceData.member.map((member, idx) => (
-                  <tr key={`${member.name}-${idx}`}>
+                {attendanceData.member.map((member, index) => (
+                  <tr key={`${member.name}-${index}`}>
                     <td className='border-b border-primary text-center px-5 py-3 '>
                       <div className='w-8 h-8 rounded-full overflow-hidden bg-red-400' />
                     </td>
