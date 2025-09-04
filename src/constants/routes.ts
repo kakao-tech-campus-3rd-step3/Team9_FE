@@ -4,4 +4,10 @@ export const ROUTES = {
   EXAMPLE: '/example',
   LOGIN: '/login',
   SIGNUP: '/signup',
+  STUDY: {
+    EXPLORE: '/study/explore',
+    CREATE: '/study/create',
+    DETAIL: '/study/:id',
+    DASHBOARD: '/study/dashboard',
+  },
 } as const;

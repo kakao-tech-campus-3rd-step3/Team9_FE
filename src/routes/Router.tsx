@@ -9,6 +9,7 @@ import {
 } from '@/pages';
 import { ROUTES } from '@/constants';
 import { Layout } from '@/components';
+import { DashboardPage } from '@/pages/(study)';
 
 /**
  * 애플리케이션 라우터 설정
@@ -60,6 +61,18 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <SignupPage />,
+      },
+    ],
+  },
+
+  // 스터디 - 대시보드 페이지 (사이드바만)
+  {
+    path: ROUTES.STUDY.DASHBOARD,
+    element: <Layout layoutType='sidebar-only' />,
+    children: [
+      {
+        index: true,
+        element: <DashboardPage />,
       },
     ],
   },
