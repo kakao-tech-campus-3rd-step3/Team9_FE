@@ -9,7 +9,7 @@ import {
 } from '@/pages';
 import { ROUTES } from '@/constants';
 import { Layout } from '@/components';
-import { DashboardPage } from '@/pages/(study)';
+import { DashboardPage, StudyLayout } from '@/pages/(study)';
 
 /**
  * 애플리케이션 라우터 설정
@@ -65,14 +65,31 @@ const router = createBrowserRouter([
     ],
   },
 
-  // 스터디 - 대시보드 페이지 (사이드바만)
+  // 스터디 - 전역 그룹 (study/...)
   {
-    path: ROUTES.STUDY.DASHBOARD,
-    element: <Layout layoutType='sidebar-only' />,
+    path: ROUTES.STUDY.ROOT,
     children: [
+      // 스터디 연관 사이드바 사용하는 영역
       {
-        index: true,
-        element: <DashboardPage />,
+        element: <StudyLayout />,
+        children: [
+          { path: ROUTES.STUDY.DASHBOARD, element: <DashboardPage /> },
+          { path: ROUTES.STUDY.DOCUMENT, element: <ExamplePage /> },
+          { path: ROUTES.STUDY.PROGRESS, element: <ExamplePage /> },
+          { path: ROUTES.STUDY.SCHEDULE, element: <ExamplePage /> },
+          { path: ROUTES.STUDY.QUIZ, element: <ExamplePage /> },
+          { path: ROUTES.STUDY.RETRO, element: <ExamplePage /> },
+          { path: ROUTES.STUDY.ADMIN, element: <ExamplePage /> },
+        ],
+      },
+
+      // 헤더만 사용하는 영역
+      {
+        element: <Layout layoutType='header-only' />,
+        children: [
+          { path: ROUTES.STUDY.EXPLORE, element: <ExamplePage /> },
+          { path: ROUTES.STUDY.CREATE, element: <ExamplePage /> },
+        ],
       },
     ],
   },
