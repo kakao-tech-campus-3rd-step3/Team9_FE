@@ -25,7 +25,7 @@ const Layout: React.FC<LayoutProps> = ({ layoutType = 'none' }) => {
         return (
           <div className='min-h-screen bg-background'>
             <Header />
-            <main className='pt-16 h-screen overflow-auto'>
+            <main className='flex-1 overflow-auto'>
               <Outlet />
             </main>
           </div>
