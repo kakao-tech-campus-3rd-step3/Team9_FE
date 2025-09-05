@@ -22,7 +22,7 @@ const ManagePage = () => {
 
   return (
     <div className='flex flex-col p-4 items-center justify-center'>
-      <div className='flex p-4 gap-2 w-full justify-center'>
+      <div className='flex p-4 gap-8 w-full justify-center'>
         <StudyCalendarSection
           schedules={schedules}
           date={date}

@@ -18,7 +18,7 @@ const ScheduleManageSection = ({
   date,
 }: ScheduleManageSectionProps) => {
   return (
-    <section className='flex-2 flex flex-col w-full max-w-lg h-[586px] border-2 border-primary rounded-xl p-6 gap-3 bg-white text-left overflow-y-auto'>
+    <section className='flex-3 flex flex-col w-full h-[586px] border-2 border-primary rounded-xl p-6 gap-3 bg-white text-left overflow-y-auto'>
       <h3 className='mb-2'>{dayjs(date).format('M월 D일')}</h3>
       {events.length === 0 ? (
         <div className='flex flex-1 items-center justify-center h-full text-muted-foreground font-bold'>
