@@ -2,6 +2,11 @@
 export const ROUTES = {
   HOME: '/',
   EXAMPLE: '/example',
+  STUDY: {
+    EXPLORE: '/study/explore',
+    CREATE: '/study/create',
+    DETAIL: '/study/:id',
+  },
   LOGIN: '/login',
   SIGNUP: '/signup',
 } as const;

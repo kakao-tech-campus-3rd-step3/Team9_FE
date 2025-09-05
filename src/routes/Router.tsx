@@ -3,8 +3,10 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import {
   ExamplePage,
   HomePage,
-  LoginPage,
   NotFoundPage,
+  StudyExplorePage,
+  StudyCreatePage,
+  LoginPage,
   SignupPage,
 } from '@/pages';
 import { ROUTES } from '@/constants';
@@ -40,6 +42,28 @@ const router = createBrowserRouter([
     ],
   },
 
+  // 스터디 탐색 페이지 (헤더만)
+  {
+    path: ROUTES.STUDY.EXPLORE,
+    element: <Layout layoutType='header-only' />,
+    children: [
+      {
+        index: true,
+        element: <StudyExplorePage />,
+      },
+    ],
+  },
+  // 스터디 생성 페이지 (헤더만)
+  {
+    path: ROUTES.STUDY.CREATE,
+    element: <Layout layoutType='header-only' />,
+    children: [
+      {
+        index: true,
+        element: <StudyCreatePage />,
+      },
+    ],
+  },
   // 로그인 페이지 (레이아웃 없음)
   {
     path: ROUTES.LOGIN,
