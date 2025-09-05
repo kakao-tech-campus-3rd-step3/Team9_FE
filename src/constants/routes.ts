@@ -8,6 +8,7 @@ export const ROUTES = {
     ROOT: 'study',
     EXPLORE: 'explore',
     CREATE: 'create',
+    DETAIL: ':id',
     DASHBOARD: 'dashboard',
     DOCUMENT: 'document',
     DOCUMENT_ADD: 'document/add',

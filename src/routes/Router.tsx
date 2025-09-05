@@ -57,28 +57,6 @@ const router = createBrowserRouter([
     ],
   },
 
-  // 스터디 탐색 페이지 (헤더만)
-  {
-    path: ROUTES.STUDY.EXPLORE,
-    element: <Layout layoutType='header-only' />,
-    children: [
-      {
-        index: true,
-        element: <StudyExplorePage />,
-      },
-    ],
-  },
-  // 스터디 생성 페이지 (헤더만)
-  {
-    path: ROUTES.STUDY.CREATE,
-    element: <Layout layoutType='header-only' />,
-    children: [
-      {
-        index: true,
-        element: <StudyCreatePage />,
-      },
-    ],
-  },
   // 로그인 페이지 (레이아웃 없음)
   {
     path: ROUTES.LOGIN,
@@ -120,7 +98,18 @@ const router = createBrowserRouter([
           },
           { path: ROUTES.STUDY.DOCUMENT_EDIT, element: <DocumentEditPage /> },
           { path: ROUTES.STUDY.PROGRESS, element: <ExamplePage /> },
-          { path: ROUTES.STUDY.SCHEDULE, element: <ExamplePage /> },
+          {
+            path: ROUTES.STUDY.SCHEDULE,
+            element: <SchedulePage />,
+            children: [
+              {
+                index: true,
+                element: <Navigate to={ROUTES.SCHEDULE.MANAGE} replace />,
+              },
+              { path: ROUTES.SCHEDULE.MANAGE, element: <ManagePage /> },
+              { path: ROUTES.SCHEDULE.TUNE, element: <TunePage /> },
+            ],
+          },
           { path: ROUTES.STUDY.QUIZ, element: <ExamplePage /> },
           { path: ROUTES.STUDY.RETRO, element: <ExamplePage /> },
           { path: ROUTES.STUDY.ADMIN, element: <ExamplePage /> },
@@ -131,32 +120,14 @@ const router = createBrowserRouter([
       {
         element: <Layout layoutType='header-only' />,
         children: [
-          { path: ROUTES.STUDY.EXPLORE, element: <ExamplePage /> },
-          { path: ROUTES.STUDY.CREATE, element: <ExamplePage /> },
+          { path: ROUTES.STUDY.EXPLORE, element: <StudyExplorePage /> },
+          { path: ROUTES.STUDY.CREATE, element: <StudyCreatePage /> },
         ],
       },
     ],
   },
 
-  // 일정 페이지(사이드바만)
-  {
-    path: ROUTES.SCHEDULE.ROOT,
-    element: <Layout layoutType='sidebar-only' />,
-    children: [
-      {
-        path: '',
-        element: <SchedulePage />,
-        children: [
-          {
-            index: true,
-            element: <Navigate to={ROUTES.SCHEDULE.MANAGE} replace />,
-          },
-          { path: ROUTES.SCHEDULE.MANAGE, element: <ManagePage /> },
-          { path: ROUTES.SCHEDULE.TUNE, element: <TunePage /> },
-        ],
-      },
-    ],
-  },
+  // 전역 일정 라우트 제거 (스터디 내부로 이동)
 
   // 404 페이지 (레이아웃 없음)
   {
