@@ -39,7 +39,7 @@ const StudyExplorePage: React.FC = () => {
 
   return (
     <div className='min-h-screen bg-background'>
-      <div className='flex pt-16'>
+      <div className='flex'>
         {/* 사이드바 */}
         <StudyExploreSidebar
           categories={categories}

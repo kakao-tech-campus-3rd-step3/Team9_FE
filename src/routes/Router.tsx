@@ -7,7 +7,6 @@ import {
   StudyExplorePage,
   StudyCreatePage,
   LoginPage,
-  NotFoundPage,
   SignupPage,
 } from '@/pages';
 import { ROUTES } from '@/constants';
