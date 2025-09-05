@@ -9,4 +9,10 @@ export const ROUTES = {
   },
   LOGIN: '/login',
   SIGNUP: '/signup',
+
+  SCHEDULE: {
+    ROOT: '/schedule',
+    MANAGE: 'manage',
+    TUNE: 'tune',
+  },
 } as const;

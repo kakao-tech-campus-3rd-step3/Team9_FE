@@ -10,6 +10,7 @@ type Popover = {
 
 type CalendarPopoverProps = {
   schedules: {
+    id: number;
     title: string;
     start_time: string;
     end_time: string;
