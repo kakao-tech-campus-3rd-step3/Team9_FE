@@ -3,3 +3,4 @@
  */
 
 export * from './studyData';
+export * from './nav.tsx';

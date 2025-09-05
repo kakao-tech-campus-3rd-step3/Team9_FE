@@ -2,14 +2,24 @@
 export const ROUTES = {
   HOME: '/',
   EXAMPLE: '/example',
-  STUDY: {
-    EXPLORE: '/study/explore',
-    CREATE: '/study/create',
-    DETAIL: '/study/:id',
-  },
   LOGIN: '/login',
   SIGNUP: '/signup',
-
+  STUDY: {
+    ROOT: 'study',
+    EXPLORE: 'explore',
+    CREATE: 'create',
+    DETAIL: ':id',
+    DASHBOARD: 'dashboard',
+    DOCUMENT: 'document',
+    DOCUMENT_ADD: 'document/add',
+    DOCUMENT_DETAIL: 'document/:id',
+    DOCUMENT_EDIT: 'document/:id/edit',
+    PROGRESS: 'progress',
+    SCHEDULE: 'schedule',
+    QUIZ: 'quiz',
+    RETRO: 'retro',
+    ADMIN: 'admin',
+  },
   SCHEDULE: {
     ROOT: '/schedule',
     MANAGE: 'manage',

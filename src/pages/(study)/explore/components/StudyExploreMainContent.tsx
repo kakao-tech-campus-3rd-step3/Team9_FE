@@ -68,7 +68,7 @@ const StudyExploreMainContent: React.FC<StudyExploreMainContentProps> = ({
 
       {/* 스터디 생성 버튼 */}
       <button
-        onClick={() => navigate(ROUTES.STUDY.CREATE)}
+        onClick={() => navigate(`/${ROUTES.STUDY.ROOT}/${ROUTES.STUDY.CREATE}`)}
         className='fixed bottom-8 right-8 bg-primary text-primary-foreground p-4 rounded-full shadow-lg hover:bg-primary/90 transition-colors z-40'
         aria-label='스터디 생성'
       >

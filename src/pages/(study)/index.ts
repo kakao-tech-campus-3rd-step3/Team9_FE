@@ -5,3 +5,5 @@
 export { StudyExplorePage } from './explore';
 export { StudyCreatePage } from './create';
 export * from './components';
+export * from './dashboard';
+export * from './document';

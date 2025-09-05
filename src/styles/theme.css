@@ -2,45 +2,56 @@
 
 /* 기본 토큰 정의 */
 :root {
-  /* 기본 색상 - 발게 흰 계열 */
-  --background: #fafbfc; /* 페이지 전체 배경색 (매우 연한 회색빛 흰색) */
+  /* 기본 색상 - 연한 파란색빛 흰색 계열 */
+  --background: #f8faff; /* 페이지 전체 배경색 (매우 연한 파란색빛 흰색) */
   --foreground: #1a202c; /* 기본 텍스트 색상 (진한 회색) */
 
   /* 주요 액션 색상 - #3B82F6 기반 */
   --primary: #3b82f6; /* 주요 버튼, 링크, CTA 요소 배경색 */
   --primary-foreground: #ffffff; /* 주요 액션 요소의 텍스트 색상 */
   --primary-hover: #2563eb; /* 주요 액션 호버 상태 */
-  --primary-light: #eff6ff; /* 주요 액션 연한 배경 */
 
-  /* 보조 액션 색상 */
-  --secondary: #f1f5f9; /* 보조 버튼, 태그, 배지 배경색 */
-  --secondary-foreground: #475569; /* 보조 액션 요소의 텍스트 색상 */
-  --secondary-hover: #e2e8f0; /* 보조 액션 호버 상태 */
+  /* 보조 액션 색상 - primary와 동일한 푸른 계열 */
+  --secondary: #eff6ff; /* 보조 버튼, 태그, 배지 배경색 (연한 파란색) */
+  --secondary-foreground: #3b82f6; /* 보조 액션 요소의 텍스트 색상 (primary와 동일) */
+  --secondary-hover: #dbeafe; /* 보조 액션 호버 상태 (약간 진한 파란색) */
 
   /* 비활성/서브 텍스트 색상 */
-  --muted: #f8fafc; /* 비활성 상태 배경색 (disabled 버튼 등) */
+  --muted: #f1f5ff; /* 비활성 상태 배경색 (배경색과 조화되는 연한 파란색빛) */
   --muted-foreground: #64748b; /* 서브 텍스트, 설명, placeholder 색상 */
+  --muted-hover: #e2e8f0; /* 비활성 상태 호버 */
 
   /* 강조 색상 */
-  --accent: #f1f5f9; /* 호버, 선택 상태 배경색 */
-  --accent-foreground: #475569; /* 강조 상태 텍스트 색상 */
-  --accent-hover: #e2e8f0; /* 강조 상태 호버 */
+  --accent: #f0f4ff; /* 호버, 선택 상태 배경색 (배경색과 조화되는 연한 파란색빛) */
+  --accent-foreground: #3b82f6; /* 강조 상태 텍스트 색상 (primary와 동일) */
+  --accent-hover: #e0e7ff; /* 강조 상태 호버 (약간 진한 파란색빛) */
 
   /* 경고/에러 색상 */
   --destructive: #ef4444; /* 에러 메시지, 경고 배경색 */
   --destructive-foreground: #ffffff; /* 에러/경고 텍스트 색상 */
-  --destructive-light: #fef2f2; /* 에러 연한 배경 */
+  --destructive-hover: #dc2626; /* 에러 호버 상태 */
 
   /* 성공 색상 */
   --success: #10b981; /* 성공 메시지, 완료 상태 */
   --success-foreground: #ffffff; /* 성공 텍스트 색상 */
-  --success-light: #f0fdf4; /* 성공 연한 배경 */
+  --success-hover: #059669; /* 성공 호버 상태 */
 
-  /* 테두리/입력/포커스 색상 */
-  --border: #e2e8f0; /* 테두리, 구분선 색상 */
-  --input: #e2e8f0; /* 입력창 테두리 색상 */
+  /* 테두리/입력/포커스 색상 - primary(파란색)과 회색으로 구분 */
+  --border: #e2e8f0; /* 기본 회색 테두리 */
+  --border-hover: #cbd5e1; /* 회색 테두리 호버 상태 */
+  --border-primary: #3b82f6; /* primary 색상 테두리 (파란색) */
+  --border-primary-hover: #2563eb; /* primary 테두리 호버 상태 */
+  --border-primary-focus: #1d4ed8; /* primary 테두리 포커스 상태 */
+
+  /* 입력창 테두리 색상 */
+  --input: #e2e8f0; /* 입력창 기본 테두리 */
+  --input-hover: #cbd5e1; /* 입력창 호버 상태 */
+  --input-focus: #3b82f6; /* 입력창 포커스 상태 */
+  --input-disabled: #f1f5ff; /* 입력창 비활성 상태 (배경색과 조화) */
+
+  /* 포커스 링 색상 */
   --ring: #3b82f6; /* 포커스 링 색상 (focus:ring-2 등) */
-  --ring-light: #eff6ff; /* 포커스 링 연한 색상 */
+  --ring-offset: #f8faff; /* 포커스 링 오프셋 색상 (배경색과 동일) */
 }
 
 /* Tailwind 유틸리티 클래스 연결 */
@@ -57,7 +68,6 @@
   --color-primary-hover: var(
     --primary-hover
   ); /* 사용법: hover:bg-primary-hover */
-  --color-primary-light: var(--primary-light); /* 사용법: bg-primary-light */
 
   /* 보조 액션 색상 */
   --color-secondary: var(--secondary); /* 사용법: bg-secondary */
@@ -73,6 +83,7 @@
   --color-muted-foreground: var(
     --muted-foreground
   ); /* 사용법: text-muted-foreground */
+  --color-muted-hover: var(--muted-hover); /* 사용법: hover:bg-muted-hover */
 
   /* 강조 색상 */
   --color-accent: var(--accent); /* 사용법: bg-accent */
@@ -88,22 +99,49 @@
   --color-destructive-foreground: var(
     --destructive-foreground
   ); /* 사용법: text-destructive-foreground */
-  --color-destructive-light: var(
-    --destructive-light
-  ); /* 사용법: bg-destructive-light */
+  --color-destructive-hover: var(
+    --destructive-hover
+  ); /* 사용법: hover:bg-destructive-hover */
 
   /* 성공 색상 */
   --color-success: var(--success); /* 사용법: bg-success, text-success */
   --color-success-foreground: var(
     --success-foreground
   ); /* 사용법: text-success-foreground */
-  --color-success-light: var(--success-light); /* 사용법: bg-success-light */
+  --color-success-hover: var(
+    --success-hover
+  ); /* 사용법: hover:bg-success-hover */
 
-  /* 테두리/입력/포커스 색상 */
-  --color-border: var(--border); /* 사용법: border-border */
+  /* 테두리/입력/포커스 색상 - primary와 회색으로 구분 */
+  --color-border: var(--border); /* 사용법: border-border (기본 회색) */
+  --color-border-hover: var(
+    --border-hover
+  ); /* 사용법: hover:border-border-hover */
+  --color-border-primary: var(
+    --border-primary
+  ); /* 사용법: border-border-primary (파란색) */
+  --color-border-primary-hover: var(
+    --border-primary-hover
+  ); /* 사용법: hover:border-border-primary-hover */
+  --color-border-primary-focus: var(
+    --border-primary-focus
+  ); /* 사용법: focus:border-border-primary-focus */
+
+  /* 입력창 테두리 색상 */
   --color-input: var(--input); /* 사용법: border-input */
+  --color-input-hover: var(
+    --input-hover
+  ); /* 사용법: hover:border-input-hover */
+  --color-input-focus: var(
+    --input-focus
+  ); /* 사용법: focus:border-input-focus */
+  --color-input-disabled: var(
+    --input-disabled
+  ); /* 사용법: disabled:border-input-disabled */
+
+  /* 포커스 링 색상 */
   --color-ring: var(--ring); /* 사용법: ring-ring */
-  --color-ring-light: var(--ring-light); /* 사용법: ring-ring-light */
+  --color-ring-offset: var(--ring-offset); /* 사용법: ring-offset-ring-offset */
 
   /* 기본 둥글기 */
   --radius: 0.5rem; /* 사용법: rounded, rounded-lg (기본값) */

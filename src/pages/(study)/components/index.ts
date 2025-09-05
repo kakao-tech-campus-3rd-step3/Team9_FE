@@ -2,6 +2,7 @@
  * 스터디 공통 컴포넌트 exports
  */
 
+export * from './layout';
 export { default as StudyApplyModal } from './StudyApplyModal';
 export { default as StudyDetailModal } from './StudyDetailModal';
 export { default as StudyCreateCompleteModal } from './StudyCreateCompleteModal';
