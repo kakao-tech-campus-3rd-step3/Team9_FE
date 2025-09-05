@@ -6,6 +6,7 @@ import Sidebar from './Sidebar';
 export type LayoutType =
   | 'none'
   | 'header-only'
+  | 'header-with-back'
   | 'sidebar-only'
   | 'header-sidebar';
 

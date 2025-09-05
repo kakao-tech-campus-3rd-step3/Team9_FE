@@ -19,4 +19,9 @@ export const ROUTES = {
     RETRO: 'retro',
     ADMIN: 'admin',
   },
+  SCHEDULE: {
+    ROOT: '/schedule',
+    MANAGE: 'manage',
+    TUNE: 'tune',
+  },
 } as const;
