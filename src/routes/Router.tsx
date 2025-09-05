@@ -9,7 +9,14 @@ import {
 } from '@/pages';
 import { ROUTES } from '@/constants';
 import { Layout } from '@/components';
-import { DashboardPage, StudyLayout } from '@/pages/(study)';
+import {
+  DashboardPage,
+  StudyLayout,
+  DocumentPage,
+  DocumentAddPage,
+  DocumentDetailPage,
+  DocumentEditPage,
+} from '@/pages/(study)';
 
 /**
  * 애플리케이션 라우터 설정
@@ -74,7 +81,13 @@ const router = createBrowserRouter([
         element: <StudyLayout />,
         children: [
           { path: ROUTES.STUDY.DASHBOARD, element: <DashboardPage /> },
-          { path: ROUTES.STUDY.DOCUMENT, element: <ExamplePage /> },
+          { path: ROUTES.STUDY.DOCUMENT, element: <DocumentPage /> },
+          { path: ROUTES.STUDY.DOCUMENT_ADD, element: <DocumentAddPage /> },
+          {
+            path: ROUTES.STUDY.DOCUMENT_DETAIL,
+            element: <DocumentDetailPage />,
+          },
+          { path: ROUTES.STUDY.DOCUMENT_EDIT, element: <DocumentEditPage /> },
           { path: ROUTES.STUDY.PROGRESS, element: <ExamplePage /> },
           { path: ROUTES.STUDY.SCHEDULE, element: <ExamplePage /> },
           { path: ROUTES.STUDY.QUIZ, element: <ExamplePage /> },
