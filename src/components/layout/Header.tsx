@@ -12,12 +12,16 @@ import { ROUTES } from '@/constants';
  */
 const Header: React.FC = () => {
   const location = useLocation();
-  const isStudyExplorePage = location.pathname === ROUTES.STUDY.EXPLORE;
+  // 상수 기반 절대 경로 생성
+  const explorePath = `/${ROUTES.STUDY.ROOT}/${ROUTES.STUDY.EXPLORE}`;
+  const dashboardPath = `/${ROUTES.STUDY.ROOT}/${ROUTES.STUDY.DASHBOARD}`;
+  const isStudyExplorePage = location.pathname === explorePath;
 
   // 네비게이션 메뉴 항목
   const navItems = [
-    { to: ROUTES.HOME, label: '홈' },
-    { to: ROUTES.STUDY.EXPLORE, label: '스터디 탐색' },
+    { to: ROUTES.HOME, label: '홈', type: 'link' as const },
+    { to: explorePath, label: '스터디 탐색', type: 'link' as const },
+    { to: dashboardPath, label: '스터디 대시보드', type: 'link' as const },
   ];
 
   return (
@@ -42,7 +46,7 @@ const Header: React.FC = () => {
         <nav className='flex items-center space-x-6'>
           {navItems.map((item) => (
             <Link
-              key={item.to}
+              key={item.label}
               to={item.to}
               className={`text-sm font-medium transition-colors hover:text-primary ${
                 location.pathname === item.to
