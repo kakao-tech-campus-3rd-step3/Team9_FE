@@ -7,4 +7,6 @@ export const ROUTES = {
     CREATE: '/study/create',
     DETAIL: '/study/:id',
   },
+  LOGIN: '/login',
+  SIGNUP: '/signup',
 } as const;
