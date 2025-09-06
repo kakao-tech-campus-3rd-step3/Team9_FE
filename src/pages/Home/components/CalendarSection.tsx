@@ -48,7 +48,7 @@ const CalendarSection = ({ schedules }: CalendarSectionProps) => {
   };
 
   return (
-    <section className='relative flex-3 h-full w-full min-h-[640px] max-w-3xl border-2 border-primary rounded-xl p-4 bg-white'>
+    <section className='relative flex-3 h-full w-full min-h-[660px] max-w-3xl border-2 border-primary rounded-xl p-4 bg-white'>
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         height='auto'
