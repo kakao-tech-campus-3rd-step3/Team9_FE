@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import { Users } from 'lucide-react';
+import { Users, Eye } from 'lucide-react';
 import type { Study } from '../types';
 
 interface StudyCardProps {
@@ -18,10 +18,7 @@ const StudyCard: React.FC<StudyCardProps> = ({
   onApplyClick,
 }) => {
   return (
-    <div
-      className='bg-white rounded-lg shadow-sm border border-border hover:shadow-md transition-shadow flex flex-col cursor-pointer'
-      onClick={() => onCardClick(study)}
-    >
+    <div className='bg-white rounded-lg shadow-sm border border-border hover:shadow-md transition-shadow flex flex-col'>
       <div className='p-6 flex-1'>
         <div className='mb-4'>
           <div className='w-full h-32 bg-primary-light rounded-lg mb-4 flex items-center justify-center'>
@@ -46,16 +43,23 @@ const StudyCard: React.FC<StudyCardProps> = ({
             참여자 수 {study.currentMembers}/{study.maxMembers}
           </span>
         </div>
-        <button
-          type='button'
-          onClick={(e) => {
-            e.stopPropagation();
-            onApplyClick(study);
-          }}
-          className='w-full bg-primary text-primary-foreground py-2 px-4 rounded-lg hover:bg-primary-hover transition-colors'
-        >
-          참여하기
-        </button>
+        <div className='flex gap-2'>
+          <button
+            type='button'
+            onClick={() => onCardClick(study)}
+            className='flex-1 bg-secondary text-secondary-foreground py-2 px-4 rounded-lg hover:bg-secondary-hover transition-colors flex items-center justify-center gap-2'
+          >
+            <Eye className='h-4 w-4' />
+            상세보기
+          </button>
+          <button
+            type='button'
+            onClick={() => onApplyClick(study)}
+            className='flex-1 bg-primary text-primary-foreground py-2 px-4 rounded-lg hover:bg-primary-hover transition-colors'
+          >
+            참여하기
+          </button>
+        </div>
       </div>
     </div>
   );
