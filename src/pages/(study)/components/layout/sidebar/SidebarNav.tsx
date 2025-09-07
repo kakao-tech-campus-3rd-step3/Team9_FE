@@ -34,7 +34,7 @@ function SidebarNav() {
                             : 'text-muted-foreground group-hover:text-primary/80'
                         }`}
                       >
-                        {item.icon}
+                        <item.icon className='w-5 h-5' />
                       </span>
                       <span
                         className={`truncate font-semibold transition-colors duration-200 ease-out ${
