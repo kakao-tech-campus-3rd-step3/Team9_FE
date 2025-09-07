@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { mainDashboard } from './mock/studyData';
 import {
   CalendarSection,
@@ -12,20 +12,28 @@ import { studyColor } from '@/utils';
  * - 메인 페이지 컨텐츠를 표시
  */
 const HomePage: React.FC = () => {
-  const studyTitles = mainDashboard.flatMap((dashboard) =>
-    dashboard.studies.map((study) => ({
-      id: study.study_id,
-      title: study.title,
-      color: studyColor(study.study_id),
-    })),
+  const studyTitles = useMemo(
+    () =>
+      mainDashboard.flatMap((dashboard) =>
+        dashboard.studies.map((study) => ({
+          id: study.study_id,
+          title: study.title,
+          color: studyColor(study.study_id),
+        })),
+      ),
+    [],
   );
-  const schedules = mainDashboard.flatMap((dashboard) =>
-    dashboard.studies.flatMap((study) =>
-      study.schedule.map((s) => ({
-        ...s,
-        color: studyColor(study.study_id),
-      })),
-    ),
+  const schedules = useMemo(
+    () =>
+      mainDashboard.flatMap((dashboard) =>
+        dashboard.studies.flatMap((study) =>
+          study.schedule.map((s) => ({
+            ...s,
+            color: studyColor(study.study_id),
+          })),
+        ),
+      ),
+    [],
   );
 
   return (

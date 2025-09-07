@@ -1,7 +1,7 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 type StudyListProps = {
-  studies: { title: string; color: string }[];
+  studies: { id: number; title: string; color: string }[];
   canLeft: boolean;
   onLeft: () => void;
   canRight: boolean;
@@ -22,9 +22,9 @@ const StudyList = ({
           <ChevronLeft />
         </button>
       )}
-      {studies.map((study, index) => (
+      {studies.map((study) => (
         <div
-          key={index}
+          key={study.id}
           className='flex text-center text-lg gap-4 px-4 py-2 items-center bg-blue-200 rounded-xl'
         >
           <div

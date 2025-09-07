@@ -65,13 +65,12 @@ const CalendarPopover = ({
       </div>
       <ul className='space-y-1 px-2 py-1 text-sm text-left'>
         {schedules
-          .filter(
-            (schedule) =>
-              dayjs(schedule.start_time).format('YYYY-MM-DD') === popover.date,
+          .filter((schedule) =>
+            dayjs(schedule.start_time).isSame(dayjs(popover.date), 'day'),
           )
-          .map((schedule, index) => (
+          .map((schedule) => (
             <li
-              key={index}
+              key={schedule.id}
               className='p-1 rounded-lg text-white'
               style={{
                 backgroundColor: schedule.color,
