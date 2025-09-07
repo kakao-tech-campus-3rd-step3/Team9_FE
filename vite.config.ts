@@ -20,6 +20,16 @@ export default defineConfig({
           'router-vendor': ['react-router-dom'],
           // UI 아이콘 라이브러리
           'ui-vendor': ['lucide-react'],
+          // 폼 관련 라이브러리
+          'form-vendor': ['react-hook-form', 'zod'],
+          // 상태 관리 라이브러리
+          'state-vendor': ['zustand', '@tanstack/react-query'],
+          // 캘린더 관련 라이브러리
+          'calendar-vendor': [
+            '@fullcalendar/react',
+            '@fullcalendar/daygrid',
+            '@fullcalendar/interaction',
+          ],
         },
       },
     },
