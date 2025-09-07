@@ -62,20 +62,20 @@ const RegionSelectModal: React.FC<RegionSelectModalProps> = ({
 
         {/* 지역 목록 */}
         <div className='flex-1 overflow-y-auto px-6 pb-6'>
-          <div className='space-y-2'>
+          <div className='grid grid-cols-3 gap-3'>
             {filteredRegions.map(([key, value]) => (
               <button
                 key={key}
                 onClick={() => handleRegionClick(value)}
-                className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
+                className={`text-center px-3 py-3 rounded-lg transition-colors ${
                   selectedRegion === value
                     ? 'bg-primary text-primary-foreground'
                     : 'hover:bg-accent text-foreground'
                 }`}
               >
-                <div className='flex items-center space-x-3'>
+                <div className='flex flex-col items-center space-y-1'>
                   <MapPin className='h-4 w-4' />
-                  <span className='font-medium'>{value}</span>
+                  <span className='text-sm font-medium'>{value}</span>
                 </div>
               </button>
             ))}
