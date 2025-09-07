@@ -17,9 +17,7 @@ const StudyExplorePage: React.FC = () => {
     // 상태
     selectedCategories,
     selectedRegion,
-    isModalOpen,
-    isDetailModalOpen,
-    isRegionModalOpen,
+    activeModal,
     selectedStudy,
     toast,
     filteredStudies,
@@ -34,7 +32,7 @@ const StudyExplorePage: React.FC = () => {
     handleCategoryToggle,
     handleRegionSelect,
     hideToast,
-    setIsRegionModalOpen,
+    setActiveModal,
   } = useStudyExplore();
 
   return (
@@ -53,20 +51,20 @@ const StudyExplorePage: React.FC = () => {
           selectedRegion={selectedRegion}
           onCardClick={handleCardClick}
           onApplyClick={handleApplyClick}
-          onRegionSelectClick={() => setIsRegionModalOpen(true)}
+          onRegionSelectClick={() => setActiveModal('region')}
         />
       </div>
 
       {/* 스터디 신청 모달 */}
       <StudyApplyModal
-        isOpen={isModalOpen}
+        isOpen={activeModal === 'apply'}
         onClose={handleModalClose}
         studyTitle={selectedStudy?.title || ''}
       />
 
       {/* 스터디 상세 모달 */}
       <StudyDetailModal
-        isOpen={isDetailModalOpen}
+        isOpen={activeModal === 'detail'}
         onClose={handleDetailModalClose}
         study={selectedStudy}
         onApply={handleDetailApply}
@@ -74,8 +72,8 @@ const StudyExplorePage: React.FC = () => {
 
       {/* 지역 선택 모달 */}
       <RegionSelectModal
-        isOpen={isRegionModalOpen}
-        onClose={() => setIsRegionModalOpen(false)}
+        isOpen={activeModal === 'region'}
+        onClose={() => setActiveModal(null)}
         selectedRegion={selectedRegion}
         onRegionSelect={handleRegionSelect}
       />
