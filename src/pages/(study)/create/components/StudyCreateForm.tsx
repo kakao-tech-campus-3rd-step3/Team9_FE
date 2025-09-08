@@ -40,6 +40,7 @@ const StudyCreateForm: React.FC<StudyCreateFormProps> = ({
       description: '',
       category: '',
       maxMembers: 2,
+      schedule: '',
     },
   });
   return (
@@ -172,6 +173,33 @@ const StudyCreateForm: React.FC<StudyCreateFormProps> = ({
               {errors.maxMembers.message}
             </p>
           )}
+        </div>
+
+        {/* 스터디 시간 */}
+        <div>
+          <label className='block text-sm font-medium text-foreground mb-2'>
+            스터디 시간
+          </label>
+          <input
+            type='text'
+            {...register('schedule', {
+              required: '스터디 시간을 입력해주세요.',
+              minLength: {
+                value: 5,
+                message: '스터디 시간을 구체적으로 입력해주세요.',
+              },
+            })}
+            placeholder='예: 매주 토요일 오후 2시'
+            className='w-full px-4 py-2 border border-input rounded-lg focus:border-primary focus:ring-0 bg-background text-foreground'
+          />
+          {errors.schedule && (
+            <p className='mt-1 text-sm text-destructive'>
+              {errors.schedule.message}
+            </p>
+          )}
+          <p className='mt-1 text-xs text-muted-foreground'>
+            스터디가 진행되는 시간을 자유롭게 입력해주세요.
+          </p>
         </div>
 
         {/* 스터디 대표 이미지 */}

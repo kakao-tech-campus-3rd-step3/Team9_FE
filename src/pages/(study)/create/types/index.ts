@@ -8,6 +8,7 @@ export interface StudyFormData {
   description: string;
   category: string;
   maxMembers: number;
+  schedule: string;
 }
 
 export interface ToastState {
