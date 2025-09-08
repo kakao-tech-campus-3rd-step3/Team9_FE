@@ -62,6 +62,16 @@ jobs:
       - name: 패키지 설치
         run: pnpm i --frozen-lockfile
 
+      - name: Vercel 프로젝트 연결 파일 생성
+        run: |
+          mkdir -p .vercel
+          cat > .vercel/project.json << 'JSON'
+          {
+            "projectId": "${{ secrets.VERCEL_PROJECT_ID }}",
+            "orgId": "${{ secrets.VERCEL_ORG_ID }}"
+          }
+          JSON
+
       - name: Vercel 환경 동기화
         run:
           npx vercel pull --yes --environment=preview --token=${{
