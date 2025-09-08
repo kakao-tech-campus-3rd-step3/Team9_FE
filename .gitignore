@@ -46,3 +46,4 @@ coverage/
 
 # SWC 캐시 (SWC specific cache)
 .swc/
+.vercel
