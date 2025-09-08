@@ -398,10 +398,11 @@ const StudyCreateForm: React.FC<StudyCreateFormProps> = ({
         isOpen={isRegionModalOpen}
         onClose={() => setIsRegionModalOpen(false)}
         selectedRegion={watch('region')}
-        onRegionSelect={(region) => {
+        onRegionSelect={(region: string) => {
           setValue('region', region);
           setIsRegionModalOpen(false);
         }}
+        multiSelect={false}
       />
     </div>
   );

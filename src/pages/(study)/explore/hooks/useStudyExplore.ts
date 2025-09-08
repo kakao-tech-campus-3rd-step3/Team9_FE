@@ -13,7 +13,7 @@ export const useStudyExplore = () => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([
     '전체',
   ]);
-  const [selectedRegion, setSelectedRegion] = useState('전체');
+  const [selectedRegions, setSelectedRegions] = useState<string[]>(['전체']);
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [selectedStudy, setSelectedStudy] = useState<Study | null>(null);
   const [toast, setToast] = useState<ToastState>({
@@ -32,7 +32,10 @@ export const useStudyExplore = () => {
       return false;
     }
     // 지역 필터
-    if (selectedRegion !== '전체' && study.region !== selectedRegion) {
+    if (
+      !selectedRegions.includes('전체') &&
+      !selectedRegions.includes(study.region)
+    ) {
       return false;
     }
     // 검색어 필터
@@ -88,9 +91,19 @@ export const useStudyExplore = () => {
     });
   };
 
-  const handleRegionSelect = (region: string) => {
-    setSelectedRegion(region);
-    setActiveModal(null);
+  const handleRegionToggle = (region: string) => {
+    setSelectedRegions((prev) => {
+      if (region === '전체') {
+        return ['전체'];
+      }
+      if (prev.includes(region)) {
+        const newRegions = prev.filter((r) => r !== region);
+        return newRegions.length === 0 ? ['전체'] : newRegions;
+      } else {
+        const newRegions = [...prev.filter((r) => r !== '전체'), region];
+        return newRegions;
+      }
+    });
   };
 
   const hideToast = () => {
@@ -102,7 +115,7 @@ export const useStudyExplore = () => {
     searchTerm,
     setSearchTerm,
     selectedCategories,
-    selectedRegion,
+    selectedRegions,
     activeModal,
     selectedStudy,
     toast,
@@ -116,7 +129,7 @@ export const useStudyExplore = () => {
     handleDetailModalClose,
     handleDetailApply,
     handleCategoryToggle,
-    handleRegionSelect,
+    handleRegionToggle,
     hideToast,
     setActiveModal,
   };

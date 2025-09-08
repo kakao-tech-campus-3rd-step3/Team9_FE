@@ -5,15 +5,21 @@ import { REGIONS, type RegionKey } from '@/constants';
 interface RegionSelectModalProps {
   isOpen: boolean;
   onClose: () => void;
-  selectedRegion: string;
-  onRegionSelect: (region: string) => void;
+  selectedRegions?: string[];
+  selectedRegion?: string;
+  onRegionToggle?: (region: string) => void;
+  onRegionSelect?: (region: string) => void;
+  multiSelect?: boolean;
 }
 
 const RegionSelectModal: React.FC<RegionSelectModalProps> = ({
   isOpen,
   onClose,
+  selectedRegions,
   selectedRegion,
+  onRegionToggle,
   onRegionSelect,
+  multiSelect = false,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -24,8 +30,12 @@ const RegionSelectModal: React.FC<RegionSelectModalProps> = ({
   );
 
   const handleRegionClick = (region: string) => {
-    onRegionSelect(region);
-    onClose();
+    if (multiSelect && onRegionToggle) {
+      onRegionToggle(region);
+    } else if (!multiSelect && onRegionSelect) {
+      onRegionSelect(region);
+      onClose();
+    }
   };
 
   if (!isOpen) return null;
@@ -68,9 +78,13 @@ const RegionSelectModal: React.FC<RegionSelectModalProps> = ({
                 key={key}
                 onClick={() => handleRegionClick(value)}
                 className={`text-center px-3 py-3 rounded-lg transition-colors ${
-                  selectedRegion === value
-                    ? 'bg-primary text-primary-foreground'
-                    : 'hover:bg-accent text-foreground'
+                  multiSelect
+                    ? selectedRegions?.includes(value)
+                      ? 'bg-primary text-primary-foreground'
+                      : 'hover:bg-accent text-foreground'
+                    : selectedRegion === value
+                      ? 'bg-primary text-primary-foreground'
+                      : 'hover:bg-accent text-foreground'
                 }`}
               >
                 <div className='flex flex-col items-center space-y-1'>
@@ -91,20 +105,42 @@ const RegionSelectModal: React.FC<RegionSelectModalProps> = ({
 
         {/* 하단 버튼 */}
         <div className='p-6 pt-4 border-t border-border'>
-          <div className='flex justify-end space-x-3'>
-            <button
-              onClick={onClose}
-              className='px-4 py-2 text-sm font-medium text-secondary-foreground bg-secondary border border-border rounded-lg hover:bg-secondary-hover transition-colors'
-            >
-              취소
-            </button>
-            <button
-              onClick={() => handleRegionClick('전체')}
-              className='px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary-hover transition-colors'
-            >
-              전체 지역
-            </button>
-          </div>
+          {multiSelect ? (
+            <div className='flex justify-between items-center'>
+              <div className='text-sm text-muted-foreground'>
+                {selectedRegions && selectedRegions.length > 0 && (
+                  <span>
+                    {selectedRegions.includes('전체')
+                      ? '전체 지역 선택됨'
+                      : `${selectedRegions.length}개 지역 선택됨`}
+                  </span>
+                )}
+              </div>
+              <div className='flex space-x-3'>
+                <button
+                  onClick={onClose}
+                  className='px-4 py-2 text-sm font-medium text-secondary-foreground bg-secondary border border-border rounded-lg hover:bg-secondary-hover transition-colors'
+                >
+                  완료
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className='flex justify-end space-x-3'>
+              <button
+                onClick={onClose}
+                className='px-4 py-2 text-sm font-medium text-secondary-foreground bg-secondary border border-border rounded-lg hover:bg-secondary-hover transition-colors'
+              >
+                취소
+              </button>
+              <button
+                onClick={() => handleRegionClick('전체')}
+                className='px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary-hover transition-colors'
+              >
+                전체 지역
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

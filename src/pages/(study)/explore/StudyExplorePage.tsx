@@ -19,7 +19,7 @@ const StudyExplorePage: React.FC = () => {
     searchTerm,
     setSearchTerm,
     selectedCategories,
-    selectedRegion,
+    selectedRegions,
     activeModal,
     selectedStudy,
     toast,
@@ -33,7 +33,7 @@ const StudyExplorePage: React.FC = () => {
     handleDetailModalClose,
     handleDetailApply,
     handleCategoryToggle,
-    handleRegionSelect,
+    handleRegionToggle,
     hideToast,
     setActiveModal,
   } = useStudyExplore();
@@ -56,7 +56,7 @@ const StudyExplorePage: React.FC = () => {
           {/* 메인 콘텐츠 */}
           <StudyExploreMainContent
             filteredStudies={filteredStudies}
-            selectedRegion={selectedRegion}
+            selectedRegions={selectedRegions}
             onCardClick={handleCardClick}
             onApplyClick={handleApplyClick}
             onRegionSelectClick={() => setActiveModal('region')}
@@ -82,8 +82,9 @@ const StudyExplorePage: React.FC = () => {
         <RegionSelectModal
           isOpen={activeModal === 'region'}
           onClose={() => setActiveModal(null)}
-          selectedRegion={selectedRegion}
-          onRegionSelect={handleRegionSelect}
+          selectedRegions={selectedRegions}
+          onRegionToggle={handleRegionToggle}
+          multiSelect={true}
         />
 
         {/* 토스트 알림 */}
