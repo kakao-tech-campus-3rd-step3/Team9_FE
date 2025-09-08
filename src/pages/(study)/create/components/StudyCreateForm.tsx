@@ -3,7 +3,7 @@
  */
 
 import React, { useState } from 'react';
-import { Camera, X, MapPin } from 'lucide-react';
+import { Camera, X, MapPin, Plus } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 import type { StudyFormData } from '../types';
 import { RegionSelectModal } from '../../components';
@@ -17,6 +17,7 @@ interface StudyCreateFormProps {
   onImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onImageRemove: () => void;
   onSubmit: (data: StudyFormData) => void;
+  onShowToast: (message: string, type: 'success' | 'error') => void;
 }
 
 const StudyCreateForm: React.FC<StudyCreateFormProps> = ({
@@ -28,8 +29,10 @@ const StudyCreateForm: React.FC<StudyCreateFormProps> = ({
   onImageUpload,
   onImageRemove,
   onSubmit,
+  onShowToast,
 }) => {
   const [isRegionModalOpen, setIsRegionModalOpen] = useState(false);
+  const [conditionInput, setConditionInput] = useState('');
 
   const {
     register,
@@ -47,6 +50,7 @@ const StudyCreateForm: React.FC<StudyCreateFormProps> = ({
       maxMembers: 2,
       schedule: '',
       region: '',
+      conditions: [],
     },
   });
   return (
@@ -241,6 +245,91 @@ const StudyCreateForm: React.FC<StudyCreateFormProps> = ({
                     {errors.region.message}
                   </p>
                 )}
+              </div>
+            )}
+          />
+        </div>
+
+        {/* 참여조건 */}
+        <div>
+          <label className='block text-sm font-medium text-foreground mb-2'>
+            참여조건
+          </label>
+          <Controller
+            name='conditions'
+            control={control}
+            render={({ field }) => (
+              <div>
+                {/* 입력 필드 */}
+                <div className='flex gap-2 mb-3'>
+                  <input
+                    type='text'
+                    placeholder='참여조건을 입력하세요 (예: React 경험 1년 이상)'
+                    value={conditionInput}
+                    onChange={(e) => setConditionInput(e.target.value)}
+                    className='flex-1 px-4 py-2 border border-input rounded-lg focus:border-primary focus:ring-0 bg-background text-foreground'
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const value = conditionInput.trim();
+                        if (value && !field.value.includes(value)) {
+                          field.onChange([...field.value, value]);
+                          setConditionInput('');
+                        } else if (value && field.value.includes(value)) {
+                          onShowToast('이미 추가된 참여조건입니다.', 'error');
+                          setConditionInput('');
+                        }
+                      }
+                    }}
+                  />
+                  <button
+                    type='button'
+                    onClick={() => {
+                      const value = conditionInput.trim();
+                      if (value && !field.value.includes(value)) {
+                        field.onChange([...field.value, value]);
+                        setConditionInput('');
+                      } else if (value && field.value.includes(value)) {
+                        onShowToast('이미 추가된 참여조건입니다.', 'error');
+                        setConditionInput('');
+                      }
+                    }}
+                    className='px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors flex items-center gap-2'
+                  >
+                    <Plus className='h-4 w-4' />
+                    추가
+                  </button>
+                </div>
+
+                {/* 선택된 참여조건 태그들 */}
+                {field.value.length > 0 && (
+                  <div className='flex flex-wrap gap-2 mb-2'>
+                    {field.value.map((condition, index) => (
+                      <div
+                        key={index}
+                        className='flex items-center gap-2 px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm'
+                      >
+                        <span>{condition}</span>
+                        <button
+                          type='button'
+                          onClick={() => {
+                            const newConditions = field.value.filter(
+                              (_, i) => i !== index,
+                            );
+                            field.onChange(newConditions);
+                          }}
+                          className='text-primary-foreground hover:text-primary-foreground/80'
+                        >
+                          <X className='h-3 w-3' />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <p className='text-xs text-muted-foreground'>
+                  스터디 참여를 위한 조건을 입력해주세요. (선택사항)
+                </p>
               </div>
             )}
           />

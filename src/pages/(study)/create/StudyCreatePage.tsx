@@ -24,6 +24,7 @@ const StudyCreatePage: React.FC = () => {
     // 핸들러
     handleCategoryToggle,
     handleImageUpload,
+    showToast,
     hideToast,
     handleCompleteModalClose,
     handleSubmit,
@@ -57,6 +58,7 @@ const StudyCreatePage: React.FC = () => {
             onImageUpload={handleImageUpload}
             onImageRemove={() => setImagePreview(null)}
             onSubmit={handleSubmit}
+            onShowToast={(message, type) => showToast(type, message)}
           />
         </div>
       </div>

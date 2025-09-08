@@ -10,6 +10,7 @@ export interface StudyFormData {
   maxMembers: number;
   schedule: string;
   region: string;
+  conditions: string[];
 }
 
 export interface ToastState {
