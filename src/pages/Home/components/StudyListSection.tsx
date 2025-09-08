@@ -3,7 +3,7 @@ import StudyNothing from './StudyNothing';
 import { useState } from 'react';
 
 type StudyListSectionProps = {
-  studies: { title: string; color: string }[];
+  studies: { id: number; title: string; color: string }[];
 };
 
 const StudyListSection = ({ studies }: StudyListSectionProps) => {
