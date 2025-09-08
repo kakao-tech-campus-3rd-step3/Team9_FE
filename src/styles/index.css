@@ -1,0 +1,60 @@
+/* Tailwind CSS v4 기본 설정 및 전역 스타일 */
+
+@import './fonts.css';
+@import 'tailwindcss';
+@import './theme.css';
+
+/* 기본 스타일 */
+@layer base {
+  /* 페이지 기본 스타일 */
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+
+  /* 제목 태그 기본 스타일 */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold text-foreground;
+  }
+
+  /* 제목 크기 설정 */
+  h1 {
+    @apply text-4xl;
+  }
+  h2 {
+    @apply text-3xl;
+  }
+  h3 {
+    @apply text-2xl;
+  }
+  h4 {
+    @apply text-xl;
+  }
+
+  /* 상호작용 요소 기본 스타일 */
+  button,
+  a,
+  [role='button'],
+  input[type='checkbox'],
+  input[type='radio'] {
+    @apply cursor-pointer;
+  }
+
+  input,
+  textarea,
+  select {
+    @apply cursor-text;
+  }
+
+  /* 비활성 상태 */
+  button:disabled,
+  input:disabled,
+  textarea:disabled,
+  select:disabled {
+    @apply cursor-not-allowed opacity-60 pointer-events-none;
+  }
+}
