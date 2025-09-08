@@ -2,10 +2,11 @@
  * 스터디 생성 폼 컴포넌트
  */
 
-import React from 'react';
-import { Camera, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { Camera, X, MapPin } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 import type { StudyFormData } from '../types';
+import { RegionSelectModal } from '../../components';
 
 interface StudyCreateFormProps {
   selectedCategories: string[];
@@ -28,10 +29,14 @@ const StudyCreateForm: React.FC<StudyCreateFormProps> = ({
   onImageRemove,
   onSubmit,
 }) => {
+  const [isRegionModalOpen, setIsRegionModalOpen] = useState(false);
+
   const {
     register,
     control,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<StudyFormData>({
     defaultValues: {
@@ -41,6 +46,7 @@ const StudyCreateForm: React.FC<StudyCreateFormProps> = ({
       category: '',
       maxMembers: 2,
       schedule: '',
+      region: '',
     },
   });
   return (
@@ -202,6 +208,44 @@ const StudyCreateForm: React.FC<StudyCreateFormProps> = ({
           </p>
         </div>
 
+        {/* 스터디 지역 */}
+        <div>
+          <label className='block text-sm font-medium text-foreground mb-2'>
+            스터디 지역
+          </label>
+          <Controller
+            name='region'
+            control={control}
+            rules={{
+              required: '스터디 지역을 선택해주세요.',
+            }}
+            render={({ field }) => (
+              <div>
+                <button
+                  type='button'
+                  onClick={() => setIsRegionModalOpen(true)}
+                  className={`w-full px-4 py-2 border rounded-lg text-left flex items-center justify-between ${
+                    field.value
+                      ? 'border-primary bg-primary/5 text-foreground'
+                      : 'border-input bg-background text-muted-foreground'
+                  }`}
+                >
+                  <div className='flex items-center space-x-2'>
+                    <MapPin className='h-4 w-4' />
+                    <span>{field.value || '지역을 선택해주세요'}</span>
+                  </div>
+                  <span className='text-muted-foreground'>▼</span>
+                </button>
+                {errors.region && (
+                  <p className='mt-1 text-sm text-destructive'>
+                    {errors.region.message}
+                  </p>
+                )}
+              </div>
+            )}
+          />
+        </div>
+
         {/* 스터디 대표 이미지 */}
         <div>
           <label className='block text-sm font-medium text-foreground mb-2'>
@@ -259,6 +303,17 @@ const StudyCreateForm: React.FC<StudyCreateFormProps> = ({
           </button>
         </div>
       </form>
+
+      {/* 지역 선택 모달 */}
+      <RegionSelectModal
+        isOpen={isRegionModalOpen}
+        onClose={() => setIsRegionModalOpen(false)}
+        selectedRegion={watch('region')}
+        onRegionSelect={(region) => {
+          setValue('region', region);
+          setIsRegionModalOpen(false);
+        }}
+      />
     </div>
   );
 };
