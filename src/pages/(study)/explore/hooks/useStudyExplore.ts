@@ -6,15 +6,15 @@ import { useState } from 'react';
 import type { Study, ToastState } from '../types';
 import { MOCK_STUDIES, CATEGORIES } from '../constants';
 
+type ModalType = 'apply' | 'detail' | 'region' | null;
+
 export const useStudyExplore = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([
     '전체',
   ]);
   const [selectedRegion, setSelectedRegion] = useState('전체');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [isRegionModalOpen, setIsRegionModalOpen] = useState(false);
+  const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [selectedStudy, setSelectedStudy] = useState<Study | null>(null);
   const [toast, setToast] = useState<ToastState>({
     isVisible: false,
@@ -50,28 +50,27 @@ export const useStudyExplore = () => {
   // 핸들러 함수들
   const handleApplyClick = (study: Study) => {
     setSelectedStudy(study);
-    setIsModalOpen(true);
+    setActiveModal('apply');
   };
 
   const handleModalClose = () => {
-    setIsModalOpen(false);
+    setActiveModal(null);
     setSelectedStudy(null);
   };
 
   const handleCardClick = (study: Study) => {
     setSelectedStudy(study);
-    setIsDetailModalOpen(true);
+    setActiveModal('detail');
   };
 
   const handleDetailModalClose = () => {
-    setIsDetailModalOpen(false);
+    setActiveModal(null);
     setSelectedStudy(null);
   };
 
   const handleDetailApply = (study: Study) => {
-    setIsDetailModalOpen(false);
     setSelectedStudy(study);
-    setIsModalOpen(true);
+    setActiveModal('apply');
   };
 
   const handleCategoryToggle = (category: string) => {
@@ -91,6 +90,7 @@ export const useStudyExplore = () => {
 
   const handleRegionSelect = (region: string) => {
     setSelectedRegion(region);
+    setActiveModal(null);
   };
 
   const hideToast = () => {
@@ -103,9 +103,7 @@ export const useStudyExplore = () => {
     setSearchTerm,
     selectedCategories,
     selectedRegion,
-    isModalOpen,
-    isDetailModalOpen,
-    isRegionModalOpen,
+    activeModal,
     selectedStudy,
     toast,
     filteredStudies,
@@ -120,6 +118,6 @@ export const useStudyExplore = () => {
     handleCategoryToggle,
     handleRegionSelect,
     hideToast,
-    setIsRegionModalOpen,
+    setActiveModal,
   };
 };
