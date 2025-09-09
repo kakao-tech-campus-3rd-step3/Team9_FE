@@ -3,24 +3,18 @@
  */
 
 import { useState } from 'react';
-import type { Study, ToastState } from '../types';
+import type { Study } from '../types';
 import { MOCK_STUDIES, CATEGORIES } from '../constants';
 
 type ModalType = 'apply' | 'detail' | 'region' | null;
 
-export const useStudyExplore = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+export const useStudyExplore = (searchTerm: string) => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([
     '전체',
   ]);
   const [selectedRegions, setSelectedRegions] = useState<string[]>(['전체']);
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [selectedStudy, setSelectedStudy] = useState<Study | null>(null);
-  const [toast, setToast] = useState<ToastState>({
-    isVisible: false,
-    type: 'success',
-    message: '',
-  });
 
   // 필터링된 스터디 목록
   const filteredStudies = MOCK_STUDIES.filter((study: Study) => {
@@ -106,19 +100,12 @@ export const useStudyExplore = () => {
     });
   };
 
-  const hideToast = () => {
-    setToast((prev) => ({ ...prev, isVisible: false }));
-  };
-
   return {
     // 상태
-    searchTerm,
-    setSearchTerm,
     selectedCategories,
     selectedRegions,
     activeModal,
     selectedStudy,
-    toast,
     filteredStudies,
     categories: CATEGORIES,
 
@@ -130,7 +117,6 @@ export const useStudyExplore = () => {
     handleDetailApply,
     handleCategoryToggle,
     handleRegionToggle,
-    hideToast,
     setActiveModal,
   };
 };
