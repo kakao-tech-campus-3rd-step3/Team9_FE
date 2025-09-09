@@ -38,14 +38,29 @@ const Header: React.FC<HeaderProps> = ({ searchTerm = '', onSearchChange }) => {
         {isStudyExplorePage && (
           <div className='flex-1 max-w-md mx-8'>
             <div className='relative'>
-              <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5' />
               <input
                 type='text'
                 placeholder='스터디 검색'
                 value={searchTerm}
                 onChange={(e) => onSearchChange?.(e.target.value)}
-                className='w-full pl-10 pr-4 py-2 border border-input rounded-lg focus:border-primary focus:ring-0 bg-background text-foreground'
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    // Enter 키를 눌렀을 때 검색 실행
+                    console.log('검색 실행:', searchTerm);
+                  }
+                }}
+                className='w-full pl-4 pr-12 py-2 border border-input rounded-lg focus:border-primary focus:ring-0 bg-background text-foreground'
               />
+              <button
+                type='button'
+                onClick={() => {
+                  // 검색 버튼을 클릭했을 때 검색 실행
+                  console.log('검색 실행:', searchTerm);
+                }}
+                className='absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors'
+              >
+                <Search className='h-5 w-5' />
+              </button>
             </div>
           </div>
         )}
