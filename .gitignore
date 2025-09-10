@@ -8,11 +8,7 @@ build/
 
 # 환경 변수 (Environment variables)
 # .env.example 파일을 통해 어떤 변수들이 필요한지 공유
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env*
 !.env.example
 
 # IDE 및 에디터 설정 (IDE & Editor specific)
@@ -46,4 +42,4 @@ coverage/
 
 # SWC 캐시 (SWC specific cache)
 .swc/
-.vercel
+.vercel/
