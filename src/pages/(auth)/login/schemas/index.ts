@@ -1,1 +1,2 @@
-export { loginSchema } from './loginschema';
+export { loginSchema } from './loginSchema';
+export type { LoginFormData } from './loginSchema';
