@@ -1,11 +1,16 @@
 import { useForm } from 'react-hook-form';
-import type { LoginFormData } from '../types';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { loginSchema } from '../schemas';
 import { DEFAULT_LOGIN_FORM_VALUES } from '../constants';
+import type { LoginFormData } from '../schemas';
+import { useLoginMutation } from './useLoginMutation';
 
 /**
  * 로그인 폼 관리 훅
  */
 export const useLoginForm = () => {
+  const { mutate, isPending, isError } = useLoginMutation();
+
   // React Hook Form 설정
   const {
     register,
@@ -13,15 +18,11 @@ export const useLoginForm = () => {
     formState: { errors },
   } = useForm<LoginFormData>({
     defaultValues: DEFAULT_LOGIN_FORM_VALUES,
+    resolver: zodResolver(loginSchema),
+    mode: 'onTouched', // blur 시 최초 검증 이후 실시간 검증
   });
 
-  // 로그인 제출 핸들러
-  const onSubmit = (data: LoginFormData) => {
-    console.log('로그인 데이터:', data);
-
-    // TODO: 실제 API 호출
-    // await loginAPI(data);
-  };
+  const onSubmit = handleSubmit((data) => mutate(data));
 
   return {
     // React Hook Form
@@ -31,5 +32,9 @@ export const useLoginForm = () => {
 
     // 핸들러
     onSubmit,
+
+    // 상태
+    isPending,
+    isError,
   };
 };

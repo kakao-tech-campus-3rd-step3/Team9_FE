@@ -7,10 +7,10 @@ import { useLoginForm } from '../hooks/useLoginForm';
  * 로그인 폼 컴포넌트
  */
 export const LoginForm: React.FC = () => {
-  const { register, handleSubmit, onSubmit } = useLoginForm();
+  const { register, onSubmit } = useLoginForm();
 
   return (
-    <form className='space-y-4' noValidate onSubmit={handleSubmit(onSubmit)}>
+    <form className='space-y-4' noValidate onSubmit={onSubmit}>
       {/* 이메일 입력 */}
       <Input
         type='email'
@@ -32,7 +32,7 @@ export const LoginForm: React.FC = () => {
       {/* 로그인 버튼 */}
       <button
         type='submit'
-        className='w-full bg-primary text-primary-foreground py-2 px-3 mt-4 rounded hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 font-bold cursor-pointer'
+        className='w-full bg-primary text-primary-foreground py-2 px-3 mt-4 rounded hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 font-bold'
       >
         {AUTH_TEXTS.LOGIN.BUTTON}
       </button>
