@@ -1,5 +1,8 @@
 import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
+import type { Resolver } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { signupSchema } from '../schemas';
 import type { SignupFormData, SignupStep } from '../types';
 import { DEFAULT_FORM_VALUES } from '../constants';
 
@@ -16,6 +19,8 @@ export const useSignupForm = () => {
     formState: { errors },
   } = useForm<SignupFormData>({
     defaultValues: DEFAULT_FORM_VALUES,
+    resolver: zodResolver(signupSchema) as unknown as Resolver<SignupFormData>,
+    mode: 'onTouched',
   });
 
   // 현재 단계
@@ -39,7 +44,7 @@ export const useSignupForm = () => {
   const handleInterestToggle = (interest: string) => {
     const currentInterests = watchedValues.interests || [];
     const newInterests = currentInterests.includes(interest)
-      ? currentInterests.filter((item) => item !== interest)
+      ? currentInterests.filter((item: string) => item !== interest)
       : [...currentInterests, interest];
     setValue('interests', newInterests);
   };
