@@ -34,46 +34,48 @@ const TuneTable = ({
           </tr>
         </thead>
         <tbody>
-          {Array.from({ length: grid[0].length / 2 }).map((_, hourIdx) => {
-            const rows = [hourIdx * 2, hourIdx * 2 + 1];
-            return (
-              <React.Fragment key={hourIdx}>
-                {rows.map((rowIdx, idx) => (
-                  <tr
-                    key={`${hourIdx}-${rowIdx}`}
-                    className='border-b border-dotted border-gray-800'
-                  >
-                    {idx === 0 && (
-                      <td
-                        className='border-r border-gray-800 px-2 py-2 text-xs font-bold text-center'
-                        rowSpan={2}
-                      >
-                        {hourSlots[hourIdx]}
-                      </td>
-                    )}
-                    {grid.map((daySlots, colIdx) => {
-                      const value = daySlots[rowIdx];
-                      const people = countOnes(value);
-                      return (
+          {Array.isArray(grid) &&
+            grid.length > 0 &&
+            Array.from({ length: grid[0].length / 2 }).map((_, hourIdx) => {
+              const rows = [hourIdx * 2, hourIdx * 2 + 1];
+              return (
+                <React.Fragment key={hourIdx}>
+                  {rows.map((rowIdx, idx) => (
+                    <tr
+                      key={`${hourIdx}-${rowIdx}`}
+                      className='border-b border-dotted border-gray-800'
+                    >
+                      {idx === 0 && (
                         <td
-                          key={`${colIdx}-${rowIdx}`}
-                          onMouseEnter={() =>
-                            setHoverTable({ col: colIdx, row: rowIdx })
-                          }
-                          className={`border-r border-gray-800 px-2 py-1 ${getBgColor(
-                            {
-                              count: people,
-                              maxCount: tuneCheckData.participants.length,
-                            },
-                          )}`}
-                        />
-                      );
-                    })}
-                  </tr>
-                ))}
-              </React.Fragment>
-            );
-          })}
+                          className='border-r border-gray-800 px-2 py-2 text-xs font-bold text-center'
+                          rowSpan={2}
+                        >
+                          {hourSlots[hourIdx]}
+                        </td>
+                      )}
+                      {grid.map((daySlots, colIdx) => {
+                        const value = daySlots[rowIdx];
+                        const people = countOnes(value);
+                        return (
+                          <td
+                            key={`${colIdx}-${rowIdx}`}
+                            onMouseEnter={() =>
+                              setHoverTable({ col: colIdx, row: rowIdx })
+                            }
+                            className={`border-r border-gray-800 px-2 py-1 ${getBgColor(
+                              {
+                                count: people,
+                                maxCount: tuneCheckData.participants.length,
+                              },
+                            )}`}
+                          />
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </React.Fragment>
+              );
+            })}
         </tbody>
       </table>
       <div className='flex mt-4'>
