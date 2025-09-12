@@ -3,24 +3,18 @@
  */
 
 import { useState } from 'react';
-import type { Study, ToastState } from '../types';
+import type { Study } from '../types';
 import { MOCK_STUDIES, CATEGORIES } from '../constants';
 
 type ModalType = 'apply' | 'detail' | 'region' | null;
 
-export const useStudyExplore = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+export const useStudyExplore = (searchTerm: string) => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([
     '전체',
   ]);
-  const [selectedRegion, setSelectedRegion] = useState('전체');
+  const [selectedRegions, setSelectedRegions] = useState<string[]>(['전체']);
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [selectedStudy, setSelectedStudy] = useState<Study | null>(null);
-  const [toast, setToast] = useState<ToastState>({
-    isVisible: false,
-    type: 'success',
-    message: '',
-  });
 
   // 필터링된 스터디 목록
   const filteredStudies = MOCK_STUDIES.filter((study: Study) => {
@@ -32,7 +26,10 @@ export const useStudyExplore = () => {
       return false;
     }
     // 지역 필터
-    if (selectedRegion !== '전체' && study.region !== selectedRegion) {
+    if (
+      !selectedRegions.includes('전체') &&
+      !selectedRegions.includes(study.region)
+    ) {
       return false;
     }
     // 검색어 필터
@@ -88,24 +85,27 @@ export const useStudyExplore = () => {
     });
   };
 
-  const handleRegionSelect = (region: string) => {
-    setSelectedRegion(region);
-    setActiveModal(null);
-  };
-
-  const hideToast = () => {
-    setToast((prev) => ({ ...prev, isVisible: false }));
+  const handleRegionToggle = (region: string) => {
+    setSelectedRegions((prev) => {
+      if (region === '전체') {
+        return ['전체'];
+      }
+      if (prev.includes(region)) {
+        const newRegions = prev.filter((r) => r !== region);
+        return newRegions.length === 0 ? ['전체'] : newRegions;
+      } else {
+        const newRegions = [...prev.filter((r) => r !== '전체'), region];
+        return newRegions;
+      }
+    });
   };
 
   return {
     // 상태
-    searchTerm,
-    setSearchTerm,
     selectedCategories,
-    selectedRegion,
+    selectedRegions,
     activeModal,
     selectedStudy,
-    toast,
     filteredStudies,
     categories: CATEGORIES,
 
@@ -116,8 +116,7 @@ export const useStudyExplore = () => {
     handleDetailModalClose,
     handleDetailApply,
     handleCategoryToggle,
-    handleRegionSelect,
-    hideToast,
+    handleRegionToggle,
     setActiveModal,
   };
 };

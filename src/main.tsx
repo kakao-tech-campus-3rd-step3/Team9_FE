@@ -35,11 +35,14 @@ createRoot(document.getElementById('root')!).render(
       <ReactQueryDevtools initialIsOpen={false} />
       <ToastContainer
         position='top-right'
-        autoClose={5000}
+        autoClose={3000}
         hideProgressBar={false}
-        closeOnClick={true}
-        pauseOnHover={true}
-        theme='colored'
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
       />
     </QueryClientProvider>
   </StrictMode>,

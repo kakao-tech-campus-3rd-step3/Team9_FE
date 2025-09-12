@@ -3,18 +3,14 @@
  */
 
 import { useState } from 'react';
-import type { StudyFormData, ToastState } from '../types';
+import { toast } from 'react-toastify';
+import type { StudyFormData } from '../types';
 
 export const useStudyCreate = () => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
   const [currentStudyTitle, setCurrentStudyTitle] = useState<string>('');
-  const [toast, setToast] = useState<ToastState>({
-    isVisible: false,
-    type: 'success',
-    message: '',
-  });
 
   const handleCategoryToggle = (category: string) => {
     setSelectedCategories((prev) => {
@@ -37,14 +33,6 @@ export const useStudyCreate = () => {
     }
   };
 
-  const showToast = (type: 'success' | 'error' | 'info', message: string) => {
-    setToast({ isVisible: true, type, message });
-  };
-
-  const hideToast = () => {
-    setToast((prev) => ({ ...prev, isVisible: false }));
-  };
-
   const handleCompleteModalClose = () => {
     setIsCompleteModalOpen(false);
     // 폼 리셋
@@ -55,7 +43,7 @@ export const useStudyCreate = () => {
 
   const handleSubmit = (data: StudyFormData) => {
     if (selectedCategories.length === 0) {
-      showToast('error', '최소 하나의 카테고리를 선택해주세요.');
+      toast.error('최소 하나의 카테고리를 선택해주세요.');
       return;
     }
 
@@ -77,13 +65,10 @@ export const useStudyCreate = () => {
     imagePreview,
     isCompleteModalOpen,
     currentStudyTitle,
-    toast,
 
     // 핸들러
     handleCategoryToggle,
     handleImageUpload,
-    showToast,
-    hideToast,
     handleCompleteModalClose,
     handleSubmit,
     setImagePreview,
