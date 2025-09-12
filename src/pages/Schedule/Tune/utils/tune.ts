@@ -1,5 +1,6 @@
 import { formatDayOfTheWeek } from '@/utils';
 import dayjs from 'dayjs';
+import type { Participant } from '../types/participant';
 
 const checkMidnight = (time: string) => {
   const adjustedEndTime =
@@ -127,4 +128,16 @@ export const getBgColor = ({
   if (count === 0) return 'bg-white';
   const intensity = Math.ceil((count / maxCount) * 9);
   return colorMap[intensity] || 'bg-blue-900';
+};
+
+export const getAvailablePersons = ({
+  tuneNumber,
+  participants,
+}: {
+  tuneNumber: number;
+  participants: Participant[];
+}): string[] => {
+  return participants
+    .filter((participant) => (tuneNumber & participant.candidate_number) !== 0)
+    .map((participant) => participant.name);
 };

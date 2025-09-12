@@ -1,31 +1,25 @@
 import React from 'react';
 import { tuneCheckData } from '../mock/tuneCheck';
-import {
-  buildGrid,
-  countOnes,
-  getBgColor,
-  getHourSlots,
-  getTuneDay,
-} from '../utils';
+import { countOnes, getBgColor } from '../utils';
 
-const TuneTable = () => {
-  const hourSlots = getHourSlots(
-    tuneCheckData.start_time,
-    tuneCheckData.end_time,
-  );
-  const grid = buildGrid({
-    data: tuneCheckData.candidate_dates,
-    startTime: tuneCheckData.available_start_time,
-    endTime: tuneCheckData.available_end_time,
-  });
-  const days = getTuneDay({
-    startTime: tuneCheckData.available_start_time,
-    endTime: tuneCheckData.available_end_time,
-  });
+type TuneTableProps = {
+  hourSlots: string[];
+  grid: number[][];
+  days: string[];
+  setHoverTable: React.Dispatch<
+    React.SetStateAction<{ col: number; row: number } | null>
+  >;
+};
 
+const TuneTable = ({
+  hourSlots,
+  grid,
+  days,
+  setHoverTable,
+}: TuneTableProps) => {
   return (
     <div className='max-h-[950px] overflow-y-auto flex flex-col items-center'>
-      <table>
+      <table onMouseLeave={() => setHoverTable(null)}>
         <thead>
           <tr>
             <th></th>
@@ -56,6 +50,9 @@ const TuneTable = () => {
                     return (
                       <td
                         key={`${colIdx}-${hourIdx}-1`}
+                        onMouseEnter={() =>
+                          setHoverTable({ col: colIdx, row: hourIdx * 2 })
+                        }
                         className={`border-r border-gray-800 px-2 py-1 ${getBgColor(
                           {
                             count: people,
@@ -73,6 +70,9 @@ const TuneTable = () => {
                     return (
                       <td
                         key={`${colIdx}-${hourIdx}-2`}
+                        onMouseEnter={() =>
+                          setHoverTable({ col: colIdx, row: hourIdx * 2 + 1 })
+                        }
                         className={`border-r border-b border-gray-800 px-2 py-1 ${getBgColor(
                           {
                             count: people,

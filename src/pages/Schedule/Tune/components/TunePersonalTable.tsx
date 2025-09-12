@@ -1,22 +1,18 @@
 import React, { useCallback, useEffect } from 'react';
-import { tuneCheckData } from '../mock/tuneCheck';
-import { getGridBoolean, getHourSlots, getTuneDay } from '../utils';
 
-const TunePersonalTable = () => {
-  const hourSlots = getHourSlots(
-    tuneCheckData.start_time,
-    tuneCheckData.end_time,
-  );
-  const days = getTuneDay({
-    startTime: tuneCheckData.available_start_time,
-    endTime: tuneCheckData.available_end_time,
-  });
-  const gridBoolean = getGridBoolean({
-    startTime: tuneCheckData.available_start_time,
-    endTime: tuneCheckData.available_end_time,
-  });
-  const [personalTune, setPersonalTune] = React.useState(gridBoolean);
+type TunePersonalTableProps = {
+  hourSlots: string[];
+  days: string[];
+  personalTune: boolean[][];
+  setPersonalTune: React.Dispatch<React.SetStateAction<boolean[][]>>;
+};
 
+const TunePersonalTable = ({
+  hourSlots,
+  days,
+  personalTune,
+  setPersonalTune,
+}: TunePersonalTableProps) => {
   const [isDragging, setIsDragging] = React.useState(false);
   const [dragStart, setDragStart] = React.useState<{
     row: number;
@@ -69,7 +65,7 @@ const TunePersonalTable = () => {
     setIsDragging(false);
     setDragStart(null);
     setDragEnd(null);
-  }, [dragStart, dragEnd, dragStartValue]);
+  }, [dragStart, dragEnd, dragStartValue, setPersonalTune]);
 
   const isCellSelected = (row: number, col: number) => {
     const baseSelected = personalTune[col][row];
