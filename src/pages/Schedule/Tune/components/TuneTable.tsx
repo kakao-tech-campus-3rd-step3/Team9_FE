@@ -92,7 +92,7 @@ const TuneTable = ({
         <div className='border-r border-gray-800 px-2 py-1 text-xs font-bold'>
           0명 참가
         </div>
-        {Array.from({ length: tuneCheckData.participants.length }).map(
+        {Array.from({ length: tuneCheckData.participants.length + 1 }).map(
           (_, idx) => (
             <div
               key={idx}
@@ -106,7 +106,7 @@ const TuneTable = ({
           ),
         )}
         <div className='px-2 py-1 text-xs font-bold'>
-          {tuneCheckData.participants.length - 1}명 참가
+          {tuneCheckData.participants.length}명 참가
         </div>
       </div>
     </div>

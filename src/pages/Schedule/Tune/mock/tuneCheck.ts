@@ -56,11 +56,6 @@ export const tuneCheckData = {
       candidate_number: 0b0001,
     },
     {
-      id: 1,
-      name: '스터디원1',
-      candidate_number: 0b0001,
-    },
-    {
       id: 2,
       name: '스터디원2',
       candidate_number: 0b0010,
