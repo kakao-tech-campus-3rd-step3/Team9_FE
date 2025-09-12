@@ -13,6 +13,9 @@ import {
 
 /**
  * 로그인 폼 관리 훅
+ * - React Hook Form을 사용한 로그인 폼 상태 관리
+ * - 아이디 기억하기 기능 (쿠키 사용)
+ * - 폼 유효성 검증 및 제출 처리
  */
 export const useLoginForm = () => {
   const { mutate, isPending, isError } = useLoginMutation();

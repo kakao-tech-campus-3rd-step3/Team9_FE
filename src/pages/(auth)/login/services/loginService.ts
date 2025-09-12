@@ -2,8 +2,12 @@ import apiClient from '@/api';
 import type { AxiosError } from 'axios';
 import type { LoginFormData } from '../types';
 
-// json-server 기반 로그인 (예시): /users?email=...&password=...
-// 성공 시 accessToken 모의 발급
+/**
+ * 로그인 서비스
+ * - JSON-server를 통한 사용자 인증 처리
+ * - 성공 시 임시 accessToken 발급 (실제 서버 연동 전까지)
+ * - 에러 처리 및 토스트 메시지 옵션 지원
+ */
 export const loginService = {
   login: async (
     payload: LoginFormData,
