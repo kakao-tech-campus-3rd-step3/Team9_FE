@@ -38,9 +38,9 @@ const TuneTable = ({
             const rows = [hourIdx * 2, hourIdx * 2 + 1];
             return (
               <React.Fragment key={hourIdx}>
-                {rows.map((row, idx) => (
+                {rows.map((rowIdx, idx) => (
                   <tr
-                    key={`${hourIdx}-${row}`}
+                    key={`${hourIdx}-${rowIdx}`}
                     className='border-b border-dotted border-gray-800'
                   >
                     {idx === 0 && (
@@ -52,13 +52,13 @@ const TuneTable = ({
                       </td>
                     )}
                     {grid.map((daySlots, colIdx) => {
-                      const value = daySlots[row];
+                      const value = daySlots[rowIdx];
                       const people = countOnes(value);
                       return (
                         <td
-                          key={`${colIdx}-${row}`}
+                          key={`${colIdx}-${rowIdx}`}
                           onMouseEnter={() =>
-                            setHoverTable({ col: colIdx, row })
+                            setHoverTable({ col: colIdx, row: rowIdx })
                           }
                           className={`border-r border-gray-800 px-2 py-1 ${getBgColor(
                             {
@@ -80,19 +80,16 @@ const TuneTable = ({
         <div className='border-r border-gray-800 px-2 py-1 text-xs font-bold'>
           0명 참가
         </div>
-        {Array.from({ length: tuneCheckData.participants.length + 1 }).map(
-          (_, idx) => (
-            <div
-              key={idx}
-              className={`border-r border-y h-6 w-6 border-gray-800 px-2 py-2 text-xs font-bold ${getBgColor(
-                {
-                  count: idx,
-                  maxCount: tuneCheckData.participants.length,
-                },
-              )}`}
-            ></div>
-          ),
-        )}
+        <div className='border-r border-y h-6 w-6 bg-white' />
+        {tuneCheckData.participants.map((participant, index) => (
+          <div
+            key={participant.id}
+            className={`border-r border-y h-6 w-6 border-gray-800 ${getBgColor({
+              count: index + 1,
+              maxCount: tuneCheckData.participants.length,
+            })}`}
+          ></div>
+        ))}
         <div className='px-2 py-1 text-xs font-bold'>
           {tuneCheckData.participants.length}명 참가
         </div>

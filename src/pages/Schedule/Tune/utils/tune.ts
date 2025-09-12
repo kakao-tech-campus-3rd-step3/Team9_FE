@@ -85,8 +85,8 @@ export const buildGrid = ({
       dayjs(endTime).diff(dayjs(startTime), 'day') * 24 * 60) /
     30;
   const grid: number[][] = [];
-  for (let d = 0; d < days; d++) {
-    grid.push(data.slice(d * slots, (d + 1) * slots));
+  for (let day = 0; day < days; day++) {
+    grid.push(data.slice(day * slots, (day + 1) * slots));
   }
   return grid;
 };
@@ -99,9 +99,9 @@ export const getHourSlots = (startTime: string, endTime: string): string[] => {
   const totalEnd = endH === 24 ? 24 * 60 : endH * 60 + endM;
 
   const slots: string[] = [];
-  for (let t = totalStart; t < totalEnd; t += 60) {
-    const h = Math.floor(t / 60);
-    slots.push(`${String(h)}시`);
+  for (let time = totalStart; time < totalEnd; time += 60) {
+    const hour = Math.floor(time / 60);
+    slots.push(`${String(hour)}시`);
   }
   return slots;
 };

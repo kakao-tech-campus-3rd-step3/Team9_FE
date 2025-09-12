@@ -126,12 +126,12 @@ const TunePersonalTable = ({
 
               return (
                 <React.Fragment key={hourIdx}>
-                  {rows.map((row, idx) => (
+                  {rows.map((rowIdx, index) => (
                     <tr
-                      key={`${hourIdx}-${row}`}
-                      className={`border-gray-800 ${idx === 0 ? 'border-b border-dotted' : ''}`}
+                      key={`${hourIdx}-${rowIdx}`}
+                      className={`border-gray-800 ${index === 0 ? 'border-b border-dotted' : ''}`}
                     >
-                      {idx === 0 && (
+                      {index === 0 && (
                         <td
                           className='border-r border-gray-800 px-2 py-2 text-xs font-bold text-center select-none'
                           rowSpan={2}
@@ -140,15 +140,17 @@ const TunePersonalTable = ({
                         </td>
                       )}
                       {personalTune.map((_, colIdx) => {
-                        const boolean = isCellSelected(row, colIdx);
+                        const boolean = isCellSelected(rowIdx, colIdx);
                         return (
                           <td
-                            key={`${colIdx}-${row}`}
+                            key={`${colIdx}-${rowIdx}`}
                             className={`border-r border-gray-800 px-2 py-1 cursor-pointer ${
                               boolean ? 'bg-blue-400' : 'bg-red-100'
-                            } ${idx === 1 ? 'border-b' : ''}`}
-                            onMouseDown={() => handleMouseDown(row, colIdx)}
-                            onMouseEnter={() => handleMouseEnter(row, colIdx)}
+                            } ${index === 1 ? 'border-b' : ''}`}
+                            onMouseDown={() => handleMouseDown(rowIdx, colIdx)}
+                            onMouseEnter={() =>
+                              handleMouseEnter(rowIdx, colIdx)
+                            }
                           />
                         );
                       })}
