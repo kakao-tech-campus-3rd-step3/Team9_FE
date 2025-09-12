@@ -1,6 +1,6 @@
 import { formatDayOfTheWeek } from '@/utils';
 import dayjs from 'dayjs';
-import type { Participant } from '../types/participant';
+import type { Participant } from '../types';
 
 const checkMidnight = (time: string) => {
   const adjustedEndTime =

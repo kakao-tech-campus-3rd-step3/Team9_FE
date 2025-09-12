@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { tuneData } from '../mock/tune';
 import dayjs from 'dayjs';
 import { useSearchParams } from 'react-router-dom';
-import TuneInfoSection from './TuneInfoSection';
+import TuneInformation from './TuneInformation';
 
 const TuneListSection = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -41,7 +41,7 @@ const TuneListSection = () => {
             </p>
           </div>
 
-          {selectedTune === tune.id && <TuneInfoSection />}
+          {selectedTune === tune.id && <TuneInformation />}
         </div>
       ))}
     </section>
