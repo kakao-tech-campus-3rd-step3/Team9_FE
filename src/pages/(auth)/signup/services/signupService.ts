@@ -13,13 +13,22 @@ export interface SignupPayload {
 
 export const signupService = {
   sendEmailCode: (payload: { email: string }) =>
-    apiClient.post(AUTH_ENDPOINTS.EMAIL_SEND, payload),
+    apiClient.post(AUTH_ENDPOINTS.EMAIL_SEND, payload, {
+      showToast: false,
+    }),
   verifyEmailCode: (payload: { email: string; verification_code: string }) =>
-    apiClient.post(AUTH_ENDPOINTS.EMAIL_VERIFY, payload),
+    apiClient.post(AUTH_ENDPOINTS.EMAIL_VERIFY, payload, {
+      showToast: false,
+    }),
   checkNickname: (nickname: string) =>
-    apiClient.get(AUTH_ENDPOINTS.NICKNAME_CHECK, { params: { nickname } }),
+    apiClient.get(AUTH_ENDPOINTS.NICKNAME_CHECK, {
+      params: { nickname },
+      showToast: false,
+    }),
   signup: (payload: SignupPayload) =>
-    apiClient.post(AUTH_ENDPOINTS.SIGNUP, payload),
+    apiClient.post(AUTH_ENDPOINTS.SIGNUP, payload, {
+      showToast: false,
+    }),
 } as const;
 
 export type SignupRequest = SignupPayload;

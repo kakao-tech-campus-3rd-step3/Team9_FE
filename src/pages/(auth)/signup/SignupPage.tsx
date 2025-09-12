@@ -15,7 +15,7 @@ import { Step1Form, Step2Form } from './components';
 const SignupPage: React.FC = () => {
   // 회원가입 폼 훅 사용
   const signupForm = useSignupForm();
-  const { handleSubmit, currentStep, onSubmit } = signupForm;
+  const { handleSubmit, currentStep, onSubmit, isValid } = signupForm;
 
   return (
     <div className='min-h-screen bg-background flex flex-col items-center justify-start gap-4 p-6'>
@@ -63,7 +63,7 @@ const SignupPage: React.FC = () => {
           onSubmit={handleSubmit(onSubmit)}
         >
           {currentStep === 1 ? (
-            <Step1Form {...signupForm} />
+            <Step1Form {...signupForm} isValid={isValid} />
           ) : (
             <Step2Form {...signupForm} />
           )}

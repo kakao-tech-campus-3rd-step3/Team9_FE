@@ -1,6 +1,10 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import type { UseFormRegister, UseFormSetValue } from 'react-hook-form';
+import type {
+  FieldErrors,
+  UseFormRegister,
+  UseFormSetValue,
+} from 'react-hook-form';
 import { Input } from '../../components';
 import { AUTH_TEXTS } from '../../constants';
 import {
@@ -26,6 +30,8 @@ interface Step2FormProps {
   handleRemoveProfileImage: () => void;
   handleProfileImageClick: () => void;
   handleStepChange: (step: SignupStep) => void;
+  errors: FieldErrors<SignupFormData>;
+  isValid?: boolean;
 }
 
 /**
@@ -42,6 +48,8 @@ export const Step2Form: React.FC<Step2FormProps> = ({
   handleRemoveProfileImage,
   handleProfileImageClick,
   handleStepChange,
+  errors,
+  isValid,
 }) => {
   return (
     <div className='space-y-4'>
@@ -115,6 +123,8 @@ export const Step2Form: React.FC<Step2FormProps> = ({
           placeholder={AUTH_TEXTS.SIGNUP.STEP2.NICKNAME_PLACEHOLDER}
           className='flex-1'
           autoComplete='username'
+          aria-invalid={!!errors.nickname || undefined}
+          error={errors.nickname?.message as string | undefined}
           {...register('nickname')}
         />
         <button
@@ -214,6 +224,7 @@ export const Step2Form: React.FC<Step2FormProps> = ({
         {/* 회원가입 완료 버튼 */}
         <button
           type='submit'
+          disabled={!isValid}
           className='flex-1 bg-primary text-primary-foreground py-2 px-3 rounded-lg hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-all duration-200 font-medium cursor-pointer'
           aria-label='회원가입 완료'
         >

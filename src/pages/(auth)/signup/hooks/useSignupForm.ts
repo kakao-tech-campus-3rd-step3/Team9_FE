@@ -16,7 +16,7 @@ export const useSignupForm = () => {
     handleSubmit,
     watch,
     setValue,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<SignupFormData>({
     defaultValues: DEFAULT_FORM_VALUES,
     resolver: zodResolver(signupSchema) as unknown as Resolver<SignupFormData>,
@@ -95,6 +95,7 @@ export const useSignupForm = () => {
     watch,
     setValue,
     errors,
+    isValid,
 
     // 상태
     currentStep,

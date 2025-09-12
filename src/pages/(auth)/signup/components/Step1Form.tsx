@@ -1,4 +1,5 @@
 import React from 'react';
+import type { FieldErrors } from 'react-hook-form';
 import type { UseFormRegister } from 'react-hook-form';
 import { Input } from '../../components';
 import { AUTH_TEXTS } from '../../constants';
@@ -7,6 +8,8 @@ import type { SignupFormData, SignupStep } from '../types';
 interface Step1FormProps {
   register: UseFormRegister<SignupFormData>;
   handleStepChange: (step: SignupStep) => void;
+  errors: FieldErrors<SignupFormData>;
+  isValid?: boolean;
 }
 
 /**
@@ -15,6 +18,8 @@ interface Step1FormProps {
 export const Step1Form: React.FC<Step1FormProps> = ({
   register,
   handleStepChange,
+  errors,
+  isValid,
 }) => {
   return (
     <div className='space-y-4'>
@@ -26,6 +31,8 @@ export const Step1Form: React.FC<Step1FormProps> = ({
           placeholder={AUTH_TEXTS.SIGNUP.STEP1.EMAIL_PLACEHOLDER}
           className='flex-1'
           autoComplete='email'
+          aria-invalid={!!errors.email || undefined}
+          error={errors.email?.message as string | undefined}
           {...register('email')}
         />
         <button
@@ -46,6 +53,8 @@ export const Step1Form: React.FC<Step1FormProps> = ({
           maxLength={6}
           className='flex-1'
           autoComplete='one-time-code'
+          aria-invalid={!!errors.verifyCode || undefined}
+          error={errors.verifyCode?.message as string | undefined}
           {...register('verifyCode')}
         />
         <button
@@ -63,6 +72,8 @@ export const Step1Form: React.FC<Step1FormProps> = ({
         id='password'
         placeholder={AUTH_TEXTS.SIGNUP.STEP1.PASSWORD_PLACEHOLDER}
         autoComplete='new-password'
+        aria-invalid={!!errors.password || undefined}
+        error={errors.password?.message as string | undefined}
         {...register('password')}
       />
 
@@ -72,6 +83,8 @@ export const Step1Form: React.FC<Step1FormProps> = ({
         id='confirmPassword'
         placeholder={AUTH_TEXTS.SIGNUP.STEP1.CONFIRM_PASSWORD_PLACEHOLDER}
         autoComplete='new-password'
+        aria-invalid={!!errors.confirmPassword || undefined}
+        error={errors.confirmPassword?.message as string | undefined}
         {...register('confirmPassword')}
       />
 
@@ -79,6 +92,7 @@ export const Step1Form: React.FC<Step1FormProps> = ({
       <button
         type='button'
         onClick={() => handleStepChange(2)}
+        disabled={!isValid}
         className='w-full bg-primary text-primary-foreground py-2 px-3 mt-4 rounded-lg hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-all duration-200 font-medium cursor-pointer'
         aria-label='다음 단계로 이동'
       >
