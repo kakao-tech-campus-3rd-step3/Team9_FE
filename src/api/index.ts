@@ -15,13 +15,32 @@ const apiClient = axios.create({
   },
 });
 
-// 요청 인터셉터 - 인증 토큰 자동 추가
+/**
+ * axios config에 showToast 옵션 추가
+ * 토스트를 필요로 하지 않는 요청에는 showToast: false 옵션을 추가하여 토스트를 숨길 수 있음
+ *
+ * 사용법:
+ * - 토스트 표시: apiClient.get('/users')
+ * - 토스트 숨김: apiClient.get('/users', { showToast: false })
+ */
+declare module 'axios' {
+  interface AxiosRequestConfig {
+    /** 토스트 알림 표시 여부 (기본값: true) */
+    showToast?: boolean;
+  }
+}
+
+// 요청 인터셉터 - 인증 토큰 자동 추가 및 showToast 옵션 처리
 apiClient.interceptors.request.use(
   (config) => {
     const accessToken = getAccessToken();
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
+
+    // showToast 옵션을 헤더로 변환 (기본값: true, 명시적으로 false일 때만 숨김)
+    config.headers['x-show-toast'] = config.showToast === false ? '0' : '1';
+
     return config;
   },
   (error) => {
@@ -34,12 +53,12 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError<{ message: string }>) => {
-    // 토스트 표시 억제 플래그 확인
-    const suppressToast = error.config?.headers?.['x-suppress-toast'] === '1';
+    // 토스트 표시 여부 확인 (커스텀 헤더 사용, 기본값: true)
+    const showToast = error.config?.headers?.['x-show-toast'] === '1';
 
     // 네트워크 오류 처리
     if (!error.response) {
-      if (!suppressToast) {
+      if (showToast) {
         toast.error('네트워크 연결을 확인해주세요.');
       }
       return Promise.reject(error);
@@ -53,13 +72,13 @@ apiClient.interceptors.response.use(
       removeAccessToken();
       const authMessage =
         data?.message || '인증이 만료되었습니다. 다시 로그인해주세요.';
-      if (!suppressToast) {
+      if (showToast) {
         toast.error(authMessage);
       }
       window.location.href = ROUTES.LOGIN;
     } else {
       // 기타 에러 처리
-      if (!suppressToast) {
+      if (showToast) {
         toast.error(message);
       }
     }
