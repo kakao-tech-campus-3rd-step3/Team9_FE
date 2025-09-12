@@ -3,7 +3,7 @@
     {
       "id": 1,
       "email": "chaeyeon@example.com",
-      "password": "password123",
+      "password": "12345678",
       "nickname": "이채연",
       "image_url": "https://i.pravatar.cc/150?u=chaeyeon@example.com",
       "gender": "여성",
@@ -13,7 +13,7 @@
     {
       "id": 2,
       "email": "pado@example.com",
-      "password": "password123",
+      "password": "12345678",
       "nickname": "김파도",
       "image_url": "",
       "gender": "남성",
@@ -23,7 +23,7 @@
     {
       "id": 3,
       "email": "study@example.com",
-      "password": "password123",
+      "password": "12345678",
       "nickname": "박스터디",
       "image_url": "https://i.pravatar.cc/150?u=study@example.com",
       "gender": "선택안함",
