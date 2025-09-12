@@ -35,54 +35,42 @@ const TuneTable = ({
         </thead>
         <tbody>
           {Array.from({ length: grid[0].length / 2 }).map((_, hourIdx) => {
+            const rows = [hourIdx * 2, hourIdx * 2 + 1];
             return (
               <React.Fragment key={hourIdx}>
-                <tr className='border-b border-dotted border-gray-800'>
-                  <td
-                    className='border-r border-gray-800 px-2 py-2 text-xs font-bold text-center'
-                    rowSpan={2}
+                {rows.map((row, idx) => (
+                  <tr
+                    key={`${hourIdx}-${row}`}
+                    className='border-b border-dotted border-gray-800'
                   >
-                    {hourSlots[hourIdx]}
-                  </td>
-                  {grid.map((daySlots, colIdx) => {
-                    const value = daySlots[hourIdx * 2];
-                    const people = countOnes(value);
-                    return (
+                    {idx === 0 && (
                       <td
-                        key={`${colIdx}-${hourIdx}-1`}
-                        onMouseEnter={() =>
-                          setHoverTable({ col: colIdx, row: hourIdx * 2 })
-                        }
-                        className={`border-r border-gray-800 px-2 py-1 ${getBgColor(
-                          {
-                            count: people,
-                            maxCount: tuneCheckData.participants.length,
-                          },
-                        )}`}
-                      />
-                    );
-                  })}
-                </tr>
-                <tr className='border-gray-800'>
-                  {grid.map((daySlots, colIdx) => {
-                    const value = daySlots[hourIdx * 2 + 1];
-                    const people = countOnes(value);
-                    return (
-                      <td
-                        key={`${colIdx}-${hourIdx}-2`}
-                        onMouseEnter={() =>
-                          setHoverTable({ col: colIdx, row: hourIdx * 2 + 1 })
-                        }
-                        className={`border-r border-b border-gray-800 px-2 py-1 ${getBgColor(
-                          {
-                            count: people,
-                            maxCount: tuneCheckData.participants.length,
-                          },
-                        )}`}
-                      />
-                    );
-                  })}
-                </tr>
+                        className='border-r border-gray-800 px-2 py-2 text-xs font-bold text-center'
+                        rowSpan={2}
+                      >
+                        {hourSlots[hourIdx]}
+                      </td>
+                    )}
+                    {grid.map((daySlots, colIdx) => {
+                      const value = daySlots[row];
+                      const people = countOnes(value);
+                      return (
+                        <td
+                          key={`${colIdx}-${row}`}
+                          onMouseEnter={() =>
+                            setHoverTable({ col: colIdx, row })
+                          }
+                          className={`border-r border-gray-800 px-2 py-1 ${getBgColor(
+                            {
+                              count: people,
+                              maxCount: tuneCheckData.participants.length,
+                            },
+                          )}`}
+                        />
+                      );
+                    })}
+                  </tr>
+                ))}
               </React.Fragment>
             );
           })}

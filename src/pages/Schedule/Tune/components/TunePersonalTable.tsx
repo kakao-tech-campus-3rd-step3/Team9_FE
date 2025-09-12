@@ -122,48 +122,38 @@ const TunePersonalTable = ({
         <tbody>
           {Array.from({ length: personalTune[0].length / 2 }).map(
             (_, hourIdx) => {
+              const rows = [hourIdx * 2, hourIdx * 2 + 1];
+
               return (
                 <React.Fragment key={hourIdx}>
-                  <tr className='border-b border-dotted border-gray-800'>
-                    <td
-                      className='border-r border-gray-800 px-2 py-2 text-xs font-bold text-center select-none'
-                      rowSpan={2}
+                  {rows.map((row, idx) => (
+                    <tr
+                      key={`${hourIdx}-${row}`}
+                      className={`border-gray-800 ${idx === 0 ? 'border-b border-dotted' : ''}`}
                     >
-                      {hourSlots[hourIdx]}
-                    </td>
-                    {personalTune.map((_, colIdx) => {
-                      const boolean = isCellSelected(hourIdx * 2, colIdx);
-                      return (
+                      {idx === 0 && (
                         <td
-                          key={`${colIdx}-${hourIdx}-1`}
-                          className={`border-r border-gray-800 px-2 py-1 cursor-pointer ${boolean ? 'bg-blue-400' : 'bg-red-100'}`}
-                          onMouseDown={() =>
-                            handleMouseDown(hourIdx * 2, colIdx)
-                          }
-                          onMouseEnter={() =>
-                            handleMouseEnter(hourIdx * 2, colIdx)
-                          }
-                        />
-                      );
-                    })}
-                  </tr>
-                  <tr className='border-gray-800'>
-                    {personalTune.map((_, colIdx) => {
-                      const boolean = isCellSelected(hourIdx * 2 + 1, colIdx);
-                      return (
-                        <td
-                          key={`${colIdx}-${hourIdx}-2`}
-                          className={`border-r border-b border-gray-800 px-2 py-1 cursor-pointer ${boolean ? 'bg-blue-400' : 'bg-red-100'}`}
-                          onMouseDown={() =>
-                            handleMouseDown(hourIdx * 2 + 1, colIdx)
-                          }
-                          onMouseEnter={() =>
-                            handleMouseEnter(hourIdx * 2 + 1, colIdx)
-                          }
-                        />
-                      );
-                    })}
-                  </tr>
+                          className='border-r border-gray-800 px-2 py-2 text-xs font-bold text-center select-none'
+                          rowSpan={2}
+                        >
+                          {hourSlots[hourIdx]}
+                        </td>
+                      )}
+                      {personalTune.map((_, colIdx) => {
+                        const boolean = isCellSelected(row, colIdx);
+                        return (
+                          <td
+                            key={`${colIdx}-${row}`}
+                            className={`border-r border-gray-800 px-2 py-1 cursor-pointer ${
+                              boolean ? 'bg-blue-400' : 'bg-red-100'
+                            } ${idx === 1 ? 'border-b' : ''}`}
+                            onMouseDown={() => handleMouseDown(row, colIdx)}
+                            onMouseEnter={() => handleMouseEnter(row, colIdx)}
+                          />
+                        );
+                      })}
+                    </tr>
+                  ))}
                 </React.Fragment>
               );
             },
