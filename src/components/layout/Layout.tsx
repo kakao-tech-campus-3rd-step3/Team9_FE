@@ -12,7 +12,6 @@ export type LayoutType =
 
 interface LayoutProps {
   layoutType?: LayoutType;
-  children?: React.ReactNode;
 }
 
 /**
@@ -20,7 +19,7 @@ interface LayoutProps {
  * - 다양한 레이아웃 타입을 지원 (헤더, 사이드바 조합)
  * - 반응형 레이아웃 구조 제공
  */
-const Layout: React.FC<LayoutProps> = ({ layoutType = 'none', children }) => {
+const Layout: React.FC<LayoutProps> = ({ layoutType = 'none' }) => {
   const renderLayout = () => {
     switch (layoutType) {
       case 'header-only':
@@ -28,7 +27,7 @@ const Layout: React.FC<LayoutProps> = ({ layoutType = 'none', children }) => {
           <div className='min-h-screen bg-background'>
             <Header />
             <main className='flex-1 overflow-auto'>
-              {children || <Outlet />}
+              <Outlet />
             </main>
           </div>
         );
@@ -50,7 +49,7 @@ const Layout: React.FC<LayoutProps> = ({ layoutType = 'none', children }) => {
             <div className='flex pt-16 h-[calc(100vh-4rem)]'>
               <Sidebar />
               <main className='flex-1 overflow-auto'>
-                {children || <Outlet />}
+                <Outlet />
               </main>
             </div>
           </div>
@@ -60,7 +59,7 @@ const Layout: React.FC<LayoutProps> = ({ layoutType = 'none', children }) => {
       default:
         return (
           <div className='min-h-screen bg-background'>
-            {children || <Outlet />}
+            <Outlet />
           </div>
         );
     }
