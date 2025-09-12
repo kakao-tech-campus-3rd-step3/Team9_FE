@@ -17,10 +17,12 @@ createRoot(document.getElementById('root')!).render(
       <App />
       <ReactQueryDevtools initialIsOpen={false} />
       <ToastContainer
-        position='bottom-center'
-        autoClose={4000}
+        position='top-right'
+        autoClose={5000}
+        hideProgressBar={false}
+        closeOnClick={true}
+        pauseOnHover={true}
         theme='colored'
-        icon={false}
       />
     </QueryClientProvider>
   </StrictMode>,
