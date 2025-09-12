@@ -43,13 +43,11 @@ const TuneListSection = () => {
           </div>
 
           {selectedTune === tune.id && (
-            <div
-              className={`flex justify-between mt-2 p-4 border border-secondary rounded-lg bg-white`}
-            >
-              <div className='flex-1'>
+            <div className='flex mt-2 p-4 border border-secondary justify-between rounded-lg bg-white flex-nowrap whitespace-nowrap'>
+              <div className='min-w-[600px]'>
                 <TunePersonalTable />
               </div>
-              <div className='flex-1'>
+              <div className='min-w-[600px]'>
                 <TuneTable />
               </div>
             </div>

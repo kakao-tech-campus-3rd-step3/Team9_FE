@@ -130,7 +130,7 @@ const TunePersonalTable = () => {
                 <React.Fragment key={hourIdx}>
                   <tr className='border-b border-dotted border-gray-800'>
                     <td
-                      className='border-r border-gray-800 px-2 py-2 text-xs font-bold text-center'
+                      className='border-r border-gray-800 px-2 py-2 text-xs font-bold text-center select-none'
                       rowSpan={2}
                     >
                       {hourSlots[hourIdx]}
