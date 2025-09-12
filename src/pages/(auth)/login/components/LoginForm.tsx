@@ -19,7 +19,7 @@ export const LoginForm: React.FC = () => {
   } = useLoginForm();
 
   return (
-    <form className='space-y-4' noValidate onSubmit={onSubmit}>
+    <form className='space-y-6' noValidate onSubmit={onSubmit}>
       {/* 이메일 입력 */}
       <Input
         type='email'
@@ -58,27 +58,29 @@ export const LoginForm: React.FC = () => {
       </div>
 
       {/* 로그인 버튼 */}
-      <button
-        type='submit'
-        disabled={isPending || !isValid}
-        className='w-full bg-primary text-primary-foreground py-2 px-3 mt-4 rounded hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 font-bold disabled:opacity-50 disabled:cursor-not-allowed'
-      >
-        {isPending ? (
-          <span
-            className='inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent align-[-0.125em]'
-            aria-label='로딩 중'
-          />
-        ) : (
-          AUTH_TEXTS.LOGIN.BUTTON
-        )}
-      </button>
+      <div className='relative'>
+        <button
+          type='submit'
+          disabled={isPending || !isValid}
+          className='w-full bg-primary text-primary-foreground py-2 px-3 rounded hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 font-bold disabled:opacity-50 disabled:cursor-not-allowed'
+        >
+          {isPending ? (
+            <span
+              className='inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent align-[-0.125em]'
+              aria-label='로딩 중'
+            />
+          ) : (
+            AUTH_TEXTS.LOGIN.BUTTON
+          )}
+        </button>
 
-      {/* 에러 메시지 */}
-      {isError && (
-        <div className='text-red-500 text-sm text-center mt-2'>
-          {AUTH_TEXTS.LOGIN.ERROR_MESSAGE}
-        </div>
-      )}
+        {/* 에러 메시지 */}
+        {isError && (
+          <div className='absolute top-full left-0 mt-1 w-full text-red-500 text-xs text-center'>
+            {AUTH_TEXTS.LOGIN.ERROR_MESSAGE}
+          </div>
+        )}
+      </div>
     </form>
   );
 };
