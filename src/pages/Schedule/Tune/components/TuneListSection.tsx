@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { tuneData } from '../mock/tune';
 import dayjs from 'dayjs';
 import { useSearchParams } from 'react-router-dom';
+import TuneTable from './TuneTable';
 
 const TuneListSection = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -42,12 +43,9 @@ const TuneListSection = () => {
 
           {selectedTune === tune.id && (
             <div
-              className={`mt-2 p-4 border border-secondary rounded-lg bg-white overflow-hidden transition-max-height duration-500 ease-in-out`}
-              style={{ maxHeight: selectedTune === tune.id ? '500px' : '0px' }}
+              className={`mt-2 p-4 border border-secondary rounded-lg bg-white`}
             >
-              <p className='text-sm text-gray-700'>
-                상세 내용이 여기에 표시됩니다.
-              </p>
+              <TuneTable />
             </div>
           )}
         </div>
