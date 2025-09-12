@@ -40,12 +40,12 @@ const TuneTable = ({
               const rows = [hourIdx * 2, hourIdx * 2 + 1];
               return (
                 <React.Fragment key={hourIdx}>
-                  {rows.map((rowIdx, idx) => (
+                  {rows.map((rowIdx, index) => (
                     <tr
                       key={`${hourIdx}-${rowIdx}`}
-                      className='border-b border-dotted border-gray-800'
+                      className={`border-gray-800 ${index === 0 ? 'border-b border-dotted' : ''}`}
                     >
-                      {idx === 0 && (
+                      {index === 0 && (
                         <td
                           className='border-r border-gray-800 px-2 py-2 text-xs font-bold text-center'
                           rowSpan={2}
@@ -67,7 +67,7 @@ const TuneTable = ({
                                 count: people,
                                 maxCount: tuneCheckData.participants.length,
                               },
-                            )}`}
+                            )} ${index === 1 ? 'border-b' : ''}`}
                           />
                         );
                       })}
