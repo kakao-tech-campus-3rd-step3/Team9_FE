@@ -28,8 +28,8 @@ export const DEFAULT_FORM_VALUES = {
   password: '',
   confirmPassword: '',
   nickname: '',
-  gender: undefined,
-  interests: [] as string[],
-  region: undefined,
+  gender: '',
+  interests: [],
+  region: '',
   profileImage: null,
 };

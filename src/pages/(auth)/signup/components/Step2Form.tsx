@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { X, UserCheck, XCircle, Loader2 } from 'lucide-react';
-import { toast } from 'react-toastify';
 import type {
   FieldErrors,
   UseFormRegister,
@@ -52,11 +51,14 @@ export const Step2Form: React.FC<Step2FormProps> = ({
 }) => {
   // 닉네임 중복 확인 상태 관리
   const [isCheckingNickname, setIsCheckingNickname] = useState(false); // 닉네임 중복 확인 진행 상태
+  const [isNicknameAvailable, setIsNicknameAvailable] = useState<
+    boolean | null
+  >(null); // 닉네임 사용 가능 여부
 
   /**
    * 닉네임 중복 확인 처리 함수
    * - 입력된 닉네임의 중복 여부를 서버에 확인 요청
-   * - 성공/실패 시 토스트 메시지 표시
+   * - 성공/실패 시 버튼 상태 및 메시지로 피드백
    */
   const handleCheckNickname = async () => {
     if (!watchedValues.nickname) return;
@@ -69,10 +71,10 @@ export const Step2Form: React.FC<Step2FormProps> = ({
       // 임시: 성공 시뮬레이션
       console.log('닉네임 중복 확인:', watchedValues.nickname);
 
-      toast.success('사용 가능한 닉네임입니다!');
+      setIsNicknameAvailable(true);
     } catch (error) {
       console.error('닉네임 중복 확인 실패:', error);
-      toast.error('이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해주세요.');
+      setIsNicknameAvailable(false);
     } finally {
       setIsCheckingNickname(false);
     }
@@ -151,14 +153,35 @@ export const Step2Form: React.FC<Step2FormProps> = ({
           autoComplete='username'
           aria-invalid={!!errors.nickname || undefined}
           error={errors.nickname?.message}
-          {...register('nickname')}
+          {...register('nickname', {
+            onChange: () => {
+              // 닉네임이 변경되면 중복 확인 상태 초기화
+              setIsNicknameAvailable(null);
+            },
+          })}
         />
         <button
           type='button'
           onClick={handleCheckNickname}
-          disabled={!watchedValues.nickname || isCheckingNickname}
-          className='px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary-hover transition-colors text-sm whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1'
-          aria-label='닉네임 중복 확인'
+          disabled={
+            !watchedValues.nickname ||
+            isCheckingNickname ||
+            isNicknameAvailable === true
+          }
+          className={`px-4 py-2 rounded-lg transition-colors text-sm whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 ${
+            isNicknameAvailable === true
+              ? 'bg-green-500 text-white'
+              : isNicknameAvailable === false
+                ? 'bg-red-500 text-white'
+                : 'bg-secondary text-secondary-foreground hover:bg-secondary-hover'
+          }`}
+          aria-label={
+            isNicknameAvailable === true
+              ? '닉네임 사용 가능'
+              : isNicknameAvailable === false
+                ? '닉네임 중복됨'
+                : '닉네임 중복 확인'
+          }
         >
           {isCheckingNickname ? (
             <Loader2 className='w-4 h-4 animate-spin' />
@@ -167,7 +190,11 @@ export const Step2Form: React.FC<Step2FormProps> = ({
           )}
           {isCheckingNickname
             ? '확인 중...'
-            : AUTH_TEXTS.SIGNUP.STEP2.NICKNAME_CHECK_BUTTON}
+            : isNicknameAvailable === true
+              ? '사용 가능'
+              : isNicknameAvailable === false
+                ? '중복됨'
+                : AUTH_TEXTS.SIGNUP.STEP2.NICKNAME_CHECK_BUTTON}
         </button>
       </div>
 

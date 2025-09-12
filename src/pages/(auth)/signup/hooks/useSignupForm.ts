@@ -26,7 +26,7 @@ export const useSignupForm = () => {
     setValue,
     formState: { errors, isValid },
   } = useForm<SignupFormData>({
-    defaultValues: DEFAULT_FORM_VALUES,
+    defaultValues: DEFAULT_FORM_VALUES as Partial<SignupFormData>,
     resolver: zodResolver(signupSchema) as unknown as Resolver<SignupFormData>,
     mode: 'onTouched',
   });
