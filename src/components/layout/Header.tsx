@@ -32,6 +32,7 @@ const Header: React.FC<HeaderProps> = ({
     { to: ROUTES.HOME, label: '홈', type: 'link' as const },
     { to: explorePath, label: '스터디 탐색', type: 'link' as const },
     { to: dashboardPath, label: '스터디 대시보드', type: 'link' as const },
+    { to: ROUTES.LOGIN, label: '로그인', type: 'link' as const },
   ];
 
   return (

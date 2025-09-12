@@ -1,8 +1,10 @@
 import React, { forwardRef } from 'react';
+import { XCircle, CheckCircle } from 'lucide-react';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
+  success?: string;
 }
 
 /**
@@ -12,13 +14,13 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
  * - 에러 상태 지원
  */
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, className = '', ...props }, ref) => {
+  ({ label, error, success, className = '', ...props }, ref) => {
     return (
-      <div className='space-y-2 w-full'>
+      <div className='relative w-full'>
         {label && (
           <label
             htmlFor={props.id}
-            className='block text-sm font-medium text-foreground'
+            className='block text-sm font-medium text-foreground mb-2'
           >
             {label}
           </label>
@@ -38,7 +40,18 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           `.trim()}
           {...props}
         />
-        {error && <p className='text-sm text-destructive'>{error}</p>}
+        {error && (
+          <div className='absolute top-full left-0 mt-1 text-xs text-red-600 flex items-center gap-1'>
+            <XCircle className='w-3 h-3' />
+            {error}
+          </div>
+        )}
+        {success && !error && (
+          <div className='absolute top-full left-0 mt-1 text-xs text-green-600 flex items-center gap-1'>
+            <CheckCircle className='w-3 h-3' />
+            {success}
+          </div>
+        )}
       </div>
     );
   },

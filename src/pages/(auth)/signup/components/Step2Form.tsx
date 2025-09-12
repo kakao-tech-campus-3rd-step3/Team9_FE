@@ -1,6 +1,10 @@
-import React from 'react';
-import { X } from 'lucide-react';
-import type { UseFormRegister, UseFormSetValue } from 'react-hook-form';
+import React, { useState } from 'react';
+import { X, UserCheck, XCircle, Loader2 } from 'lucide-react';
+import type {
+  FieldErrors,
+  UseFormRegister,
+  UseFormSetValue,
+} from 'react-hook-form';
 import { Input } from '../../components';
 import { AUTH_TEXTS } from '../../constants';
 import {
@@ -26,6 +30,7 @@ interface Step2FormProps {
   handleRemoveProfileImage: () => void;
   handleProfileImageClick: () => void;
   handleStepChange: (step: SignupStep) => void;
+  errors: FieldErrors<SignupFormData>;
 }
 
 /**
@@ -42,9 +47,40 @@ export const Step2Form: React.FC<Step2FormProps> = ({
   handleRemoveProfileImage,
   handleProfileImageClick,
   handleStepChange,
+  errors,
 }) => {
+  // 닉네임 중복 확인 상태 관리
+  const [isCheckingNickname, setIsCheckingNickname] = useState(false); // 닉네임 중복 확인 진행 상태
+  const [isNicknameAvailable, setIsNicknameAvailable] = useState<
+    boolean | null
+  >(null); // 닉네임 사용 가능 여부
+
+  /**
+   * 닉네임 중복 확인 처리 함수
+   * - 입력된 닉네임의 중복 여부를 서버에 확인 요청
+   * - 성공/실패 시 버튼 상태 및 메시지로 피드백
+   */
+  const handleCheckNickname = async () => {
+    if (!watchedValues.nickname) return;
+
+    setIsCheckingNickname(true);
+    try {
+      // TODO: 실제 서버 연동 시 signupService.checkNickname 호출
+      // await signupService.checkNickname(watchedValues.nickname);
+
+      // 임시: 성공 시뮬레이션
+      console.log('닉네임 중복 확인:', watchedValues.nickname);
+
+      setIsNicknameAvailable(true);
+    } catch (error) {
+      console.error('닉네임 중복 확인 실패:', error);
+      setIsNicknameAvailable(false);
+    } finally {
+      setIsCheckingNickname(false);
+    }
+  };
   return (
-    <div className='space-y-4'>
+    <div className='space-y-6'>
       {/* 프로필 이미지 업로드 */}
       <div className='space-y-2'>
         <label className='block text-sm font-medium text-foreground'>
@@ -115,19 +151,55 @@ export const Step2Form: React.FC<Step2FormProps> = ({
           placeholder={AUTH_TEXTS.SIGNUP.STEP2.NICKNAME_PLACEHOLDER}
           className='flex-1'
           autoComplete='username'
-          {...register('nickname')}
+          aria-invalid={!!errors.nickname || undefined}
+          error={errors.nickname?.message}
+          {...register('nickname', {
+            onChange: () => {
+              // 닉네임이 변경되면 중복 확인 상태 초기화
+              setIsNicknameAvailable(null);
+            },
+          })}
         />
         <button
           type='button'
-          className='px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary-hover transition-colors text-sm whitespace-nowrap cursor-pointer'
-          aria-label='닉네임 중복 확인'
+          onClick={handleCheckNickname}
+          disabled={
+            !watchedValues.nickname ||
+            isCheckingNickname ||
+            isNicknameAvailable === true
+          }
+          className={`px-4 py-2 rounded-lg transition-colors text-sm whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 ${
+            isNicknameAvailable === true
+              ? 'bg-green-500 text-white'
+              : isNicknameAvailable === false
+                ? 'bg-red-500 text-white'
+                : 'bg-secondary text-secondary-foreground hover:bg-secondary-hover'
+          }`}
+          aria-label={
+            isNicknameAvailable === true
+              ? '닉네임 사용 가능'
+              : isNicknameAvailable === false
+                ? '닉네임 중복됨'
+                : '닉네임 중복 확인'
+          }
         >
-          {AUTH_TEXTS.SIGNUP.STEP2.NICKNAME_CHECK_BUTTON}
+          {isCheckingNickname ? (
+            <Loader2 className='w-4 h-4 animate-spin' />
+          ) : (
+            <UserCheck className='w-4 h-4' />
+          )}
+          {isCheckingNickname
+            ? '확인 중...'
+            : isNicknameAvailable === true
+              ? '사용 가능'
+              : isNicknameAvailable === false
+                ? '중복됨'
+                : AUTH_TEXTS.SIGNUP.STEP2.NICKNAME_CHECK_BUTTON}
         </button>
       </div>
 
       {/* 성별 선택 */}
-      <div className='space-y-2'>
+      <div className='space-y-1'>
         <label className='block text-sm font-medium text-foreground'>
           {AUTH_TEXTS.SIGNUP.STEP2.GENDER_TITLE}
         </label>
@@ -151,10 +223,16 @@ export const Step2Form: React.FC<Step2FormProps> = ({
             </button>
           ))}
         </div>
+        {errors.gender && (
+          <div className='text-xs text-red-600 flex items-center gap-1'>
+            <XCircle className='w-3 h-3' />
+            {errors.gender.message}
+          </div>
+        )}
       </div>
 
       {/* 관심 분야 선택 */}
-      <div className='space-y-2'>
+      <div className='space-y-1'>
         <label className='block text-sm font-medium text-foreground'>
           {AUTH_TEXTS.SIGNUP.STEP2.INTEREST_TITLE}
         </label>
@@ -178,10 +256,16 @@ export const Step2Form: React.FC<Step2FormProps> = ({
             </button>
           ))}
         </div>
+        {errors.interests && (
+          <div className='text-xs text-red-600 flex items-center gap-1'>
+            <XCircle className='w-3 h-3' />
+            {errors.interests.message}
+          </div>
+        )}
       </div>
 
       {/* 지역 선택 */}
-      <div className='space-y-2'>
+      <div className='space-y-1'>
         <label className='block text-sm font-medium text-foreground'>
           {AUTH_TEXTS.SIGNUP.STEP2.REGION_TITLE}
         </label>
@@ -198,6 +282,12 @@ export const Step2Form: React.FC<Step2FormProps> = ({
             </option>
           ))}
         </select>
+        {errors.region && (
+          <div className='text-xs text-red-600 flex items-center gap-1'>
+            <XCircle className='w-3 h-3' />
+            {errors.region.message}
+          </div>
+        )}
       </div>
 
       {/* 단계 이동 버튼들 */}

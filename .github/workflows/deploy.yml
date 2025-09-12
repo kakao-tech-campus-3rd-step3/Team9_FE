@@ -1,0 +1,177 @@
+name: PADO FE CI/CD
+
+on:
+  push:
+    branches:
+      - develop
+      - 'feature/**'
+      - main
+      - 'release/**'
+  pull_request:
+    branches:
+      - develop
+      - main
+      - 'release/**'
+
+permissions:
+  contents: read
+  pull-requests: write # PR에 코멘트를 작성하기 위한 권한
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: pnpm 설정
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.1.0
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: 패키지 설치
+        run: pnpm i --frozen-lockfile
+
+      - name: 린트 검사
+        run: pnpm lint
+
+  build:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: pnpm 설정
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.1.0
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: 패키지 설치
+        run: pnpm i --frozen-lockfile
+
+      - name: Vercel 프로젝트 연결 파일 생성
+        run: |
+          mkdir -p .vercel
+          cat > .vercel/project.json << 'JSON'
+          {
+            "projectId": "${{ secrets.VERCEL_PROJECT_ID }}",
+            "orgId": "${{ secrets.VERCEL_ORG_ID }}"
+          }
+          JSON
+
+      - name: Vercel 환경 동기화
+        run:
+          npx vercel pull --yes --environment=preview --token=${{
+          secrets.VERCEL_TOKEN }}
+
+      - name: Vercel 빌드 (prebuilt 생성)
+        run: npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: 빌드 아티팩트 업로드
+        uses: actions/upload-artifact@v4
+        with:
+          name: vercel-build-output
+          path: .vercel/output
+
+  deploy-preview:
+    # PR이거나 develop/feature/** 브랜치 푸시 시 Preview 배포
+    if:
+      ${{ github.event_name == 'pull_request' || github.ref_name == 'develop' ||
+      startsWith(github.ref_name, 'feature/') }}
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: pnpm 설정
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.1.0
+          run_install: false
+
+      - name: Vercel 환경 동기화 (Preview)
+        run: npx vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
+
+      - name: Vercel 빌드 (prebuilt 생성)
+        run: npx vercel build --token=$VERCEL_TOKEN
+
+      - name: 미리보기 배포 (Preview)
+        id: deploy
+        run:
+          echo "url=$(npx vercel deploy --prebuilt --token=$VERCEL_TOKEN)" >>
+          $GITHUB_OUTPUT
+
+      - name: PR에 Preview URL 코멘트
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = '${{ steps.deploy.outputs.url }}';
+            const branch = (context.payload.pull_request?.head?.ref) || (context.ref || '').replace('refs/heads/','');
+            const sha = (context.sha || '').slice(0,7);
+            const body = `🚀 PADO FE Preview 배포 완료 (branch: ${branch}, commit: ${sha})\n\n${url}`;
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body
+            });
+
+  deploy-production:
+    # main 및 release/** 를 Production 배포 대상으로 명시
+    if:
+      ${{ github.ref_name == 'main' || startsWith(github.ref_name, 'release/')
+      }}
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: pnpm 설정
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.1.0
+          run_install: false
+
+      - name: Vercel 환경 동기화 (Production)
+        run:
+          npx vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+
+      - name: Vercel 빌드 (prebuilt 생성)
+        run: npx vercel build --token=$VERCEL_TOKEN
+
+      - name: 운영 배포 (Production)
+        run: npx vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
