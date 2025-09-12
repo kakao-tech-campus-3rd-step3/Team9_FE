@@ -3,6 +3,7 @@ import { tuneData } from '../mock/tune';
 import dayjs from 'dayjs';
 import { useSearchParams } from 'react-router-dom';
 import TuneTable from './TuneTable';
+import TunePersonalTable from './TunePersonalTable';
 
 const TuneListSection = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -43,9 +44,14 @@ const TuneListSection = () => {
 
           {selectedTune === tune.id && (
             <div
-              className={`mt-2 p-4 border border-secondary rounded-lg bg-white`}
+              className={`flex justify-between mt-2 p-4 border border-secondary rounded-lg bg-white`}
             >
-              <TuneTable />
+              <div className='flex-1'>
+                <TunePersonalTable />
+              </div>
+              <div className='flex-1'>
+                <TuneTable />
+              </div>
             </div>
           )}
         </div>
