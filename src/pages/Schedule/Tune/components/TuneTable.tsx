@@ -24,7 +24,7 @@ const TuneTable = () => {
   });
 
   return (
-    <div className='max-h-[950px] overflow-y-auto'>
+    <div className='max-h-[950px] overflow-y-auto flex flex-col items-center'>
       <table>
         <thead>
           <tr>
@@ -34,7 +34,7 @@ const TuneTable = () => {
                 key={day}
                 className='border-b border-gray-800 px-2 py-2 text-center text-xs'
               >
-                {day}
+                {day.split(' ')[0]} <br /> {day.split(' ')[1]}
               </th>
             ))}
           </tr>
@@ -45,7 +45,7 @@ const TuneTable = () => {
               <React.Fragment key={hourIdx}>
                 <tr className='border-b border-dotted border-gray-800'>
                   <td
-                    className='border-r border-gray-800 px-2 py-2 text-xs font-bold'
+                    className='border-r border-gray-800 px-2 py-2 text-xs font-bold text-center'
                     rowSpan={2}
                   >
                     {hourSlots[hourIdx]}
@@ -56,7 +56,7 @@ const TuneTable = () => {
                     return (
                       <td
                         key={`${colIdx}-${hourIdx}-1`}
-                        className={`border-r border-gray-800px-2 py-1 ${getBgColor(
+                        className={`border-r border-gray-800 px-2 py-1 ${getBgColor(
                           {
                             count: people,
                             maxCount: tuneCheckData.participants.length,
@@ -88,6 +88,27 @@ const TuneTable = () => {
           })}
         </tbody>
       </table>
+      <div className='flex mt-4'>
+        <div className='border-r border-gray-800 px-2 py-1 text-xs font-bold'>
+          0명 참가
+        </div>
+        {Array.from({ length: tuneCheckData.participants.length }).map(
+          (_, idx) => (
+            <div
+              key={idx}
+              className={`border-r border-y h-6 w-6 border-gray-800 px-2 py-2 text-xs font-bold ${getBgColor(
+                {
+                  count: idx,
+                  maxCount: tuneCheckData.participants.length,
+                },
+              )}`}
+            ></div>
+          ),
+        )}
+        <div className='px-2 py-1 text-xs font-bold'>
+          {tuneCheckData.participants.length - 1}명 참가
+        </div>
+      </div>
     </div>
   );
 };

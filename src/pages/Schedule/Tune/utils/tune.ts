@@ -1,3 +1,4 @@
+import { formatDayOfTheWeek } from '@/utils';
 import dayjs from 'dayjs';
 
 const checkMidnight = (time: string) => {
@@ -39,10 +40,11 @@ export const getTuneDay = ({
   const startDay = dayjs(startTime).startOf('day');
   const endDay = checkMidnight(endTime).endOf('day');
   const days = [];
-  let current = startDay;
 
+  let current = startDay;
   while (current.isBefore(endDay) || current.isSame(endDay)) {
-    days.push(current.format('MM/DD'));
+    const dayOfTheWeek = formatDayOfTheWeek(current.day());
+    days.push(`${current.format('MM/DD')} ${dayOfTheWeek}`);
     current = current.add(1, 'day');
   }
   return days;
@@ -79,8 +81,7 @@ export const getHourSlots = (startTime: string, endTime: string): string[] => {
   const slots: string[] = [];
   for (let t = totalStart; t < totalEnd; t += 60) {
     const h = Math.floor(t / 60);
-    const m = t % 60;
-    slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+    slots.push(`${String(h)}시`);
   }
   return slots;
 };
