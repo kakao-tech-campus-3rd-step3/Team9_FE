@@ -40,7 +40,7 @@
   --border: #e2e8f0; /* 기본 회색 테두리 */
   --border-hover: #cbd5e1; /* 회색 테두리 호버 상태 */
   --border-primary: #3b82f6; /* primary 색상 테두리 (파란색) */
-  --border-primary-hover: #2563eb; /* primary 테두리 호버 상태 */
+  --border-primary-hover: #60a5fa; /* primary 테두리 호버 상태 (연한 파란색) */
   --border-primary-focus: #1d4ed8; /* primary 테두리 포커스 상태 */
 
   /* 입력창 테두리 색상 */
