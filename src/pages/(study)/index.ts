@@ -7,3 +7,4 @@ export { StudyCreatePage } from './create';
 export * from './components';
 export * from './dashboard';
 export * from './document';
+export * from './admin';

@@ -25,6 +25,7 @@ import {
   DocumentAddPage,
   DocumentDetailPage,
   DocumentEditPage,
+  AdminPage,
 } from '@/pages/(study)';
 
 /**
@@ -112,7 +113,7 @@ const router = createBrowserRouter([
           },
           { path: ROUTES.STUDY.QUIZ, element: <ExamplePage /> },
           { path: ROUTES.STUDY.RETRO, element: <ExamplePage /> },
-          { path: ROUTES.STUDY.ADMIN, element: <ExamplePage /> },
+          { path: ROUTES.STUDY.ADMIN, element: <AdminPage /> },
         ],
       },
 
