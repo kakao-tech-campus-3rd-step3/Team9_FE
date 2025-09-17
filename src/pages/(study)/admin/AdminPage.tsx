@@ -4,6 +4,7 @@
 
 import React, { useState } from 'react';
 import { AdminTabs } from './components/AdminTabs';
+import { MemberManagement } from './components/MemberManagement';
 import type { AdminTabType } from './types';
 
 const AdminPage: React.FC = () => {
@@ -12,13 +13,13 @@ const AdminPage: React.FC = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'members':
-        return <div>스터디원 관리 컨텐츠</div>;
+        return <MemberManagement />;
       case 'applicants':
         return <div>신청자 관리 컨텐츠</div>;
       case 'study-info':
         return <div>스터디 정보 관리 컨텐츠</div>;
       default:
-        return <div>스터디원 관리 컨텐츠</div>;
+        return <MemberManagement />;
     }
   };
 
