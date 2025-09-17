@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 import { AdminTabs } from './components/AdminTabs';
 import { MemberManagement } from './components/MemberManagement';
 import { ApplicantManagement } from './components/ApplicantManagement';
+import { StudyInfoManagement } from './components/StudyInfoManagement';
 import type { AdminTabType } from './types';
 
 const AdminPage: React.FC = () => {
@@ -18,7 +19,7 @@ const AdminPage: React.FC = () => {
       case 'applicants':
         return <ApplicantManagement />;
       case 'study-info':
-        return <div>스터디 정보 관리 컨텐츠</div>;
+        return <StudyInfoManagement />;
       default:
         return <MemberManagement />;
     }
