@@ -29,26 +29,26 @@ export const cookieStorage = {
 
 /**
  * 토큰 관리 (세션 스토리지)
+ * - 세션 스토리지에 액세스 토큰 저장/조회/삭제 제공
+ * - 사용처: 로그인 성공 시 저장, API 요청 인터셉터에서 조회/401 시 삭제
  */
-
-// 토큰 설정
-export const setAccessToken = (token: string): void => {
-  sessionStorage.setItem(TOKEN_KEYS.ACCESS, token);
-};
-
-// 토큰 조회
-export const getAccessToken = (): string | null => {
-  return sessionStorage.getItem(TOKEN_KEYS.ACCESS);
-};
-
-// 토큰 삭제
-export const removeAccessToken = (): void => {
-  sessionStorage.removeItem(TOKEN_KEYS.ACCESS);
-};
-
-// 토큰 유효 여부 확인
-export const hasValidToken = (): boolean => {
-  return Boolean(getAccessToken()?.trim());
+export const accessTokenStorage = {
+  // 액세스 토큰 저장
+  set: (token: string): void => {
+    sessionStorage.setItem(TOKEN_KEYS.ACCESS, token);
+  },
+  // 액세스 토큰 조회 (없으면 null)
+  get: (): string | null => {
+    return sessionStorage.getItem(TOKEN_KEYS.ACCESS);
+  },
+  // 액세스 토큰 삭제
+  remove: (): void => {
+    sessionStorage.removeItem(TOKEN_KEYS.ACCESS);
+  },
+  // 저장 여부
+  has: (): boolean => {
+    return Boolean(accessTokenStorage.get()?.trim());
+  },
 };
 
 /**
