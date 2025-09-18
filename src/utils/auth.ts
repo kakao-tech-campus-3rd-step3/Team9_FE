@@ -52,25 +52,26 @@ export const accessTokenStorage = {
 };
 
 /**
- * 아이디 기억하기 (쿠키 헬퍼 함수 기반)
+ * 아이디 기억하기 (쿠키)
+ * - 쿠키 기반으로 이메일 저장/조회/삭제
+ * - 키/만료일: REMEMBER_ME 상수 사용
+ * - 사용처: 로그인 폼 기본값, '아이디 기억하기' 체크 처리
  */
-
-// 아이디(이메일) 기억 여부 설정
-export const setRememberedEmail = (email: string): void => {
-  setCookie(REMEMBER_ME.EMAIL_KEY, email, REMEMBER_ME.EXPIRY_DAYS);
-};
-
-// 아이디(이메일) 기억 여부 조회
-export const getRememberedEmail = (): string | null => {
-  return getCookie(REMEMBER_ME.EMAIL_KEY);
-};
-
-// 아이디(이메일) 기억 여부 삭제
-export const removeRememberedEmail = (): void => {
-  removeCookie(REMEMBER_ME.EMAIL_KEY);
-};
-
-// 아이디(이메일) 기억 여부 확인
-export const hasRememberedEmail = (): boolean => {
-  return Boolean(getRememberedEmail()?.trim());
+export const rememberedEmailStorage = {
+  // 이메일 저장 (쿠키)
+  set: (email: string): void => {
+    cookieStorage.set(REMEMBER_ME.EMAIL_KEY, email, REMEMBER_ME.EXPIRY_DAYS);
+  },
+  // 이메일 조회 (없으면 null)
+  get: (): string | null => {
+    return cookieStorage.get(REMEMBER_ME.EMAIL_KEY);
+  },
+  // 이메일 삭제
+  remove: (): void => {
+    cookieStorage.remove(REMEMBER_ME.EMAIL_KEY);
+  },
+  // 저장 여부
+  has: (): boolean => {
+    return Boolean(rememberedEmailStorage.get()?.trim());
+  },
 };
