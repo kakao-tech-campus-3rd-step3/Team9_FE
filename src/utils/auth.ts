@@ -6,29 +6,25 @@ import dayjs from 'dayjs';
 import { TOKEN_KEYS, REMEMBER_ME } from '@/constants';
 
 /**
- * 쿠키 헬퍼 함수 (아이디 기억하기용)
+ * 쿠키 유틸 (객체 기반)
+ * - 단순 쿠키 set/get/remove를 제공
+ * - 보안 옵션은 필요 시 확장(예: Secure, domain) 가능
  */
-
-// 쿠키 설정
-const setCookie = (name: string, value: string, days: number = 30): void => {
-  // 만료 날짜 계산
-  const expires = dayjs().add(days, 'day').toDate();
-  // 쿠키 설정
-  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Strict`;
-};
-
-// 쿠키 조회
-const getCookie = (name: string): string | null => {
-  // 쿠키 조회
-  const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
-  // 쿠키 값 반환
-  return match ? match[2] : null;
-};
-
-// 쿠키 삭제
-const removeCookie = (name: string): void => {
-  // 쿠키 초기화
-  document.cookie = `${name}=;expires=${dayjs(0).toDate().toUTCString()};path=/;`;
+export const cookieStorage = {
+  // 쿠키 저장 (기본 만료: 30일)
+  set: (name: string, value: string, days: number = 30): void => {
+    const expires = dayjs().add(days, 'day').toDate();
+    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Strict`;
+  },
+  // 쿠키 조회 (없으면 null)
+  get: (name: string): string | null => {
+    const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
+    return match ? match[2] : null;
+  },
+  // 쿠키 삭제 (즉시 만료 처리)
+  remove: (name: string): void => {
+    document.cookie = `${name}=;expires=${dayjs(0).toDate().toUTCString()};path=/;`;
+  },
 };
 
 /**
