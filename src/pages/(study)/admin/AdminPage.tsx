@@ -26,16 +26,21 @@ const AdminPage: React.FC = () => {
   };
 
   return (
-    <div className='p-6'>
-      <div className='max-w-4xl mx-auto'>
-        <h1 className='text-2xl font-bold text-foreground mb-6'>
-          관리자 페이지
-        </h1>
+    <div className='h-full flex flex-col bg-background'>
+      {/* 헤더 - 고정 */}
+      <div className='flex items-center justify-between px-6 py-6 border-b border-border bg-background flex-shrink-0'>
+        <div>
+          <h1 className='text-2xl font-bold text-primary'>관리자 기능</h1>
+        </div>
+      </div>
 
-        {/* 탭 네비게이션 */}
+      {/* 탭 네비게이션 - 고정 */}
+      <div className='px-6 pt-6 bg-background flex-shrink-0'>
         <AdminTabs activeTab={activeTab} onTabChange={setActiveTab} />
+      </div>
 
-        {/* 컨텐츠 영역 */}
+      {/* 스크롤 가능한 콘텐츠 영역 */}
+      <div className='flex-1 px-6 pb-6 overflow-auto'>
         <div className='bg-card rounded-lg border border-border p-6'>
           {renderContent()}
         </div>

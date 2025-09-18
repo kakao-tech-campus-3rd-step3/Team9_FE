@@ -4,7 +4,7 @@
 
 import React, { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { MapPin, Plus, X } from 'lucide-react';
+import { MapPin, Plus, X, Camera } from 'lucide-react';
 import RegionSelectModal from '../../components/RegionSelectModal';
 import { MOCK_STUDY_INFO, CATEGORIES } from '../constants';
 
@@ -17,11 +17,13 @@ interface StudyInfoFormData {
   schedule: string;
   region: string;
   conditions: string[];
+  image?: string;
 }
 
 export const StudyInfoManagement: React.FC = () => {
   const [isRegionModalOpen, setIsRegionModalOpen] = useState(false);
   const [conditionInput, setConditionInput] = useState('');
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const { control, register, handleSubmit, setValue, watch } =
     useForm<StudyInfoFormData>({
@@ -58,6 +60,24 @@ export const StudyInfoManagement: React.FC = () => {
       e.preventDefault();
       handleConditionAdd();
     }
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        setImagePreview(result);
+        setValue('image', result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleImageRemove = () => {
+    setImagePreview(null);
+    setValue('image', '');
   };
 
   const onSubmit = (data: StudyInfoFormData) => {
@@ -224,6 +244,52 @@ export const StudyInfoManagement: React.FC = () => {
                 </button>
               </span>
             ))}
+          </div>
+        </div>
+
+        {/* 스터디 대표 이미지 */}
+        <div>
+          <label className='block text-sm font-medium text-foreground mb-2'>
+            스터디 대표 이미지
+          </label>
+          <div className='border-2 border-dashed border-border rounded-lg p-6 text-center'>
+            {imagePreview ? (
+              <div className='relative'>
+                <img
+                  src={imagePreview}
+                  alt='스터디 대표 이미지'
+                  className='max-w-full h-48 object-cover mx-auto rounded-lg'
+                />
+                <button
+                  type='button'
+                  onClick={handleImageRemove}
+                  className='absolute top-2 right-2 p-1 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90'
+                >
+                  <X className='h-4 w-4' />
+                </button>
+              </div>
+            ) : (
+              <div>
+                <Camera className='h-12 w-12 text-muted-foreground mx-auto mb-4' />
+                <p className='text-muted-foreground mb-4'>
+                  클릭하여 대표 이미지를 설정해주세요
+                </p>
+                <input
+                  type='file'
+                  accept='image/*'
+                  onChange={handleImageUpload}
+                  className='hidden'
+                  id='image-upload'
+                />
+                <label
+                  htmlFor='image-upload'
+                  className='inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 cursor-pointer transition-colors'
+                >
+                  <Camera className='h-4 w-4 mr-2' />
+                  이미지 업로드
+                </label>
+              </div>
+            )}
           </div>
         </div>
 

@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import { User, Check, X } from 'lucide-react';
+import { User } from 'lucide-react';
 import { MOCK_APPLICANTS } from '../constants';
 
 export const ApplicantManagement: React.FC = () => {
@@ -60,17 +60,15 @@ export const ApplicantManagement: React.FC = () => {
               <div className='flex items-center space-x-2'>
                 <button
                   onClick={() => handleApprove(applicant.id)}
-                  className='flex items-center justify-center w-8 h-8 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors'
-                  aria-label='승인'
+                  className='px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium'
                 >
-                  <Check className='h-4 w-4' />
+                  수락
                 </button>
                 <button
                   onClick={() => handleReject(applicant.id)}
-                  className='flex items-center justify-center w-8 h-8 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors'
-                  aria-label='거절'
+                  className='px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium'
                 >
-                  <X className='h-4 w-4' />
+                  거절
                 </button>
               </div>
             </div>
