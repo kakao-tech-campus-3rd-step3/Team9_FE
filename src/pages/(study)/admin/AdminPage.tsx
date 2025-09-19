@@ -3,11 +3,8 @@
  */
 
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Outlet } from 'react-router-dom';
 import { AdminTabs } from './components/AdminTabs';
-import { MemberManagement } from './components/MemberManagement';
-import { ApplicantManagement } from './components/ApplicantManagement';
-import { StudyInfoManagement } from './components/StudyInfoManagement';
 import type { AdminTabType } from './types';
 
 const AdminPage: React.FC = () => {
@@ -22,19 +19,6 @@ const AdminPage: React.FC = () => {
   };
 
   const activeTab = getCurrentTab();
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'members':
-        return <MemberManagement />;
-      case 'applicants':
-        return <ApplicantManagement />;
-      case 'study-info':
-        return <StudyInfoManagement />;
-      default:
-        return <MemberManagement />;
-    }
-  };
 
   return (
     <div className='h-full flex flex-col bg-background'>
@@ -52,9 +36,7 @@ const AdminPage: React.FC = () => {
 
       {/* 스크롤 가능한 콘텐츠 영역 */}
       <div className='flex-1 px-6 pb-6 overflow-auto'>
-        <div className='bg-card rounded-lg border border-border p-6'>
-          {renderContent()}
-        </div>
+        <Outlet />
       </div>
     </div>
   );

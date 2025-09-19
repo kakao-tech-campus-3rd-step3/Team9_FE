@@ -8,3 +8,8 @@ export * from './components';
 export * from './dashboard';
 export * from './document';
 export * from './admin';
+export {
+  MemberManagement,
+  ApplicantManagement,
+  StudyInfoManagement,
+} from './admin/components';

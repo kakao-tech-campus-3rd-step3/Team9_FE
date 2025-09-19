@@ -86,234 +86,236 @@ export const StudyInfoManagement: React.FC = () => {
   };
 
   return (
-    <div className='space-y-6'>
-      <div>
-        <h2 className='text-lg font-semibold text-foreground'>스터디 관리</h2>
-        <p className='text-sm text-muted-foreground mt-1'>
-          스터디 정보를 수정할 수 있습니다.
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
-        {/* 스터디 이름 */}
+    <div className='bg-card rounded-lg border border-border p-6'>
+      <div className='space-y-6'>
         <div>
-          <label className='block text-sm font-medium text-foreground mb-2'>
-            스터디 이름
-          </label>
-          <input
-            {...register('title', { required: true })}
-            className='w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary'
-            placeholder='스터디 이름을 입력하세요'
-          />
+          <h2 className='text-lg font-semibold text-foreground'>스터디 관리</h2>
+          <p className='text-sm text-muted-foreground mt-1'>
+            스터디 정보를 수정할 수 있습니다.
+          </p>
         </div>
 
-        {/* 스터디 한 줄 소개 */}
-        <div>
-          <label className='block text-sm font-medium text-foreground mb-2'>
-            스터디 한 줄 소개
-          </label>
-          <input
-            {...register('shortDescription', { required: true })}
-            className='w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary'
-            placeholder='스터디에 대한 간략한 설명'
-          />
-        </div>
-
-        {/* 스터디 설명 */}
-        <div>
-          <label className='block text-sm font-medium text-foreground mb-2'>
-            스터디 설명
-          </label>
-          <textarea
-            {...register('description', { required: true })}
-            rows={4}
-            className='w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary resize-none'
-            placeholder='스터디에 대한 상세한 설명'
-          />
-        </div>
-
-        {/* 스터디 카테고리 */}
-        <div>
-          <label className='block text-sm font-medium text-foreground mb-2'>
-            스터디 카테고리
-          </label>
-          <div className='flex flex-wrap gap-2'>
-            {CATEGORIES.map((category) => (
-              <Controller
-                key={category}
-                name='category'
-                control={control}
-                render={({ field }) => (
-                  <button
-                    type='button'
-                    onClick={() => field.onChange(category)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                      field.value === category
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                    }`}
-                  >
-                    {category}
-                  </button>
-                )}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* 스터디 인원 */}
-        <div>
-          <label className='block text-sm font-medium text-foreground mb-2'>
-            스터디 인원
-          </label>
-          <select
-            {...register('maxMembers', { required: true })}
-            className='w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary'
-          >
-            {[2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-              <option key={num} value={num}>
-                {num}명
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* 스터디 시간 */}
-        <div>
-          <label className='block text-sm font-medium text-foreground mb-2'>
-            스터디 시간
-          </label>
-          <input
-            {...register('schedule', { required: true })}
-            className='w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary'
-            placeholder='예: 매주 토요일 오후 2시'
-          />
-        </div>
-
-        {/* 스터디 지역 */}
-        <div>
-          <label className='block text-sm font-medium text-foreground mb-2'>
-            스터디 지역
-          </label>
-          <button
-            type='button'
-            onClick={() => setIsRegionModalOpen(true)}
-            className='w-full flex items-center justify-between px-3 py-2 border border-border rounded-lg hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors'
-          >
-            <span className='flex items-center'>
-              <MapPin className='h-4 w-4 mr-2 text-muted-foreground' />
-              {watchedRegion || '지역을 선택하세요'}
-            </span>
-          </button>
-        </div>
-
-        {/* 참여조건 */}
-        <div>
-          <label className='block text-sm font-medium text-foreground mb-2'>
-            참여조건
-          </label>
-          <div className='flex gap-2 mb-3'>
+        <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
+          {/* 스터디 이름 */}
+          <div>
+            <label className='block text-sm font-medium text-foreground mb-2'>
+              스터디 이름
+            </label>
             <input
-              value={conditionInput}
-              onChange={(e) => setConditionInput(e.target.value)}
-              onKeyDown={handleConditionKeyDown}
-              className='flex-1 px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary'
-              placeholder='참여조건을 입력하세요'
+              {...register('title', { required: true })}
+              className='w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary'
+              placeholder='스터디 이름을 입력하세요'
             />
+          </div>
+
+          {/* 스터디 한 줄 소개 */}
+          <div>
+            <label className='block text-sm font-medium text-foreground mb-2'>
+              스터디 한 줄 소개
+            </label>
+            <input
+              {...register('shortDescription', { required: true })}
+              className='w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary'
+              placeholder='스터디에 대한 간략한 설명'
+            />
+          </div>
+
+          {/* 스터디 설명 */}
+          <div>
+            <label className='block text-sm font-medium text-foreground mb-2'>
+              스터디 설명
+            </label>
+            <textarea
+              {...register('description', { required: true })}
+              rows={4}
+              className='w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary resize-none'
+              placeholder='스터디에 대한 상세한 설명'
+            />
+          </div>
+
+          {/* 스터디 카테고리 */}
+          <div>
+            <label className='block text-sm font-medium text-foreground mb-2'>
+              스터디 카테고리
+            </label>
+            <div className='flex flex-wrap gap-2'>
+              {CATEGORIES.map((category) => (
+                <Controller
+                  key={category}
+                  name='category'
+                  control={control}
+                  render={({ field }) => (
+                    <button
+                      type='button'
+                      onClick={() => field.onChange(category)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                        field.value === category
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                      }`}
+                    >
+                      {category}
+                    </button>
+                  )}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* 스터디 인원 */}
+          <div>
+            <label className='block text-sm font-medium text-foreground mb-2'>
+              스터디 인원
+            </label>
+            <select
+              {...register('maxMembers', { required: true })}
+              className='w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary'
+            >
+              {[2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                <option key={num} value={num}>
+                  {num}명
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* 스터디 시간 */}
+          <div>
+            <label className='block text-sm font-medium text-foreground mb-2'>
+              스터디 시간
+            </label>
+            <input
+              {...register('schedule', { required: true })}
+              className='w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary'
+              placeholder='예: 매주 토요일 오후 2시'
+            />
+          </div>
+
+          {/* 스터디 지역 */}
+          <div>
+            <label className='block text-sm font-medium text-foreground mb-2'>
+              스터디 지역
+            </label>
             <button
               type='button'
-              onClick={handleConditionAdd}
-              className='flex items-center px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors'
+              onClick={() => setIsRegionModalOpen(true)}
+              className='w-full flex items-center justify-between px-3 py-2 border border-border rounded-lg hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors'
             >
-              <Plus className='h-4 w-4' />
+              <span className='flex items-center'>
+                <MapPin className='h-4 w-4 mr-2 text-muted-foreground' />
+                {watchedRegion || '지역을 선택하세요'}
+              </span>
             </button>
           </div>
-          <div className='flex flex-wrap gap-2'>
-            {watchedConditions.map((condition, index) => (
-              <span
-                key={index}
-                className='flex items-center px-3 py-1 bg-secondary text-secondary-foreground rounded-full text-sm'
+
+          {/* 참여조건 */}
+          <div>
+            <label className='block text-sm font-medium text-foreground mb-2'>
+              참여조건
+            </label>
+            <div className='flex gap-2 mb-3'>
+              <input
+                value={conditionInput}
+                onChange={(e) => setConditionInput(e.target.value)}
+                onKeyDown={handleConditionKeyDown}
+                className='flex-1 px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary'
+                placeholder='참여조건을 입력하세요'
+              />
+              <button
+                type='button'
+                onClick={handleConditionAdd}
+                className='flex items-center px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors'
               >
-                {condition}
-                <button
-                  type='button'
-                  onClick={() => handleConditionRemove(index)}
-                  className='ml-2 text-muted-foreground hover:text-destructive'
+                <Plus className='h-4 w-4' />
+              </button>
+            </div>
+            <div className='flex flex-wrap gap-2'>
+              {watchedConditions.map((condition, index) => (
+                <span
+                  key={index}
+                  className='flex items-center px-3 py-1 bg-secondary text-secondary-foreground rounded-full text-sm'
                 >
-                  <X className='h-3 w-3' />
-                </button>
-              </span>
-            ))}
+                  {condition}
+                  <button
+                    type='button'
+                    onClick={() => handleConditionRemove(index)}
+                    className='ml-2 text-muted-foreground hover:text-destructive'
+                  >
+                    <X className='h-3 w-3' />
+                  </button>
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* 스터디 대표 이미지 */}
-        <div>
-          <label className='block text-sm font-medium text-foreground mb-2'>
-            스터디 대표 이미지
-          </label>
-          <div className='border-2 border-dashed border-border rounded-lg p-6 text-center'>
-            {imagePreview ? (
-              <div className='relative'>
-                <img
-                  src={imagePreview}
-                  alt='스터디 대표 이미지'
-                  className='max-w-full h-48 object-cover mx-auto rounded-lg'
-                />
-                <button
-                  type='button'
-                  onClick={handleImageRemove}
-                  className='absolute top-2 right-2 p-1 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90'
-                >
-                  <X className='h-4 w-4' />
-                </button>
-              </div>
-            ) : (
-              <div>
-                <Camera className='h-12 w-12 text-muted-foreground mx-auto mb-4' />
-                <p className='text-muted-foreground mb-4'>
-                  클릭하여 대표 이미지를 설정해주세요
-                </p>
-                <input
-                  type='file'
-                  accept='image/*'
-                  onChange={handleImageUpload}
-                  className='hidden'
-                  id='image-upload'
-                />
-                <label
-                  htmlFor='image-upload'
-                  className='inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 cursor-pointer transition-colors'
-                >
-                  <Camera className='h-4 w-4 mr-2' />
-                  이미지 업로드
-                </label>
-              </div>
-            )}
+          {/* 스터디 대표 이미지 */}
+          <div>
+            <label className='block text-sm font-medium text-foreground mb-2'>
+              스터디 대표 이미지
+            </label>
+            <div className='border-2 border-dashed border-border rounded-lg p-6 text-center'>
+              {imagePreview ? (
+                <div className='relative'>
+                  <img
+                    src={imagePreview}
+                    alt='스터디 대표 이미지'
+                    className='max-w-full h-48 object-cover mx-auto rounded-lg'
+                  />
+                  <button
+                    type='button'
+                    onClick={handleImageRemove}
+                    className='absolute top-2 right-2 p-1 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90'
+                  >
+                    <X className='h-4 w-4' />
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <Camera className='h-12 w-12 text-muted-foreground mx-auto mb-4' />
+                  <p className='text-muted-foreground mb-4'>
+                    클릭하여 대표 이미지를 설정해주세요
+                  </p>
+                  <input
+                    type='file'
+                    accept='image/*'
+                    onChange={handleImageUpload}
+                    className='hidden'
+                    id='image-upload'
+                  />
+                  <label
+                    htmlFor='image-upload'
+                    className='inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 cursor-pointer transition-colors'
+                  >
+                    <Camera className='h-4 w-4 mr-2' />
+                    이미지 업로드
+                  </label>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* 수정하기 버튼 */}
-        <div className='flex justify-end'>
-          <button
-            type='submit'
-            className='px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors'
-          >
-            수정하기
-          </button>
-        </div>
-      </form>
+          {/* 수정하기 버튼 */}
+          <div className='flex justify-end'>
+            <button
+              type='submit'
+              className='px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors'
+            >
+              수정하기
+            </button>
+          </div>
+        </form>
 
-      {/* 지역 선택 모달 */}
-      <RegionSelectModal
-        isOpen={isRegionModalOpen}
-        onClose={() => setIsRegionModalOpen(false)}
-        selectedRegion={watchedRegion}
-        onRegionSelect={(region: string) => {
-          setValue('region', region);
-          setIsRegionModalOpen(false);
-        }}
-      />
+        {/* 지역 선택 모달 */}
+        <RegionSelectModal
+          isOpen={isRegionModalOpen}
+          onClose={() => setIsRegionModalOpen(false)}
+          selectedRegion={watchedRegion}
+          onRegionSelect={(region: string) => {
+            setValue('region', region);
+            setIsRegionModalOpen(false);
+          }}
+        />
+      </div>
     </div>
   );
 };

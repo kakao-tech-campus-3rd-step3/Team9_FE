@@ -5,7 +5,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ADMIN_TABS } from '../constants';
-import { ROUTES } from '@/constants';
 import type { AdminTabType } from '../types';
 
 interface AdminTabsProps {
@@ -13,18 +12,17 @@ interface AdminTabsProps {
 }
 
 export const AdminTabs: React.FC<AdminTabsProps> = ({ activeTab }) => {
-  // 탭 ID를 URL로 매핑
+  // 탭 ID를 상대 URL로 매핑
   const getTabUrl = (tabId: string) => {
-    const baseUrl = `/${ROUTES.STUDY.ROOT}`;
     switch (tabId) {
       case 'members':
-        return `${baseUrl}/${ROUTES.STUDY.ADMIN.MEMBERS}`;
+        return 'members';
       case 'applicants':
-        return `${baseUrl}/${ROUTES.STUDY.ADMIN.APPLICANTS}`;
+        return 'applicants';
       case 'study-info':
-        return `${baseUrl}/${ROUTES.STUDY.ADMIN.STUDY_INFO}`;
+        return 'study-info';
       default:
-        return `${baseUrl}/${ROUTES.STUDY.ADMIN.MEMBERS}`;
+        return 'members';
     }
   };
 
