@@ -63,7 +63,7 @@ const SignupPage: React.FC = () => {
           onSubmit={handleSubmit(onSubmit)}
         >
           {currentStep === 1 ? (
-            <Step1Form {...signupForm} />
+            <Step1Form {...signupForm} watch={signupForm.watch} />
           ) : (
             <Step2Form {...signupForm} />
           )}

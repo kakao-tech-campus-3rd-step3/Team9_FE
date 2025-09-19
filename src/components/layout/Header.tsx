@@ -4,13 +4,23 @@ import { Search } from 'lucide-react';
 import { Logo } from '@/components/common';
 import { ROUTES } from '@/constants';
 
+interface HeaderProps {
+  searchTerm?: string;
+  onSearchChange?: (value: string) => void;
+  onSearch?: () => void;
+}
+
 /**
  * 헤더 컴포넌트
  * - 로고와 네비게이션 메뉴를 포함
  * - 스터디 탐색 페이지에서만 검색창 표시
  * - 현재 페이지에 따른 활성 메뉴 하이라이트
  */
-const Header: React.FC = () => {
+const Header: React.FC<HeaderProps> = ({
+  searchTerm = '',
+  onSearchChange,
+  onSearch,
+}) => {
   const location = useLocation();
   // 상수 기반 절대 경로 생성
   const explorePath = `/${ROUTES.STUDY.ROOT}/${ROUTES.STUDY.EXPLORE}`;
@@ -22,6 +32,7 @@ const Header: React.FC = () => {
     { to: ROUTES.HOME, label: '홈', type: 'link' as const },
     { to: explorePath, label: '스터디 탐색', type: 'link' as const },
     { to: dashboardPath, label: '스터디 대시보드', type: 'link' as const },
+    { to: ROUTES.LOGIN, label: '로그인', type: 'link' as const },
   ];
 
   return (
@@ -33,12 +44,25 @@ const Header: React.FC = () => {
         {isStudyExplorePage && (
           <div className='flex-1 max-w-md mx-8'>
             <div className='relative'>
-              <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5' />
               <input
                 type='text'
                 placeholder='스터디 검색'
-                className='w-full pl-10 pr-4 py-2 border border-input rounded-lg focus:border-primary focus:ring-0 bg-background text-foreground'
+                value={searchTerm}
+                onChange={(e) => onSearchChange?.(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    onSearch?.();
+                  }
+                }}
+                className='w-full pl-4 pr-12 py-2 border border-input rounded-lg focus:border-primary focus:ring-0 bg-background text-foreground'
               />
+              <button
+                type='button'
+                onClick={onSearch}
+                className='absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors'
+              >
+                <Search className='h-5 w-5' />
+              </button>
             </div>
           </div>
         )}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Users, MapPin, Calendar, Clock } from 'lucide-react';
+import { X, Users, MapPin, Clock } from 'lucide-react';
 
 interface Study {
   id: number;
@@ -89,6 +89,10 @@ const StudyDetailModal: React.FC<StudyDetailModalProps> = ({
                   {study.category}
                 </span>
               </div>
+              <div className='flex items-center'>
+                <Clock className='h-4 w-4 mr-1' />
+                <span>{study.schedule || '매주 토요일 오후 2시'}</span>
+              </div>
             </div>
           </div>
 
@@ -107,50 +111,24 @@ const StudyDetailModal: React.FC<StudyDetailModalProps> = ({
             </div>
           </div>
 
-          {/* 스터디 정보 */}
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-6'>
-            <div>
-              <h4 className='text-lg font-semibold text-foreground mb-3'>
-                스터디 정보
-              </h4>
-              <div className='space-y-3'>
-                <div className='flex items-center text-sm'>
-                  <Calendar className='h-4 w-4 mr-2 text-muted-foreground' />
-                  <span className='text-foreground'>
-                    {study.schedule || '매주 토요일 오후 2시'}
-                  </span>
+          {/* 참여 조건 */}
+          <div className='mb-6'>
+            <h4 className='text-lg font-semibold text-foreground mb-3'>
+              참여 조건
+            </h4>
+            <div className='space-y-2'>
+              {(
+                study.requirements || [
+                  '해당 분야에 대한 기본적인 관심',
+                  '정기적인 참여 가능',
+                  '적극적인 소통과 협력',
+                ]
+              ).map((requirement, index) => (
+                <div key={index} className='flex items-start text-sm'>
+                  <span className='text-primary mr-2'>•</span>
+                  <span className='text-foreground'>{requirement}</span>
                 </div>
-                <div className='flex items-center text-sm'>
-                  <Clock className='h-4 w-4 mr-2 text-muted-foreground' />
-                  <span className='text-foreground'>
-                    {study.duration || '2시간'}
-                  </span>
-                </div>
-                <div className='flex items-center text-sm'>
-                  <MapPin className='h-4 w-4 mr-2 text-muted-foreground' />
-                  <span className='text-foreground'>{study.region}</span>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h4 className='text-lg font-semibold text-foreground mb-3'>
-                참여 조건
-              </h4>
-              <div className='space-y-2'>
-                {(
-                  study.requirements || [
-                    '해당 분야에 대한 기본적인 관심',
-                    '정기적인 참여 가능',
-                    '적극적인 소통과 협력',
-                  ]
-                ).map((requirement, index) => (
-                  <div key={index} className='flex items-start text-sm'>
-                    <span className='text-primary mr-2'>•</span>
-                    <span className='text-foreground'>{requirement}</span>
-                  </div>
-                ))}
-              </div>
+              ))}
             </div>
           </div>
 

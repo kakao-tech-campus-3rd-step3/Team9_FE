@@ -3,6 +3,7 @@
  */
 
 import React from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useStudyExplore } from './hooks';
 import { StudyExploreSidebar, StudyExploreMainContent } from './components';
 import {
@@ -10,16 +11,19 @@ import {
   StudyDetailModal,
   RegionSelectModal,
 } from '../components';
-import Toast from '@/components/common/Toast';
+import Header from '@/components/layout/Header';
 
 const StudyExplorePage: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchTerm = searchParams.get('search') || '';
+  const [inputValue, setInputValue] = React.useState(searchTerm);
+
   const {
     // 상태
     selectedCategories,
-    selectedRegion,
+    selectedRegions,
     activeModal,
     selectedStudy,
-    toast,
     filteredStudies,
     categories,
 
@@ -30,14 +34,37 @@ const StudyExplorePage: React.FC = () => {
     handleDetailModalClose,
     handleDetailApply,
     handleCategoryToggle,
-    handleRegionSelect,
-    hideToast,
+    handleRegionToggle,
     setActiveModal,
-  } = useStudyExplore();
+  } = useStudyExplore(searchTerm);
+
+  // URL의 searchTerm이 변경될 때 inputValue 동기화
+  React.useEffect(() => {
+    setInputValue(searchTerm);
+  }, [searchTerm]);
+
+  const handleSearchChange = (value: string) => {
+    setInputValue(value);
+    // URL은 업데이트하지 않음 - Enter나 버튼 클릭 시에만 업데이트
+  };
+
+  const handleSearch = () => {
+    // Enter나 검색 버튼을 눌렀을 때만 URL 업데이트
+    if (inputValue.trim()) {
+      setSearchParams({ search: inputValue });
+    } else {
+      setSearchParams({});
+    }
+  };
 
   return (
     <div className='min-h-screen bg-background'>
-      <div className='flex'>
+      <Header
+        searchTerm={inputValue}
+        onSearchChange={handleSearchChange}
+        onSearch={handleSearch}
+      />
+      <div className='flex h-[calc(100vh-4rem)]'>
         {/* 사이드바 */}
         <StudyExploreSidebar
           categories={categories}
@@ -48,7 +75,7 @@ const StudyExplorePage: React.FC = () => {
         {/* 메인 콘텐츠 */}
         <StudyExploreMainContent
           filteredStudies={filteredStudies}
-          selectedRegion={selectedRegion}
+          selectedRegions={selectedRegions}
           onCardClick={handleCardClick}
           onApplyClick={handleApplyClick}
           onRegionSelectClick={() => setActiveModal('region')}
@@ -74,16 +101,9 @@ const StudyExplorePage: React.FC = () => {
       <RegionSelectModal
         isOpen={activeModal === 'region'}
         onClose={() => setActiveModal(null)}
-        selectedRegion={selectedRegion}
-        onRegionSelect={handleRegionSelect}
-      />
-
-      {/* 토스트 알림 */}
-      <Toast
-        type={toast.type}
-        message={toast.message}
-        isVisible={toast.isVisible}
-        onClose={hideToast}
+        selectedRegions={selectedRegions}
+        onRegionToggle={handleRegionToggle}
+        multiSelect={true}
       />
     </div>
   );

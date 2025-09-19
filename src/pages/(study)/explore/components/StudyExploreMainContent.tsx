@@ -12,7 +12,7 @@ import type { Study } from '../types';
 
 interface StudyExploreMainContentProps {
   filteredStudies: Study[];
-  selectedRegion: string;
+  selectedRegions: string[];
   onCardClick: (study: Study) => void;
   onApplyClick: (study: Study) => void;
   onRegionSelectClick: () => void;
@@ -20,7 +20,7 @@ interface StudyExploreMainContentProps {
 
 const StudyExploreMainContent: React.FC<StudyExploreMainContentProps> = ({
   filteredStudies,
-  selectedRegion,
+  selectedRegions,
   onCardClick,
   onApplyClick,
   onRegionSelectClick,
@@ -32,8 +32,12 @@ const StudyExploreMainContent: React.FC<StudyExploreMainContentProps> = ({
       <div className='max-w-6xl mx-auto'>
         <div className='flex items-center justify-between mb-6'>
           <h1 className='text-xl font-semibold text-foreground'>
-            {selectedRegion === '전체' ? '전체 지역' : selectedRegion} 근처
-            스터디
+            {selectedRegions.includes('전체')
+              ? '전체 지역'
+              : selectedRegions.length === 1
+                ? selectedRegions[0]
+                : `${selectedRegions[0]} 외 ${selectedRegions.length - 1}개 지역`}{' '}
+            근처 스터디
           </h1>
           <button
             onClick={onRegionSelectClick}

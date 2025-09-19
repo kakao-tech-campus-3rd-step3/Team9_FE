@@ -4,11 +4,11 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useStudyCreate } from './hooks';
 import { StudyCreateSidebar, StudyCreateForm } from './components';
 import { STUDY_CREATE_CATEGORIES, MAX_MEMBER_OPTIONS } from './constants';
 import { StudyCreateCompleteModal } from '../components';
-import Toast from '@/components/common/Toast';
 import { ROUTES } from '@/constants';
 
 const StudyCreatePage: React.FC = () => {
@@ -19,12 +19,10 @@ const StudyCreatePage: React.FC = () => {
     imagePreview,
     isCompleteModalOpen,
     currentStudyTitle,
-    toast,
 
     // 핸들러
     handleCategoryToggle,
     handleImageUpload,
-    hideToast,
     handleCompleteModalClose,
     handleSubmit,
     setImagePreview,
@@ -57,6 +55,13 @@ const StudyCreatePage: React.FC = () => {
             onImageUpload={handleImageUpload}
             onImageRemove={() => setImagePreview(null)}
             onSubmit={handleSubmit}
+            onShowToast={(message, type) => {
+              if (type === 'error') {
+                toast.error(message);
+              } else {
+                toast.success(message);
+              }
+            }}
           />
         </div>
       </div>
@@ -66,14 +71,6 @@ const StudyCreatePage: React.FC = () => {
         isOpen={isCompleteModalOpen}
         onClose={handleCompleteModalCloseWithNavigation}
         studyTitle={currentStudyTitle}
-      />
-
-      {/* 토스트 알림 */}
-      <Toast
-        type={toast.type}
-        message={toast.message}
-        isVisible={toast.isVisible}
-        onClose={hideToast}
       />
     </div>
   );
