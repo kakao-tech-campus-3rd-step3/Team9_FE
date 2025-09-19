@@ -25,6 +25,10 @@ import {
   DocumentAddPage,
   DocumentDetailPage,
   DocumentEditPage,
+  AdminPage,
+  MemberManagement,
+  ApplicantManagement,
+  StudyInfoManagement,
 } from '@/pages/(study)';
 
 /**
@@ -112,7 +116,28 @@ const router = createBrowserRouter([
           },
           { path: ROUTES.STUDY.QUIZ, element: <ExamplePage /> },
           { path: ROUTES.STUDY.RETRO, element: <ExamplePage /> },
-          { path: ROUTES.STUDY.ADMIN, element: <ExamplePage /> },
+          {
+            path: ROUTES.STUDY.ADMIN.ROOT,
+            element: <AdminPage />,
+            children: [
+              {
+                index: true,
+                element: <Navigate to='members' replace />,
+              },
+              {
+                path: 'members',
+                element: <MemberManagement />,
+              },
+              {
+                path: 'applicants',
+                element: <ApplicantManagement />,
+              },
+              {
+                path: 'study-info',
+                element: <StudyInfoManagement />,
+              },
+            ],
+          },
         ],
       },
 
