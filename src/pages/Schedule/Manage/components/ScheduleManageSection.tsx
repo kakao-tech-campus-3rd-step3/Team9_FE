@@ -29,7 +29,7 @@ const ScheduleManageSection = ({
           onClick={() => {
             setIsModalOpen(true);
           }}
-          className=' px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium'
+          className='px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium'
         >
           일정 추가
         </button>
