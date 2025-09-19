@@ -47,6 +47,7 @@ export const validateTuneTime = ({
   endTime?: string;
 }) => {
   if (!startTime || !endTime) return true;
+  if (endTime === '24:00') return true; // 24:00은 항상 유효
 
   const start = dayjs(`2000-01-01 ${startTime}`);
   const end = dayjs(`2000-01-01 ${endTime}`);
