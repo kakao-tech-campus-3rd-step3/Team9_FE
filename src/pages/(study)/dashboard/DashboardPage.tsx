@@ -43,7 +43,7 @@ const DashboardPage = () => {
         <DashboardRow cols={1}>
           <NoticeSection
             notices={mockNotices}
-            onClick={() => navigateToStudy(ROUTES.STUDY.ADMIN)}
+            onClick={() => navigateToStudy(ROUTES.STUDY.ADMIN.ROOT)}
           />
         </DashboardRow>
 

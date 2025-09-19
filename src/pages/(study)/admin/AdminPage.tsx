@@ -2,7 +2,8 @@
  * 스터디 관리자 페이지
  */
 
-import React, { useState } from 'react';
+import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { AdminTabs } from './components/AdminTabs';
 import { MemberManagement } from './components/MemberManagement';
 import { ApplicantManagement } from './components/ApplicantManagement';
@@ -10,7 +11,17 @@ import { StudyInfoManagement } from './components/StudyInfoManagement';
 import type { AdminTabType } from './types';
 
 const AdminPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<AdminTabType>('members');
+  const location = useLocation();
+
+  // URL 기반으로 현재 탭 결정
+  const getCurrentTab = (): AdminTabType => {
+    const path = location.pathname;
+    if (path.includes('/admin/applicants')) return 'applicants';
+    if (path.includes('/admin/study-info')) return 'study-info';
+    return 'members';
+  };
+
+  const activeTab = getCurrentTab();
 
   const renderContent = () => {
     switch (activeTab) {
@@ -36,7 +47,7 @@ const AdminPage: React.FC = () => {
 
       {/* 탭 네비게이션 - 고정 */}
       <div className='px-6 pt-6 bg-background flex-shrink-0'>
-        <AdminTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        <AdminTabs activeTab={activeTab} />
       </div>
 
       {/* 스크롤 가능한 콘텐츠 영역 */}

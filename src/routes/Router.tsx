@@ -113,7 +113,18 @@ const router = createBrowserRouter([
           },
           { path: ROUTES.STUDY.QUIZ, element: <ExamplePage /> },
           { path: ROUTES.STUDY.RETRO, element: <ExamplePage /> },
-          { path: ROUTES.STUDY.ADMIN, element: <AdminPage /> },
+          {
+            path: ROUTES.STUDY.ADMIN.ROOT,
+            element: (
+              <Navigate
+                to={`/${ROUTES.STUDY.ROOT}/${ROUTES.STUDY.ADMIN.MEMBERS}`}
+                replace
+              />
+            ),
+          },
+          { path: ROUTES.STUDY.ADMIN.MEMBERS, element: <AdminPage /> },
+          { path: ROUTES.STUDY.ADMIN.APPLICANTS, element: <AdminPage /> },
+          { path: ROUTES.STUDY.ADMIN.STUDY_INFO, element: <AdminPage /> },
         ],
       },
 
