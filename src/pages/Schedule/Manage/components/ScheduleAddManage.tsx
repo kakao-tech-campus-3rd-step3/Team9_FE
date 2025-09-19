@@ -1,4 +1,7 @@
+import { useFormContext } from 'react-hook-form';
+
 const ScheduleAddManage = () => {
+  const { register } = useFormContext();
   return (
     <>
       <div className='flex flex-col gap-2'>
@@ -8,11 +11,13 @@ const ScheduleAddManage = () => {
           <input
             type='date'
             className='border border-gray-300 rounded-lg p-2'
+            {...register('fixed.startDate')}
           />
           <input
             type='time'
             step='600'
             className='border border-gray-300 rounded-lg p-2'
+            {...register('fixed.startTime')}
           />
         </div>
         <div className='flex justify-between gap-2'>
@@ -20,11 +25,13 @@ const ScheduleAddManage = () => {
           <input
             type='date'
             className='border border-gray-300 rounded-lg p-2'
+            {...register('fixed.endDate')}
           />
           <input
             type='time'
             step='600'
             className='border border-gray-300 rounded-lg p-2'
+            {...register('fixed.endTime')}
           />
         </div>
       </div>

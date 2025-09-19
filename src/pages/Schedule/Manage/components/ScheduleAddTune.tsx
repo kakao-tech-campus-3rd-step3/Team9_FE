@@ -1,4 +1,7 @@
+import { useFormContext } from 'react-hook-form';
+
 const ScheduleAddTune = () => {
+  const { register } = useFormContext();
   return (
     <>
       <div className='flex flex-col gap-2'>
@@ -8,6 +11,7 @@ const ScheduleAddTune = () => {
           <input
             type='date'
             className='border border-gray-300 rounded-lg p-2'
+            {...register('tune.startDate')}
           />
         </div>
         <div className='flex justify-between gap-2'>
@@ -15,6 +19,7 @@ const ScheduleAddTune = () => {
           <input
             type='date'
             className='border border-gray-300 rounded-lg p-2'
+            {...register('tune.endDate')}
           />
         </div>
       </div>
@@ -26,6 +31,7 @@ const ScheduleAddTune = () => {
             type='time'
             step='3600'
             className='border border-gray-300 rounded-lg p-2'
+            {...register('tune.startTime')}
           />
         </div>
         <div className='flex justify-between gap-2'>
@@ -34,6 +40,7 @@ const ScheduleAddTune = () => {
             type='time'
             step='3600'
             className='border border-gray-300 rounded-lg p-2'
+            {...register('tune.endTime')}
           />
         </div>
       </div>
