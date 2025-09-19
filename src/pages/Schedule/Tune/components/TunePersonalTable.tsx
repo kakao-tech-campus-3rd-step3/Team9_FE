@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect } from 'react';
+import React from 'react';
+import { useDrag } from '../hooks';
 
 type TunePersonalTableProps = {
   hourSlots: string[];
@@ -13,92 +14,8 @@ const TunePersonalTable = ({
   personalTune,
   setPersonalTune,
 }: TunePersonalTableProps) => {
-  const [isDragging, setIsDragging] = React.useState(false);
-  const [dragStart, setDragStart] = React.useState<{
-    row: number;
-    col: number;
-  } | null>(null);
-  const [dragEnd, setDragEnd] = React.useState<{
-    row: number;
-    col: number;
-  } | null>(null);
-  const [dragStartValue, setDragStartValue] = React.useState<boolean | null>(
-    null,
-  );
-
-  const handleMouseDown = (row: number, col: number) => {
-    setIsDragging(true);
-    setDragStart({ row, col });
-    setDragEnd({ row, col });
-    setDragStartValue(personalTune[col][row]);
-  };
-
-  const handleMouseEnter = (row: number, col: number) => {
-    if (isDragging) {
-      setDragEnd({ row, col });
-    }
-  };
-
-  const handleMouseUp = useCallback(() => {
-    if (!dragStart || !dragEnd) return;
-    const startRow = Math.min(dragStart.row, dragEnd.row);
-    const endRow = Math.max(dragStart.row, dragEnd.row);
-    const startCol = Math.min(dragStart.col, dragEnd.col);
-    const endCol = Math.max(dragStart.col, dragEnd.col);
-
-    setPersonalTune((prev) => {
-      const newGrid = prev.map((daySlots, colIdx) =>
-        daySlots.map((slot, rowIdx) => {
-          if (
-            colIdx >= startCol &&
-            colIdx <= endCol &&
-            rowIdx >= startRow &&
-            rowIdx <= endRow
-          ) {
-            return !dragStartValue;
-          }
-          return slot;
-        }),
-      );
-      return newGrid;
-    });
-    setIsDragging(false);
-    setDragStart(null);
-    setDragEnd(null);
-  }, [dragStart, dragEnd, dragStartValue, setPersonalTune]);
-
-  const isCellSelected = (row: number, col: number) => {
-    const baseSelected = personalTune[col][row];
-    if (isDragging && dragStart && dragEnd) {
-      const startRow = Math.min(dragStart.row, dragEnd.row);
-      const endRow = Math.max(dragStart.row, dragEnd.row);
-      const startCol = Math.min(dragStart.col, dragEnd.col);
-      const endCol = Math.max(dragStart.col, dragEnd.col);
-
-      if (
-        col >= startCol &&
-        col <= endCol &&
-        row >= startRow &&
-        row <= endRow
-      ) {
-        return !dragStartValue;
-      }
-    }
-    return baseSelected;
-  };
-
-  useEffect(() => {
-    const handleWindowMouseUp = () => {
-      if (isDragging) {
-        handleMouseUp();
-      }
-    };
-    window.addEventListener('mouseup', handleWindowMouseUp);
-
-    return () => {
-      window.removeEventListener('mouseup', handleWindowMouseUp);
-    };
-  }, [isDragging, handleMouseUp]);
+  const { handleMouseDown, handleMouseEnter, handleMouseUp, isCellSelected } =
+    useDrag({ personalTune, setPersonalTune });
 
   return (
     <div

@@ -1,7 +1,13 @@
 import { useState } from 'react';
 import TunePersonalTable from './TunePersonalTable';
 import TuneTable from './TuneTable';
-import { buildGrid, getGridBoolean, getHourSlots, getTuneDay } from '../utils';
+import {
+  buildGrid,
+  getAvailablePersons,
+  getGridBoolean,
+  getHourSlots,
+  getTuneDay,
+} from '../utils';
 import { tuneCheckData } from '../mock/tuneCheck';
 import TuneAvailableList from './TuneAvailableList';
 import TuneParticipant from './TuneParticipant';
@@ -30,6 +36,14 @@ const TuneInformation = () => {
     endTime: tuneCheckData.available_end_time,
   });
 
+  const availablePerson =
+    hoverTable != null
+      ? getAvailablePersons({
+          tuneNumber: grid[hoverTable.col][hoverTable.row],
+          participants: tuneCheckData.participants,
+        })
+      : [];
+
   return (
     <div className='flex flex-col mt-2 p-4 border border-secondary rounded-lg bg-white'>
       <TuneParticipant participants={tuneCheckData.participants} />
@@ -37,7 +51,7 @@ const TuneInformation = () => {
         <div className='min-w-[600px]'>
           {hoverTable ? (
             <TuneAvailableList
-              tuneNumber={grid[hoverTable.col][hoverTable.row]}
+              availablePerson={availablePerson}
               day={days[hoverTable.col]}
               hour={hourSlots[Math.floor(hoverTable.row / 2)]}
               half={hoverTable.row % 2 === 1 ? true : false}

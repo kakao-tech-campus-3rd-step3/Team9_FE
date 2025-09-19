@@ -12,6 +12,7 @@ import {
   RegionSelectModal,
 } from '../components';
 import Header from '@/components/layout/Header';
+import { SearchBar } from '@/components/common';
 
 const StudyExplorePage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -59,12 +60,16 @@ const StudyExplorePage: React.FC = () => {
 
   return (
     <div className='min-h-screen bg-background'>
-      <Header
-        searchTerm={inputValue}
-        onSearchChange={handleSearchChange}
-        onSearch={handleSearch}
-      />
-      <div className='flex h-[calc(100vh-4rem)]'>
+      <Header />
+      <div className='px-6 py-4 border-b border-border bg-background'>
+        <SearchBar
+          searchTerm={inputValue}
+          onSearchChange={handleSearchChange}
+          onSearch={handleSearch}
+          placeholder='스터디를 검색해보세요'
+        />
+      </div>
+      <div className='flex h-[calc(100vh-8rem)]'>
         {/* 사이드바 */}
         <StudyExploreSidebar
           categories={categories}

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import type { LoginFormData } from '../types';
 import { ROUTES } from '@/constants';
 import { loginService } from '../services';
-import { setAccessToken } from '@/utils';
+import { accessTokenStorage } from '@/utils';
 
 /**
  * 로그인 뮤테이션 훅
@@ -20,7 +20,7 @@ export const useLoginMutation = () => {
     onSuccess: (result) => {
       // 토큰 저장 후 홈페이지로 이동
       if (result?.accessToken) {
-        setAccessToken(result.accessToken);
+        accessTokenStorage.set(result.accessToken);
       }
       navigate(ROUTES.HOME);
     },

@@ -70,4 +70,7 @@ export const MOCK_STUDY_INFO: StudyInfo = {
   category: '어학',
   maxMembers: 8,
   currentMembers: 4,
+  schedule: '매주 토요일 오후 2시',
+  region: '서울',
+  conditions: ['토익 600점 이상', '매주 참석 가능'],
 };

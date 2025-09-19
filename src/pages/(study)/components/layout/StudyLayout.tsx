@@ -9,8 +9,10 @@ import Sidebar from './sidebar/Sidebar';
 function StudyLayout() {
   return (
     <div className='flex h-screen bg-background'>
-      <Sidebar />
-      <main className='flex-1 flex flex-col min-h-0'>
+      <div className='w-64 fixed left-0 top-0 h-full bg-card border-r border-border overflow-y-auto z-10'>
+        <Sidebar />
+      </div>
+      <main className='flex-1 ml-64 flex flex-col min-h-0 overflow-auto'>
         <Outlet />
       </main>
     </div>
