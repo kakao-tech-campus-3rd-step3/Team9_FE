@@ -15,7 +15,6 @@ const ScheduleAddManage = () => {
           />
           <input
             type='time'
-            step='600'
             className='border border-gray-300 rounded-lg p-2'
             {...register('fixed.startTime')}
           />
@@ -29,7 +28,6 @@ const ScheduleAddManage = () => {
           />
           <input
             type='time'
-            step='600'
             className='border border-gray-300 rounded-lg p-2'
             {...register('fixed.endTime')}
           />
