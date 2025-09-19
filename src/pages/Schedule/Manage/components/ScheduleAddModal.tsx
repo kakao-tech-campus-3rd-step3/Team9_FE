@@ -32,6 +32,7 @@ const ScheduleAddModal = ({ onClose }: ScheduleAddModalProps) => {
 
   const methods = useForm<ScheduleFormValues>({
     shouldUnregister: true,
+    mode: 'onChange',
     defaultValues: {
       title: '',
       description: '',
@@ -101,7 +102,14 @@ const ScheduleAddModal = ({ onClose }: ScheduleAddModalProps) => {
             <div className='flex justify-end gap-2'>
               <button
                 type='submit'
-                className='px-4 py-2 rounded bg-primary text-white text-sm font-medium'
+                disabled={
+                  !methods.formState.isValid || methods.formState.isSubmitting
+                }
+                className={`px-4 py-2 rounded text-white text-sm font-medium ${
+                  !methods.formState.isValid || methods.formState.isSubmitting
+                    ? 'bg-gray-300 cursor-not-allowed'
+                    : 'bg-primary'
+                }`}
               >
                 추가
               </button>
