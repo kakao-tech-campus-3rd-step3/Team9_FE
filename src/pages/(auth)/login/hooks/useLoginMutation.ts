@@ -15,8 +15,7 @@ export const useLoginMutation = () => {
   const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: (data: LoginFormData) =>
-      loginService.login(data, { showToast: false }), // 로그인 시 토스트 숨김
+    mutationFn: (data: LoginFormData) => loginService(data),
     onSuccess: (result) => {
       // 토큰 저장 후 홈페이지로 이동
       if (result?.accessToken) {
