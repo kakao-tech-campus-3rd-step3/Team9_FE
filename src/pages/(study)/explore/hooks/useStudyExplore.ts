@@ -3,7 +3,8 @@
  */
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 import type { Study } from '../types';
 import { studyExploreService } from '../services';
 import { MOCK_STUDIES, CATEGORIES } from '../constants';
@@ -73,6 +74,31 @@ export const useStudyExplore = (searchTerm: string) => {
     },
   );
 
+  // 스터디 신청 Mutation
+  const applyStudyMutation = useMutation({
+    mutationFn: async ({
+      studyId,
+      message,
+    }: {
+      studyId: number;
+      message: string;
+    }) => {
+      return studyExploreService.applyStudy({
+        study_id: studyId,
+        message,
+      });
+    },
+    onSuccess: () => {
+      toast.success('스터디 신청이 완료되었습니다!');
+      setActiveModal(null);
+      setSelectedStudy(null);
+    },
+    onError: (error) => {
+      console.error('스터디 신청 실패:', error);
+      // 에러는 기존 apiClient에서 토스트로 처리됨
+    },
+  });
+
   // 핸들러 함수들
   const handleApplyClick = (study: Study) => {
     setSelectedStudy(study);
@@ -141,6 +167,7 @@ export const useStudyExplore = (searchTerm: string) => {
     // React Query 상태
     isLoading,
     error,
+    isApplying: applyStudyMutation.isPending,
 
     // 핸들러
     handleApplyClick,
@@ -151,5 +178,8 @@ export const useStudyExplore = (searchTerm: string) => {
     handleCategoryToggle,
     handleRegionToggle,
     setActiveModal,
+
+    // 신청 관련
+    applyStudy: applyStudyMutation.mutate,
   };
 };
