@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema } from '../schemas';
 import { DEFAULT_LOGIN_FORM_VALUES } from '../constants';
-import type { LoginFormData } from '../schemas';
+import type { LoginPayload } from '../schemas';
 import { useLoginMutation } from './useLoginMutation';
 import { rememberedEmailStorage } from '@/utils';
 
@@ -28,7 +28,7 @@ export const useLoginForm = () => {
     register,
     handleSubmit,
     formState: { errors, isValid },
-  } = useForm<LoginFormData>({
+  } = useForm<LoginPayload>({
     defaultValues,
     resolver: zodResolver(loginSchema),
     mode: 'onTouched', // blur 시 최초 검증 이후 실시간 검증

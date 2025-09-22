@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import type { LoginFormData } from '../types';
+import type { LoginPayload } from '../types';
 import { ROUTES } from '@/constants';
 import { loginService } from '../services';
 import { accessTokenStorage } from '@/utils';
@@ -15,7 +15,7 @@ export const useLoginMutation = () => {
   const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: (data: LoginFormData) => loginService(data),
+    mutationFn: (data: LoginPayload) => loginService(data),
     onSuccess: (result) => {
       // 토큰 저장 후 홈페이지로 이동
       if (result?.accessToken) {

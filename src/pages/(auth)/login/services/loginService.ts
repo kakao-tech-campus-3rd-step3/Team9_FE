@@ -1,6 +1,6 @@
 import apiClient from '@/api';
-import type { LoginFormData } from '../types';
 import { AUTH_ENDPOINTS } from '@/api/constants';
+import type { LoginPayload } from '../types';
 
 /**
  * 로그인 서비스 함수 (단일 함수 형태)
@@ -9,7 +9,7 @@ import { AUTH_ENDPOINTS } from '@/api/constants';
  * - 에러 처리는 인터셉터에서 통일 관리, 옵션으로 토스트 제어 가능
  */
 export const loginService = async (
-  payload: LoginFormData,
+  payload: LoginPayload,
   options?: { showToast?: boolean },
 ): Promise<{ accessToken: string }> => {
   // 실제 서버 인증 요청
