@@ -9,6 +9,9 @@ import { DEFAULT_FORM_VALUES } from '../constants';
 import { ROUTES } from '@/constants';
 import { signupService } from '../services';
 import type { SignupPayload } from '../types';
+import type { InterestKey, RegionKey } from '@/constants';
+import { INTERESTS, REGIONS } from '@/constants';
+// 매핑은 서비스에서 수행
 
 /**
  * 회원가입 폼 관리 훅
@@ -124,15 +127,17 @@ export const useSignupForm = () => {
    */
   const onSubmit = async (data: SignupFormData) => {
     try {
-      const image_url = await resolveImageUrl(data.profileImage ?? null);
+      const image_key = await resolveImageUrl(data.profileImage ?? null);
       const payload: SignupPayload = {
         email: data.email,
         password: data.password,
-        image_url,
+        image_key,
         nickname: data.nickname,
         gender: data.gender,
-        interests: data.interests || [],
-        region: data.region,
+        interests: ((data.interests || []) as InterestKey[]).map(
+          (k) => INTERESTS[k],
+        ),
+        region: REGIONS[data.region as RegionKey],
       };
       await signupService.signup(payload);
 

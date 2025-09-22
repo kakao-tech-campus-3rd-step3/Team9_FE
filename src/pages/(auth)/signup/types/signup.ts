@@ -1,14 +1,14 @@
-import type { GenderKey, RegionKey } from '@/constants';
+import type { GenderKey } from '@/constants';
 
 // 회원가입 API 타입
 export interface SignupPayload {
   email: string;
   password: string;
-  image_url: string;
+  image_key: string;
   nickname: string;
   gender: GenderKey;
-  interests: string[];
-  region: RegionKey;
+  interests: string[]; // 한국어 라벨 배열
+  region: string; // 한국어 라벨
 }
 
 // 이메일 인증 관련 타입
