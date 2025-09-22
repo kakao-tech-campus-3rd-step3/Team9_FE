@@ -8,6 +8,7 @@ import type { SignupFormData, SignupStep } from '../types';
 import { DEFAULT_FORM_VALUES } from '../constants';
 import { ROUTES } from '@/constants';
 import { signupService } from '../services';
+import { uploadWithPresignedUrl } from '@/utils/upload';
 import type { SignupPayload } from '../types';
 import type { InterestKey, RegionKey } from '@/constants';
 import { INTERESTS, REGIONS } from '@/constants';
@@ -41,6 +42,9 @@ export const useSignupForm = () => {
 
   // 프로필 이미지 미리보기
   const [profileImagePreview, setProfileImagePreview] = useState<string>('');
+  const [imageKey, setImageKey] = useState<string>('');
+  const [isUploadingImage, setIsUploadingImage] = useState<boolean>(false);
+  const [isImageUploaded, setIsImageUploaded] = useState<boolean>(false);
 
   // 파일 input ref
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -71,7 +75,7 @@ export const useSignupForm = () => {
    * - 선택된 파일을 폼 데이터에 저장
    * - FileReader를 사용한 이미지 미리보기 생성
    */
-  const handleProfileImageChange = (
+  const handleProfileImageChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
@@ -84,6 +88,22 @@ export const useSignupForm = () => {
         setProfileImagePreview(e.target?.result as string);
       };
       reader.readAsDataURL(file);
+
+      // 파일 선택 직후 즉시 업로드 (Presigned URL 흐름)
+      setIsUploadingImage(true);
+      setIsImageUploaded(false);
+      try {
+        const key = await uploadWithPresignedUrl(file);
+        setImageKey(key);
+        setIsImageUploaded(true);
+      } catch (err) {
+        console.error('프로필 이미지 업로드 실패:', err);
+        setImageKey('');
+        setIsImageUploaded(false);
+        toast.error('프로필 이미지 업로드에 실패했습니다. 다시 시도해주세요.');
+      } finally {
+        setIsUploadingImage(false);
+      }
     }
   };
 
@@ -91,6 +111,8 @@ export const useSignupForm = () => {
   const handleRemoveProfileImage = () => {
     setValue('profileImage', null);
     setProfileImagePreview('');
+    setImageKey('');
+    setIsImageUploaded(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -106,18 +128,7 @@ export const useSignupForm = () => {
    * - 파일이 없으면 빈 문자열 반환
    * - 파일이 있으면 업로드 후 URL 반환 (백엔드 준비 전까지 TODO 유지)
    */
-  const resolveImageUrl = async (
-    file: File | null | undefined,
-  ): Promise<string> => {
-    if (!file) return '';
-    // TODO: 이미지 업로드 API 연동 시 실제 업로드 후 URL 반환
-    // 예시:
-    // const formData = new FormData();
-    // formData.append('file', file);
-    // const { data } = await apiClient.post('/api/files/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' }, showToast: false });
-    // return data.url as string;
-    return '';
-  };
+  // 이미지 업로드는 파일 선택 시점에 처리됨
 
   /**
    * 회원가입 제출 처리 함수
@@ -127,7 +138,12 @@ export const useSignupForm = () => {
    */
   const onSubmit = async (data: SignupFormData) => {
     try {
-      const image_key = await resolveImageUrl(data.profileImage ?? null);
+      if (isUploadingImage) {
+        toast.warn('이미지 업로드가 완료될 때까지 기다려주세요.');
+        return;
+      }
+
+      const image_key = imageKey;
       const payload: SignupPayload = {
         email: data.email,
         password: data.password,
@@ -167,6 +183,9 @@ export const useSignupForm = () => {
     profileImagePreview,
     fileInputRef,
     watchedValues,
+    imageKey,
+    isUploadingImage,
+    isImageUploaded,
 
     // 핸들러
     handleStepChange,
