@@ -7,6 +7,8 @@ import { signupSchema } from '../schemas';
 import type { SignupFormData, SignupStep } from '../types';
 import { DEFAULT_FORM_VALUES } from '../constants';
 import { ROUTES } from '@/constants';
+import { signupService } from '../services';
+import type { SignupPayload } from '../types';
 
 /**
  * 회원가입 폼 관리 훅
@@ -97,6 +99,24 @@ export const useSignupForm = () => {
   };
 
   /**
+   * 프로필 이미지 업로드 URL 해결
+   * - 파일이 없으면 빈 문자열 반환
+   * - 파일이 있으면 업로드 후 URL 반환 (백엔드 준비 전까지 TODO 유지)
+   */
+  const resolveImageUrl = async (
+    file: File | null | undefined,
+  ): Promise<string> => {
+    if (!file) return '';
+    // TODO: 이미지 업로드 API 연동 시 실제 업로드 후 URL 반환
+    // 예시:
+    // const formData = new FormData();
+    // formData.append('file', file);
+    // const { data } = await apiClient.post('/api/files/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' }, showToast: false });
+    // return data.url as string;
+    return '';
+  };
+
+  /**
    * 회원가입 제출 처리 함수
    * - 폼 데이터 유효성 검증 후 서버 전송
    * - 성공 시 토스트 메시지 표시 및 로그인 페이지 이동
@@ -104,11 +124,17 @@ export const useSignupForm = () => {
    */
   const onSubmit = async (data: SignupFormData) => {
     try {
-      // TODO: 실제 서버 연동 시 signupService.signup(data) 호출
-      // await signupService.signup(data);
-
-      // 임시: 성공 시뮬레이션
-      console.log('회원가입 데이터:', data);
+      const image_url = await resolveImageUrl(data.profileImage ?? null);
+      const payload: SignupPayload = {
+        email: data.email,
+        password: data.password,
+        image_url,
+        nickname: data.nickname,
+        gender: data.gender,
+        interests: data.interests || [],
+        region: data.region,
+      };
+      await signupService.signup(payload);
 
       // 성공 토스트 표시
       toast.success('회원가입이 완료되었습니다!');
