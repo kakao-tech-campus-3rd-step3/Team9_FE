@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import React, { useState, useEffect } from 'react';
 import { X, CheckCircle } from 'lucide-react';
-import { studyExploreService } from '../explore/services';
 
 interface StudyApplyModalProps {
   isOpen: boolean;
   onClose: () => void;
   studyTitle: string;
   studyId: number;
+  onApply: (studyId: number, message: string) => void;
+  isApplying?: boolean;
 }
 
 const StudyApplyModal: React.FC<StudyApplyModalProps> = ({
@@ -15,30 +15,24 @@ const StudyApplyModal: React.FC<StudyApplyModalProps> = ({
   onClose,
   studyTitle,
   studyId,
+  onApply,
+  isApplying = false,
 }) => {
   const [message, setMessage] = useState('');
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
-  // React Query로 스터디 신청
-  const applyMutation = useMutation({
-    mutationFn: async (applyMessage: string) => {
-      return studyExploreService.applyStudy({
-        study_id: studyId,
-        message: applyMessage,
-      });
-    },
-    onSuccess: () => {
-      console.log('스터디 신청 성공');
-      // 성공 상태는 UI에서 처리
-    },
-    onError: (error) => {
-      console.error('스터디 신청 실패:', error);
-      // 에러는 기존 apiClient에서 토스트로 처리됨
-    },
-  });
+  // 모달이 열릴 때마다 상태 리셋
+  useEffect(() => {
+    if (isOpen) {
+      setMessage('');
+      setIsSubmitted(false);
+    }
+  }, [isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    applyMutation.mutate(message);
+    onApply(studyId, message);
+    setIsSubmitted(true);
   };
 
   if (!isOpen) return null;
@@ -58,7 +52,7 @@ const StudyApplyModal: React.FC<StudyApplyModalProps> = ({
         </div>
 
         <div className='p-6'>
-          {!applyMutation.isSuccess ? (
+          {!isSubmitted ? (
             <form onSubmit={handleSubmit}>
               <div className='mb-4'>
                 <p className='text-sm text-foreground mb-4'>
@@ -71,24 +65,24 @@ const StudyApplyModal: React.FC<StudyApplyModalProps> = ({
                   placeholder='스터디장에게 할 말이 있다면 적어주세요.'
                   rows={4}
                   className='w-full px-3 py-2 border border-input rounded-lg focus:border-primary focus:ring-0 bg-background text-foreground resize-none'
-                  disabled={applyMutation.isPending}
+                  disabled={isApplying}
                 />
               </div>
               <div className='flex justify-end space-x-3'>
                 <button
                   type='button'
                   onClick={onClose}
-                  disabled={applyMutation.isPending}
+                  disabled={isApplying}
                   className='px-4 py-2 text-sm font-medium text-secondary-foreground bg-secondary border border-border rounded-lg hover:bg-secondary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                 >
                   취소
                 </button>
                 <button
                   type='submit'
-                  disabled={applyMutation.isPending}
+                  disabled={isApplying}
                   className='px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                 >
-                  {applyMutation.isPending ? '신청 중...' : '참여하기'}
+                  {isApplying ? '신청 중...' : '참여하기'}
                 </button>
               </div>
             </form>
