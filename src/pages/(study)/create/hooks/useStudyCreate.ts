@@ -13,6 +13,7 @@ export const useStudyCreate = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
   const [currentStudyTitle, setCurrentStudyTitle] = useState<string>('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleCategoryToggle = (category: string) => {
     setSelectedCategories((prev) => {
@@ -29,21 +30,15 @@ export const useStudyCreate = () => {
   ) => {
     const file = event.target.files?.[0];
     if (file) {
-      // 이미지 미리보기
+      // 이미지 미리보기만 설정 (실제 업로드는 스터디 생성 시)
       const reader = new FileReader();
       reader.onload = (e) => {
         setImagePreview(e.target?.result as string);
       };
       reader.readAsDataURL(file);
 
-      // TODO: 실제 서버 연동 시 이미지 업로드
-      // try {
-      //   const result = await studyCreateService.uploadImage(file);
-      //   console.log('이미지 업로드 성공:', result);
-      // } catch (error) {
-      //   console.error('이미지 업로드 실패:', error);
-      //   toast.error('이미지 업로드에 실패했습니다.');
-      // }
+      // 파일을 상태에 저장 (스터디 생성 시 업로드)
+      setSelectedFile(file);
     }
   };
 
@@ -53,6 +48,7 @@ export const useStudyCreate = () => {
     setSelectedCategories([]);
     setImagePreview(null);
     setCurrentStudyTitle('');
+    setSelectedFile(null);
   };
 
   // React Query로 스터디 생성
@@ -60,6 +56,21 @@ export const useStudyCreate = () => {
     mutationFn: async (data: StudyFormData) => {
       if (selectedCategories.length === 0) {
         throw new Error('최소 하나의 카테고리를 선택해주세요.');
+      }
+
+      let fileKey: string | undefined = undefined;
+
+      // 이미지가 선택된 경우 업로드
+      if (selectedFile) {
+        try {
+          const uploadResult =
+            await studyCreateService.uploadImage(selectedFile);
+          fileKey = uploadResult.file_key;
+          console.log('이미지 업로드 성공:', fileKey);
+        } catch (error) {
+          console.error('이미지 업로드 실패:', error);
+          throw new Error('이미지 업로드에 실패했습니다.');
+        }
       }
 
       // CreateStudyRequest 형태로 변환
@@ -72,10 +83,19 @@ export const useStudyCreate = () => {
         schedule: data.schedule,
         region: data.region,
         conditions: data.conditions,
-        file_key: undefined, // TODO: 이미지 업로드 후 file_key 설정
+        file_key: fileKey, // 업로드된 이미지의 file_key 사용
       };
 
-      return studyCreateService.createStudy(requestData);
+      // TODO: 실제 서버 연동 시 아래 주석 해제
+      // return studyCreateService.createStudy(requestData);
+
+      // 임시: 서버 연동 전까지는 성공으로 처리
+      console.log('스터디 생성 요청 데이터:', requestData);
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve({ id: Date.now(), ...requestData });
+        }, 1000);
+      });
     },
     onSuccess: (data, variables) => {
       // 현재 스터디 제목 저장
