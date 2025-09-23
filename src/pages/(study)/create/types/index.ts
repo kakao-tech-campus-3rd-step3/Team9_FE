@@ -30,3 +30,13 @@ export interface CreateStudyRequest {
   conditions: string[];
   file_key?: string; // 이미지 파일 키 (스웨거 방식)
 }
+
+// 이미지 업로드 관련 타입 (스웨거 API)
+export interface ImageUploadRequest {
+  content_type: string;
+}
+
+export interface ImageUploadResponse {
+  presigned_url: string;
+  file_key: string;
+}

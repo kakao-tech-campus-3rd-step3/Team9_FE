@@ -34,8 +34,25 @@ const StudyCreatePage: React.FC = () => {
 
   const handleCompleteModalCloseWithNavigation = () => {
     handleCompleteModalClose();
-    // 스터디 탐색 페이지로 이동
-    navigate(ROUTES.STUDY.EXPLORE);
+    // 스터디 탐색 페이지로 이동 (새로 생성한 스터디 정보 포함)
+    const studyInfo = {
+      title: currentStudyTitle,
+      category: selectedCategories[0] || '기타',
+      region: '온라인', // 기본값
+      description: '새로 생성된 스터디입니다.',
+      maxMembers: 4,
+      currentMembers: 1,
+    };
+
+    const params = new URLSearchParams({
+      newStudy: 'true',
+      studyTitle: studyInfo.title,
+      studyCategory: studyInfo.category,
+    });
+
+    navigate(
+      `/${ROUTES.STUDY.ROOT}/${ROUTES.STUDY.EXPLORE}?${params.toString()}`,
+    );
   };
 
   return (
