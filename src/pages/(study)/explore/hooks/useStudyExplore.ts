@@ -21,6 +21,7 @@ export const useStudyExplore = (searchTerm: string) => {
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [selectedStudy, setSelectedStudy] = useState<Study | null>(null);
   const [newlyCreatedStudies, setNewlyCreatedStudies] = useState<Study[]>([]);
+  const [hasProcessedNewStudy, setHasProcessedNewStudy] = useState(false);
 
   // React Query로 스터디 목록 조회
   const {
@@ -162,36 +163,57 @@ export const useStudyExplore = (searchTerm: string) => {
     });
   };
 
-  // URL 파라미터에서 새로 생성한 스터디 정보 읽기
+  // 로컬 스토리지에서 새로 생성한 스터디 정보 읽기
   useEffect(() => {
     const newStudy = searchParams.get('newStudy');
-    const studyTitle = searchParams.get('studyTitle');
-    const studyCategory = searchParams.get('studyCategory');
 
-    if (newStudy === 'true' && studyTitle && studyCategory) {
-      const newStudyData: Study = {
-        id: Date.now(), // 임시 ID
-        title: studyTitle,
-        category: studyCategory,
-        region: '온라인',
-        description: '새로 생성된 스터디입니다.',
-        maxMembers: 4,
-        currentMembers: 1,
-        imageUrl: '/api/placeholder/300/200', // 기본 이미지
-      };
+    if (newStudy === 'true' && !hasProcessedNewStudy) {
+      // 중복 추가 방지
+      setHasProcessedNewStudy(true);
 
-      setNewlyCreatedStudies((prev) => [newStudyData, ...prev]);
+      // 로컬 스토리지에서 스터디 데이터 읽기
+      const storedStudyData = localStorage.getItem('newlyCreatedStudy');
+
+      if (storedStudyData) {
+        try {
+          const studyData = JSON.parse(storedStudyData);
+
+          console.log('로컬 스토리지에서 읽은 데이터:', studyData);
+          console.log('이미지 URL:', studyData.imageUrl);
+
+          const newStudyData: Study = {
+            id: Date.now(), // 간단한 ID
+            title: studyData.title,
+            category: studyData.category,
+            region: studyData.region || '온라인',
+            description: studyData.description || '새로 생성된 스터디입니다.',
+            shortDescription: studyData.shortDescription || undefined,
+            detailedDescription: studyData.description || undefined,
+            schedule: studyData.schedule || undefined,
+            requirements: studyData.conditions || [],
+            maxMembers: studyData.maxMembers || 4,
+            currentMembers: 1,
+            imageUrl: studyData.imageUrl || '/api/placeholder/300/200',
+          };
+
+          console.log('생성된 스터디 데이터:', newStudyData);
+          setNewlyCreatedStudies((prev) => [newStudyData, ...prev]);
+
+          // 로컬 스토리지에서 데이터 제거 (중복 방지)
+          localStorage.removeItem('newlyCreatedStudy');
+        } catch (error) {
+          console.error('스터디 데이터 파싱 실패:', error);
+        }
+      }
 
       // URL 파라미터 제거 (새로고침 시 중복 추가 방지)
       const newSearchParams = new URLSearchParams(searchParams);
       newSearchParams.delete('newStudy');
-      newSearchParams.delete('studyTitle');
-      newSearchParams.delete('studyCategory');
 
       const newUrl = `${window.location.pathname}${newSearchParams.toString() ? `?${newSearchParams.toString()}` : ''}`;
       window.history.replaceState({}, '', newUrl);
     }
-  }, [searchParams]);
+  }, [searchParams, hasProcessedNewStudy]);
 
   // 새로 생성한 스터디 추가 함수
   const addNewlyCreatedStudy = (study: Study) => {

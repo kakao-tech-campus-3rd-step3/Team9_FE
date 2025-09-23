@@ -5,6 +5,7 @@ interface Study {
   id: number;
   title: string;
   description: string;
+  shortDescription?: string;
   category: string;
   currentMembers: number;
   maxMembers: number;
@@ -54,12 +55,20 @@ const StudyDetailModal: React.FC<StudyDetailModalProps> = ({
         <div className='p-6'>
           {/* 스터디 이미지 및 기본 정보 */}
           <div className='mb-6'>
-            <div className='w-full h-48 bg-primary-light rounded-lg mb-4 flex items-center justify-center'>
-              <div className='w-16 h-16 bg-primary rounded-lg flex items-center justify-center'>
-                <span className='text-primary-foreground text-2xl font-bold'>
-                  {study.title.charAt(0)}
-                </span>
-              </div>
+            <div className='w-full h-48 bg-primary-light rounded-lg mb-4 flex items-center justify-center overflow-hidden'>
+              {study.imageUrl && study.imageUrl.startsWith('data:') ? (
+                <img
+                  src={study.imageUrl}
+                  alt={study.title}
+                  className='w-full h-full object-cover rounded-lg'
+                />
+              ) : (
+                <div className='w-16 h-16 bg-primary rounded-lg flex items-center justify-center'>
+                  <span className='text-primary-foreground text-2xl font-bold'>
+                    {study.title.charAt(0)}
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className='flex items-start justify-between mb-4'>
@@ -67,9 +76,11 @@ const StudyDetailModal: React.FC<StudyDetailModalProps> = ({
                 <h3 className='text-2xl font-bold text-foreground mb-2'>
                   {study.title}
                 </h3>
-                <p className='text-muted-foreground mb-3'>
-                  {study.description}
-                </p>
+                {study.shortDescription && (
+                  <p className='text-muted-foreground mb-3 font-medium'>
+                    {study.shortDescription}
+                  </p>
+                )}
               </div>
               <div className='flex items-center text-sm text-muted-foreground bg-secondary px-3 py-1 rounded-full'>
                 <Users className='h-4 w-4 mr-1' />
@@ -103,10 +114,7 @@ const StudyDetailModal: React.FC<StudyDetailModalProps> = ({
             </h4>
             <div className='bg-accent/30 p-4 rounded-lg'>
               <p className='text-foreground leading-relaxed'>
-                {study.detailedDescription ||
-                  `미시경제학의 기본 개념부터 응용 문제까지 깊이 파고드는 스터디입니다. 
-                  각자 예습한 내용을 공유하고, 토론하며 어려운 이론도 함께 해결해 나갑니다. 
-                  복습과 퀴즈로 이해도를 높여 학기 성적과 실무 감각을 동시에 잡는 것을 목표로 합니다.`}
+                {study.description}
               </p>
             </div>
           </div>
