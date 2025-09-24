@@ -5,7 +5,7 @@ import { loginSchema } from '../schemas';
 import { DEFAULT_LOGIN_FORM_VALUES } from '../constants';
 import type { LoginPayload } from '../schemas';
 import { useLoginMutation } from './useLoginMutation';
-import { rememberedEmailStorage } from '@/utils';
+import { RememberedEmail } from '@/utils/auth';
 
 /**
  * 로그인 폼 관리 훅
@@ -17,7 +17,7 @@ export const useLoginForm = () => {
   const { mutate, isPending, isError } = useLoginMutation();
 
   // 기억된 이메일이 있으면 기본값으로 설정
-  const rememberedEmail = rememberedEmailStorage.get();
+  const rememberedEmail = RememberedEmail.get();
   const defaultValues = {
     ...DEFAULT_LOGIN_FORM_VALUES,
     email: rememberedEmail || DEFAULT_LOGIN_FORM_VALUES.email,
@@ -40,9 +40,9 @@ export const useLoginForm = () => {
   const onSubmit = handleSubmit((data) => {
     // 아이디 기억하기 처리
     if (rememberMe) {
-      rememberedEmailStorage.set(data.email);
+      RememberedEmail.set(data.email);
     } else {
-      rememberedEmailStorage.remove();
+      RememberedEmail.remove();
     }
 
     mutate(data);
