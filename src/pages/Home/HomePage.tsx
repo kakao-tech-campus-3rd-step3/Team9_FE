@@ -37,7 +37,7 @@ const HomePage: React.FC = () => {
   );
 
   return (
-    <div className='h-full bg-accent p-8 text-center flex flex-col justify-center items-center'>
+    <div className='h-full bg-background p-8 text-center flex flex-col justify-center items-center'>
       <div className='flex w-full flex-col px-8 pb-4 items-center'>
         <StudyListSection studies={studyTitles} />
       </div>
