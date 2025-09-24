@@ -1,1 +1,1 @@
-export {};
+export { withProtection } from './withProtection';
