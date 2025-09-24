@@ -8,7 +8,8 @@ export const logoutService = async (): Promise<void> => {
     await apiClient.post(AUTH_ENDPOINTS.LOGOUT, {}, { showToast: false });
   } finally {
     // 로컬 상태 초기화 (메모리의 액세스 토큰 제거)
-    const { reset } = useAuthStore.getState();
+    const { reset, setIsLogin } = useAuthStore.getState();
+    setIsLogin(false);
     reset();
   }
 };

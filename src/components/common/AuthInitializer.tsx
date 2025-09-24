@@ -1,9 +1,12 @@
 /**
- * 인증 상태 초기화 로딩 컴포넌트
+ * 인증 상태 초기화 컴포넌트
+ * - 마운트 시 인증 상태 초기화 실행
+ * - 초기화 완료까지 로딩 스피너 표시
  */
 
-import React from 'react';
+import { useEffect } from 'react';
 import { useAuthStore } from '@/stores/auth';
+import { AuthInitializer as AuthUtils } from '@/utils/auth';
 import LoadingSpinner from './LoadingSpinner';
 
 // AuthInitializer Props 타입
@@ -15,7 +18,12 @@ interface AuthInitializerProps {
 const AuthInitializer = ({ children }: AuthInitializerProps) => {
   const { isInitialized } = useAuthStore();
 
-  // 초기화 중이면 로딩 스피너 표시
+  useEffect(() => {
+    // 컴포넌트 마운트 시 인증 상태 초기화
+    AuthUtils.init();
+  }, []);
+
+  // 초기화 완료까지 로딩 표시
   if (!isInitialized) {
     return <LoadingSpinner message='인증 상태를 확인하는 중...' fullScreen />;
   }

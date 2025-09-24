@@ -42,6 +42,9 @@ export const RememberedEmail = {
  * 토큰 관리
  */
 export const TokenManager = {
+  /**
+   * 토큰 새로고침 (스토어 업데이트 포함)
+   */
   refreshAccessToken: async (): Promise<boolean> => {
     try {
       const result = await refreshTokenService();
@@ -55,6 +58,9 @@ export const TokenManager = {
     }
   },
 
+  /**
+   * 새 액세스 토큰 요청 (스토어 업데이트 없이 토큰만 반환)
+   */
   getNewAccessToken: async (): Promise<string | null> => {
     try {
       const result = await refreshTokenService();
@@ -75,8 +81,7 @@ export const AuthInitializer = {
     if (isInitializing) return;
     isInitializing = true;
 
-    const { setUser, setIsLogin, setIsInitialized, isInitialized } =
-      useAuthStore.getState();
+    const { setIsInitialized, isInitialized } = useAuthStore.getState();
 
     if (isInitialized) {
       isInitializing = false;
@@ -86,9 +91,7 @@ export const AuthInitializer = {
     try {
       const refreshSuccess = await TokenManager.refreshAccessToken();
       if (refreshSuccess) {
-        const profile = await getUserProfile();
-        setUser(mapUserProfileToAuthUser(profile));
-        setIsLogin(true);
+        await loadUserProfile();
       }
     } catch (error) {
       console.log('인증 초기화 실패:', error);
@@ -99,5 +102,17 @@ export const AuthInitializer = {
   },
 } as const;
 
-// 프로필 → 스토어 사용자 매핑 유틸 (재사용용)
-// (이전 위치에서 공통 유틸로 이동)
+/**
+ * 프로필 로드 및 스토어 동기화 공통 함수
+ */
+export const loadUserProfile = async (): Promise<void> => {
+  const { setUser, setIsLogin } = useAuthStore.getState();
+  try {
+    const profile = await getUserProfile();
+    setUser(mapUserProfileToAuthUser(profile));
+    setIsLogin(true);
+  } catch (error) {
+    console.warn('프로필 로드 실패:', error);
+    throw error; // 호출자가 에러 처리 결정하도록
+  }
+};

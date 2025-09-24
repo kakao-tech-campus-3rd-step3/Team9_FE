@@ -1,7 +1,12 @@
 import { Router } from '@/routes';
+import { AuthInitializer } from '@/components';
 
 function App() {
-  return <Router />;
+  return (
+    <AuthInitializer>
+      <Router />
+    </AuthInitializer>
+  );
 }
 
 export default App;
