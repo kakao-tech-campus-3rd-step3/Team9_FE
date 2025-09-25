@@ -18,7 +18,12 @@ export const ROUTES = {
     SCHEDULE: 'schedule',
     QUIZ: 'quiz',
     RETRO: 'retro',
-    ADMIN: 'admin',
+    ADMIN: {
+      ROOT: 'admin',
+      MEMBERS: 'admin/members',
+      APPLICANTS: 'admin/applicants',
+      STUDY_INFO: 'admin/study-info',
+    },
   },
   SCHEDULE: {
     ROOT: '/schedule',

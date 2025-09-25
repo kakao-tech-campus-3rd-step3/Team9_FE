@@ -27,6 +27,9 @@ export interface StudyInfo {
   maxMembers: number;
   currentMembers: number;
   image?: string;
+  schedule: string;
+  region: string;
+  conditions: string[];
 }
 
 export type AdminTabType = 'members' | 'applicants' | 'study-info';

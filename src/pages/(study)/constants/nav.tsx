@@ -41,7 +41,7 @@ export const STUDY_NAV_ITEMS = [
     icon: ClipboardList,
   },
   {
-    to: ROUTES.STUDY.ADMIN,
+    to: ROUTES.STUDY.ADMIN.ROOT,
     label: '관리자 기능',
     icon: Settings,
   },

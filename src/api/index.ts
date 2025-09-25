@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import { toast } from 'react-toastify';
-import { getAccessToken, removeAccessToken } from '@/utils';
+import { accessTokenStorage } from '@/utils';
 import { ROUTES } from '@/constants';
 
 // API 클라이언트 설정
@@ -33,7 +33,7 @@ declare module 'axios' {
 // 요청 인터셉터 - 인증 토큰 자동 추가 및 showToast 옵션 처리
 apiClient.interceptors.request.use(
   (config) => {
-    const accessToken = getAccessToken();
+    const accessToken = accessTokenStorage.get();
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
@@ -69,7 +69,7 @@ apiClient.interceptors.response.use(
 
     // 401 인증 실패 처리
     if (status === 401) {
-      removeAccessToken();
+      accessTokenStorage.remove();
       const authMessage =
         data?.message || '인증이 만료되었습니다. 다시 로그인해주세요.';
       if (showToast) {
