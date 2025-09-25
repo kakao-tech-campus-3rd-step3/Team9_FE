@@ -4,8 +4,9 @@
  */
 import dayjs from 'dayjs';
 import { REMEMBER_ME } from '@/constants';
-import { refreshTokenService } from '@/pages/(auth)/login/services';
-import { getUserProfile } from '@/services';
+import { refreshTokenService } from '@/pages/(auth)/login/services/refreshService';
+import { getUserProfile } from '@/services/users/getUserProfile';
+import { downloadImageService } from '@/services/images/downloadImage';
 import { useAuthStore } from '@/stores/auth';
 import { mapUserProfileToAuthUser } from '@/utils/mappers';
 
@@ -91,7 +92,44 @@ export const AuthInitializer = {
     try {
       const refreshSuccess = await TokenManager.refreshAccessToken();
       if (refreshSuccess) {
-        await loadUserProfile();
+        // 토큰 재발급 성공 시 프로필도 로드
+        try {
+          const { setUser, setUserImageUrl, setIsLogin } =
+            useAuthStore.getState();
+          const profile = await getUserProfile();
+          const authUser = mapUserProfileToAuthUser(profile);
+          setUser(authUser);
+          setIsLogin(true);
+
+          // 이미지 키가 있으면 이미지 URL도 로드
+          if (authUser.imageKey) {
+            try {
+              const imageUrl = await downloadImageService.getImagePresignedUrl(
+                authUser.imageKey,
+              );
+              setUserImageUrl(imageUrl);
+            } catch (error) {
+              console.warn('이미지 URL 로드 실패:', error);
+            }
+          }
+
+          // React Query 캐시도 업데이트 (브라우저 환경에서만)
+          if (
+            typeof window !== 'undefined' &&
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (window as any).__REACT_QUERY_CLIENT__
+          ) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const queryClient = (window as any).__REACT_QUERY_CLIENT__;
+            queryClient.setQueryData(['userProfile'], profile);
+            queryClient.setQueryData(['userProfileDetail'], profile);
+          }
+        } catch (profileError) {
+          console.warn('프로필 로드 실패:', profileError);
+          // 프로필 로드 실패해도 토큰은 유효하므로 로그인 상태 유지
+          const { setIsLogin } = useAuthStore.getState();
+          setIsLogin(true);
+        }
       }
     } catch (error) {
       console.log('인증 초기화 실패:', error);
@@ -102,17 +140,4 @@ export const AuthInitializer = {
   },
 } as const;
 
-/**
- * 프로필 로드 및 스토어 동기화 공통 함수
- */
-export const loadUserProfile = async (): Promise<void> => {
-  const { setUser, setIsLogin } = useAuthStore.getState();
-  try {
-    const profile = await getUserProfile();
-    setUser(mapUserProfileToAuthUser(profile));
-    setIsLogin(true);
-  } catch (error) {
-    console.warn('프로필 로드 실패:', error);
-    throw error; // 호출자가 에러 처리 결정하도록
-  }
-};
+// loadUserProfile 함수는 useLoadUserProfile 훅으로 대체됨
