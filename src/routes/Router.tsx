@@ -25,6 +25,7 @@ import {
   DocumentAddPage,
   DocumentDetailPage,
   DocumentEditPage,
+  ProgressPage,
   AdminPage,
   MemberManagement,
   ApplicantManagement,
@@ -101,7 +102,7 @@ const router = createBrowserRouter([
             element: <DocumentDetailPage />,
           },
           { path: ROUTES.STUDY.DOCUMENT_EDIT, element: <DocumentEditPage /> },
-          { path: ROUTES.STUDY.PROGRESS, element: <ExamplePage /> },
+          { path: ROUTES.STUDY.PROGRESS, element: <ProgressPage /> },
           {
             path: ROUTES.STUDY.SCHEDULE,
             element: <SchedulePage />,
