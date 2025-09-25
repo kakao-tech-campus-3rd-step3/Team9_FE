@@ -7,6 +7,7 @@ import type {
 } from 'react-hook-form';
 import { Input } from '../../components';
 import { AUTH_TEXTS } from '../../constants';
+import { signupService } from '../services';
 import {
   GENDER_OPTIONS,
   INTEREST_OPTIONS,
@@ -65,12 +66,7 @@ export const Step2Form: React.FC<Step2FormProps> = ({
 
     setIsCheckingNickname(true);
     try {
-      // TODO: 실제 서버 연동 시 signupService.checkNickname 호출
-      // await signupService.checkNickname(watchedValues.nickname);
-
-      // 임시: 성공 시뮬레이션
-      console.log('닉네임 중복 확인:', watchedValues.nickname);
-
+      await signupService.checkNickname({ nickname: watchedValues.nickname });
       setIsNicknameAvailable(true);
     } catch (error) {
       console.error('닉네임 중복 확인 실패:', error);

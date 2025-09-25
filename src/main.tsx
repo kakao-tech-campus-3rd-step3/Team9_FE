@@ -21,10 +21,6 @@ const queryClient = new QueryClient({
       // 네트워크 재연결 시 자동 리페치 활성화
       refetchOnReconnect: true,
     },
-    mutations: {
-      // 뮤테이션 재시도: 1회 (로그인/회원가입에서는 1회만)
-      retry: 1,
-    },
   },
 });
 

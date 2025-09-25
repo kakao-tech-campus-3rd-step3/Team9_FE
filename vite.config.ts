@@ -10,6 +10,10 @@ export default defineConfig({
       '@': '/src',
     },
   },
+  server: {
+    port: 3000,
+    strictPort: true,
+  },
   build: {
     rollupOptions: {
       output: {
