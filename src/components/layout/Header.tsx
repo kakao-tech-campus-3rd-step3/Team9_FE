@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Home, Search, BookOpen } from 'lucide-react';
-import { Logo } from '@/components/common';
+import { Logo, UserProfileSection } from '@/components/common';
 import { ROUTES } from '@/constants';
 
 /**
@@ -101,12 +101,7 @@ const Header: React.FC = () => {
 
           {/* 데스크톱 로그인/프로필 영역 */}
           <div className='hidden lg:flex w-40 items-center justify-center px-4 h-full'>
-            <Link
-              to={ROUTES.LOGIN}
-              className='px-4 py-2 rounded-md text-sm font-semibold transition-all duration-200 whitespace-nowrap bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-sm'
-            >
-              로그인
-            </Link>
+            <UserProfileSection variant='header' />
           </div>
         </div>
       </header>
@@ -133,14 +128,11 @@ const Header: React.FC = () => {
                 </Link>
               );
             })}
-            <div className='pt-2 border-t border-border'>
-              <Link
-                to={ROUTES.LOGIN}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className='block w-full px-4 py-3 rounded-md text-sm font-semibold text-center transition-all duration-200 bg-primary text-primary-foreground hover:bg-primary/90'
-              >
-                로그인
-              </Link>
+            <div className='pt-2 border-t border-border px-4 py-3'>
+              <UserProfileSection
+                variant='header'
+                onMobileMenuClose={() => setIsMobileMenuOpen(false)}
+              />
             </div>
           </div>
         </div>
