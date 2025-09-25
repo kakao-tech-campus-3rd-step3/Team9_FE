@@ -1,7 +1,7 @@
-import { mockStudy, mockUser } from '@/pages/(study)/mock/sidebarData';
+import { mockStudy } from '@/pages/(study)/mock/sidebarData';
+import { UserProfileSection } from '@/components/common';
 import SidebarHeader from './SidebarHeader';
 import SidebarNav from './SidebarNav';
-import SidebarProfile from './SidebarProfile';
 
 /**
  * 스터디 페이지 사이드바 컴포넌트
@@ -9,16 +9,17 @@ import SidebarProfile from './SidebarProfile';
  */
 function Sidebar() {
   return (
-    <aside className='w-64 bg-gray-00 border-r-2 border-border-primary relative z-20 flex flex-col min-h-full shadow-xl/40'>
-      <SidebarHeader
-        studyName={mockStudy.studyName}
-        studyImageUrl={mockStudy.studyImageUrl}
-      />
-      <SidebarNav />
-      <SidebarProfile
-        userName={mockUser.userName}
-        userImageUrl={mockUser.userImageUrl}
-      />
+    <aside className='w-full bg-background border-r-2 border-border-primary relative z-20 flex flex-col h-full shadow-xl/40 overflow-x-hidden'>
+      <div className='flex-1 overflow-y-auto'>
+        <SidebarHeader
+          studyName={mockStudy.studyName}
+          studyImageUrl={mockStudy.studyImageUrl}
+        />
+        <SidebarNav />
+      </div>
+      <div className='mt-auto'>
+        <UserProfileSection variant='study-sidebar' />
+      </div>
     </aside>
   );
 }
