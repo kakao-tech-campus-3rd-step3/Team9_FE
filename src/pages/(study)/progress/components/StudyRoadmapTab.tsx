@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Plus, Edit, Trash2, Check, Clock } from 'lucide-react';
-import { AddSessionModal } from './AddSessionModal';
 
 type Session = {
   id: number;
@@ -19,45 +18,62 @@ export const StudyRoadmapTab = () => {
   const [sessions, setSessions] = useState<Session[]>([
     {
       id: 1,
-      title: '1차시에 진행할 내용입니다.',
-      description: 'React 기초 개념과 컴포넌트 구조에 대해 학습합니다.',
+      title: '1차시 - React 기초개념과 컴포넌트 구조',
+      description: '',
       isCompleted: false,
       createdAt: '2024-01-15',
     },
     {
       id: 2,
-      title: '2차시에 진행할 내용입니다.',
-      description: 'State와 Props를 활용한 동적 컴포넌트 구현을 학습합니다.',
+      title: '2차시 - State와 Props를 활용한 동적 컴포넌트',
+      description: '',
       isCompleted: false,
       createdAt: '2024-01-22',
     },
     {
       id: 3,
-      title: '3차시에 진행할 내용입니다.',
-      description: 'React Hooks를 사용한 함수형 컴포넌트 개발을 학습합니다.',
+      title: '3차시 - React Hooks를 사용한 함수형 컴포넌트',
+      description: '',
       isCompleted: false,
       createdAt: '2024-01-29',
     },
     {
       id: 4,
-      title: '4차시에 진행할 내용입니다.',
-      description: 'React Router를 활용한 SPA 라우팅 구현을 학습합니다.',
+      title: '4차시 - React Router를 활용한 SPA 라우팅',
+      description: '',
       isCompleted: false,
       createdAt: '2024-02-05',
     },
   ]);
 
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isAddingSession, setIsAddingSession] = useState(false);
+  const [newTitle, setNewTitle] = useState('');
+  const [editingSession, setEditingSession] = useState<number | null>(null);
+  const [editingTitle, setEditingTitle] = useState('');
 
-  const handleAddSession = (title: string, description: string) => {
-    const newSession: Session = {
-      id: Math.max(...sessions.map((s) => s.id)) + 1,
-      title,
-      description,
-      isCompleted: false,
-      createdAt: new Date().toISOString().split('T')[0],
-    };
-    setSessions([...sessions, newSession]);
+  const handleAddSession = () => {
+    if (newTitle.trim()) {
+      const newSession: Session = {
+        id: Math.max(...sessions.map((s) => s.id)) + 1,
+        title: newTitle.trim(),
+        description: '',
+        isCompleted: false,
+        createdAt: new Date().toISOString().split('T')[0],
+      };
+      setSessions([...sessions, newSession]);
+      setNewTitle('');
+      setIsAddingSession(false);
+    }
+  };
+
+  const handleStartAdd = () => {
+    setIsAddingSession(true);
+    setNewTitle('');
+  };
+
+  const handleCancelAdd = () => {
+    setIsAddingSession(false);
+    setNewTitle('');
   };
 
   const handleCompleteSession = (id: number) => {
@@ -74,6 +90,33 @@ export const StudyRoadmapTab = () => {
     setSessions(sessions.filter((session) => session.id !== id));
   };
 
+  const handleStartEdit = (session: Session) => {
+    setEditingSession(session.id);
+    setEditingTitle(session.title);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingSession && editingTitle.trim()) {
+      setSessions(
+        sessions.map((session) =>
+          session.id === editingSession
+            ? {
+                ...session,
+                title: editingTitle.trim(),
+              }
+            : session,
+        ),
+      );
+      setEditingSession(null);
+      setEditingTitle('');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingSession(null);
+    setEditingTitle('');
+  };
+
   return (
     <div className='p-6'>
       {/* 헤더 */}
@@ -88,7 +131,7 @@ export const StudyRoadmapTab = () => {
           </p>
         </div>
         <button
-          onClick={() => setIsAddModalOpen(true)}
+          onClick={handleStartAdd}
           className='flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors'
         >
           <Plus className='w-4 h-4' />
@@ -98,7 +141,44 @@ export const StudyRoadmapTab = () => {
 
       {/* 타임라인 */}
       <div className='space-y-6'>
-        {sessions.length === 0 ? (
+        {/* 인라인 추가 폼 */}
+        {isAddingSession && (
+          <div className='flex items-start gap-4'>
+            <div className='flex flex-col items-center'>
+              <div className='w-10 h-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium'>
+                +
+              </div>
+            </div>
+            <div className='flex-1 bg-muted border border-border rounded-lg p-4'>
+              <div className='space-y-2'>
+                <input
+                  type='text'
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  className='w-full px-2 py-1 text-sm border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary'
+                  placeholder='차시 제목을 입력하세요'
+                  autoFocus
+                />
+                <div className='flex gap-2'>
+                  <button
+                    onClick={handleAddSession}
+                    className='px-3 py-1 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90'
+                  >
+                    추가하기
+                  </button>
+                  <button
+                    onClick={handleCancelAdd}
+                    className='px-3 py-1 text-xs text-muted-foreground hover:text-foreground'
+                  >
+                    취소
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {sessions.length === 0 && !isAddingSession ? (
           <div className='text-center py-12 text-muted-foreground'>
             <Clock className='w-12 h-12 mx-auto mb-4 opacity-50' />
             <p className='text-lg font-medium'>아직 등록된 차시가 없습니다</p>
@@ -137,66 +217,80 @@ export const StudyRoadmapTab = () => {
               >
                 <div className='flex justify-between items-start mb-3'>
                   <div className='flex-1'>
-                    <h3
-                      className={`font-medium ${
+                    {editingSession === session.id ? (
+                      <div className='space-y-2'>
+                        <input
+                          type='text'
+                          value={editingTitle}
+                          onChange={(e) => setEditingTitle(e.target.value)}
+                          className='w-full px-2 py-1 text-sm border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary'
+                          placeholder='차시 제목'
+                        />
+                        <div className='flex gap-2'>
+                          <button
+                            onClick={handleSaveEdit}
+                            className='px-2 py-1 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90'
+                          >
+                            저장
+                          </button>
+                          <button
+                            onClick={handleCancelEdit}
+                            className='px-2 py-1 text-xs text-muted-foreground hover:text-foreground'
+                          >
+                            취소
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <h3
+                          className={`text-sm font-medium ${
+                            session.isCompleted
+                              ? 'text-green-800 line-through'
+                              : 'text-foreground'
+                          }`}
+                        >
+                          {session.title}
+                        </h3>
+                      </>
+                    )}
+                  </div>
+                  {editingSession !== session.id && (
+                    <div className='flex gap-2 ml-4'>
+                      <button
+                        onClick={() => handleStartEdit(session)}
+                        className='p-1 text-muted-foreground hover:text-foreground transition-colors'
+                      >
+                        <Edit className='w-4 h-4' />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteSession(session.id)}
+                        className='p-1 text-muted-foreground hover:text-destructive transition-colors'
+                      >
+                        <Trash2 className='w-4 h-4' />
+                      </button>
+                    </div>
+                  )}
+                </div>
+                {editingSession !== session.id && (
+                  <div className='flex justify-end'>
+                    <button
+                      onClick={() => handleCompleteSession(session.id)}
+                      className={`px-3 py-1 text-xs rounded-md transition-colors ${
                         session.isCompleted
-                          ? 'text-green-800 line-through'
-                          : 'text-foreground'
+                          ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                          : 'bg-primary text-primary-foreground hover:bg-primary/90'
                       }`}
                     >
-                      {session.title}
-                    </h3>
-                    {session.description && (
-                      <p
-                        className={`text-sm mt-1 ${
-                          session.isCompleted
-                            ? 'text-green-600'
-                            : 'text-muted-foreground'
-                        }`}
-                      >
-                        {session.description}
-                      </p>
-                    )}
-                    <p className='text-xs text-muted-foreground mt-2'>
-                      생성일: {session.createdAt}
-                    </p>
-                  </div>
-                  <div className='flex gap-2 ml-4'>
-                    <button className='p-1 text-muted-foreground hover:text-foreground transition-colors'>
-                      <Edit className='w-4 h-4' />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteSession(session.id)}
-                      className='p-1 text-muted-foreground hover:text-destructive transition-colors'
-                    >
-                      <Trash2 className='w-4 h-4' />
+                      {session.isCompleted ? '완료됨' : '완료하기'}
                     </button>
                   </div>
-                </div>
-                <div className='flex justify-end'>
-                  <button
-                    onClick={() => handleCompleteSession(session.id)}
-                    className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                      session.isCompleted
-                        ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                        : 'bg-primary text-primary-foreground hover:bg-primary/90'
-                    }`}
-                  >
-                    {session.isCompleted ? '완료됨' : '완료하기'}
-                  </button>
-                </div>
+                )}
               </div>
             </div>
           ))
         )}
       </div>
-
-      {/* 차시 추가 모달 */}
-      <AddSessionModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onAdd={handleAddSession}
-      />
     </div>
   );
 };
