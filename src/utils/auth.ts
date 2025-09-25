@@ -112,18 +112,6 @@ export const AuthInitializer = {
               console.warn('이미지 URL 로드 실패:', error);
             }
           }
-
-          // React Query 캐시도 업데이트 (브라우저 환경에서만)
-          if (
-            typeof window !== 'undefined' &&
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (window as any).__REACT_QUERY_CLIENT__
-          ) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const queryClient = (window as any).__REACT_QUERY_CLIENT__;
-            queryClient.setQueryData(['userProfile'], profile);
-            queryClient.setQueryData(['userProfileDetail'], profile);
-          }
         } catch (profileError) {
           console.warn('프로필 로드 실패:', profileError);
           // 프로필 로드 실패해도 토큰은 유효하므로 로그인 상태 유지
