@@ -7,7 +7,7 @@ import type {
 } from 'react-hook-form';
 import { Input } from '../../components';
 import { AUTH_TEXTS } from '../../constants';
-import { signupService } from '../services';
+import { useCheckNicknameMutation } from '../hooks';
 import {
   GENDER_OPTIONS,
   INTEREST_OPTIONS,
@@ -50,6 +50,7 @@ export const Step2Form: React.FC<Step2FormProps> = ({
   handleStepChange,
   errors,
 }) => {
+  const checkNicknameMutation = useCheckNicknameMutation();
   // 닉네임 중복 확인 상태 관리
   const [isCheckingNickname, setIsCheckingNickname] = useState(false); // 닉네임 중복 확인 진행 상태
   const [isNicknameAvailable, setIsNicknameAvailable] = useState<
@@ -66,7 +67,9 @@ export const Step2Form: React.FC<Step2FormProps> = ({
 
     setIsCheckingNickname(true);
     try {
-      await signupService.checkNickname({ nickname: watchedValues.nickname });
+      await checkNicknameMutation.mutateAsync({
+        nickname: watchedValues.nickname,
+      });
       setIsNicknameAvailable(true);
     } catch (error) {
       console.error('닉네임 중복 확인 실패:', error);

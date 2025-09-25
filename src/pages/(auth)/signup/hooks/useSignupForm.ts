@@ -1,3 +1,4 @@
+// TODO: 추후 다른 비동기 동작이 추가될 때에만 뮤테이션 훅을 가져옵니다.
 import { useState, useRef } from 'react';
 import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,8 +8,8 @@ import { signupSchema } from '../schemas';
 import type { SignupFormData, SignupStep } from '../types';
 import { DEFAULT_FORM_VALUES } from '../constants';
 import { ROUTES } from '@/constants';
-import { signupService } from '../services';
-import { uploadWithPresignedUrl } from '@/utils/upload';
+import { useUploadMutation } from '@/hooks';
+import { useSignupMutationApi } from './mutations/useSignupMutation';
 import type { SignupPayload } from '../types';
 import type { InterestKey, RegionKey } from '@/constants';
 import { INTERESTS, REGIONS } from '@/constants';
@@ -23,6 +24,10 @@ import { INTERESTS, REGIONS } from '@/constants';
  */
 export const useSignupForm = () => {
   const navigate = useNavigate();
+  const uploadMutation = useUploadMutation();
+
+  // 회원가입 뮤테이션 훅 사용
+  const signupApiMutation = useSignupMutationApi();
 
   // React Hook Form 설정
   const {
@@ -92,18 +97,23 @@ export const useSignupForm = () => {
       // 파일 선택 직후 즉시 업로드 (Presigned URL 흐름)
       setIsUploadingImage(true);
       setIsImageUploaded(false);
-      try {
-        const key = await uploadWithPresignedUrl(file);
-        setImageKey(key);
-        setIsImageUploaded(true);
-      } catch (err) {
-        console.error('프로필 이미지 업로드 실패:', err);
-        setImageKey('');
-        setIsImageUploaded(false);
-        toast.error('프로필 이미지 업로드에 실패했습니다. 다시 시도해주세요.');
-      } finally {
-        setIsUploadingImage(false);
-      }
+
+      uploadMutation.mutate(file, {
+        onSuccess: (key) => {
+          setImageKey(key);
+          setIsImageUploaded(true);
+          setIsUploadingImage(false);
+        },
+        onError: (err) => {
+          console.error('프로필 이미지 업로드 실패:', err);
+          setImageKey('');
+          setIsImageUploaded(false);
+          setIsUploadingImage(false);
+          toast.error(
+            '프로필 이미지 업로드에 실패했습니다. 다시 시도해주세요.',
+          );
+        },
+      });
     }
   };
 
@@ -137,36 +147,36 @@ export const useSignupForm = () => {
    * - 실패 시 에러 토스트 메시지 표시
    */
   const onSubmit = async (data: SignupFormData) => {
-    try {
-      if (isUploadingImage) {
-        toast.warn('이미지 업로드가 완료될 때까지 기다려주세요.');
-        return;
-      }
-
-      const image_key = imageKey;
-      const payload: SignupPayload = {
-        email: data.email,
-        password: data.password,
-        image_key,
-        nickname: data.nickname,
-        gender: data.gender,
-        interests: ((data.interests || []) as InterestKey[]).map(
-          (k) => INTERESTS[k],
-        ),
-        region: REGIONS[data.region as RegionKey],
-      };
-      await signupService.signup(payload);
-
-      // 성공 토스트 표시
-      toast.success('회원가입이 완료되었습니다!');
-
-      // 로그인 페이지로 이동
-      navigate(ROUTES.LOGIN);
-    } catch (error) {
-      // TODO: 실제 서버 연동 시 에러 처리
-      console.error('회원가입 실패:', error);
-      toast.error('회원가입에 실패했습니다. 다시 시도해주세요.');
+    if (isUploadingImage) {
+      toast.warn('이미지 업로드가 완료될 때까지 기다려주세요.');
+      return;
     }
+
+    const image_key = imageKey;
+    const payload: SignupPayload = {
+      email: data.email,
+      password: data.password,
+      image_key,
+      nickname: data.nickname,
+      gender: data.gender,
+      interests: ((data.interests || []) as InterestKey[]).map(
+        (k) => INTERESTS[k],
+      ),
+      region: REGIONS[data.region as RegionKey],
+    };
+
+    signupApiMutation.mutate(payload, {
+      onSuccess: () => {
+        // 성공 토스트 표시
+        toast.success('회원가입이 완료되었습니다!');
+        // 로그인 페이지로 이동
+        navigate(ROUTES.LOGIN);
+      },
+      onError: (error) => {
+        console.error('회원가입 실패:', error);
+        toast.error('회원가입에 실패했습니다. 다시 시도해주세요.');
+      },
+    });
   };
 
   return {
@@ -184,8 +194,9 @@ export const useSignupForm = () => {
     fileInputRef,
     watchedValues,
     imageKey,
-    isUploadingImage,
+    isUploadingImage: isUploadingImage || uploadMutation.isPending,
     isImageUploaded,
+    isSigningUp: signupApiMutation.isPending,
 
     // 핸들러
     handleStepChange,
