@@ -32,6 +32,9 @@ export const useAuthStatus = () => {
     isAuthenticated: isInitialized && isLogin,
     isGuest: isInitialized && !isLogin,
 
+    // 사용자 정보
+    user,
+
     // 역할 정보
     userRole,
 

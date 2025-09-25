@@ -4,3 +4,8 @@ export { default as Logo } from './Logo';
 export { default as CalendarPopover } from './CalendarPopover';
 export { default as SearchBar } from './SearchBar';
 export { default as BaseModal } from './BaseModal';
+export { default as UserProfileSection } from './UserProfileSection';
+export { default as UserAvatar } from './UserAvatar';
+export { default as Dropdown } from './Dropdown';
+export { default as DropdownMenu } from './DropdownMenu';
+export { default as ProfileButton } from './ProfileButton';

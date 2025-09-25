@@ -9,6 +9,7 @@ import type { StudyRole } from '@/types';
 export type AuthUser = {
   nickname: string;
   imageKey: string;
+  imageUrl?: string; // 캐시된 이미지 URL
   // 현재 선택된 스터디의 타이틀과 역할 (선택적, 하나만 유지)
   currentStudy?: {
     title: string;
@@ -28,6 +29,7 @@ type AuthState = {
 
   // 액션
   setUser: (user: AuthUser) => void;
+  setUserImageUrl: (imageUrl: string) => void;
   setCurrentStudy: (study: AuthUser['currentStudy'] | null) => void;
   setAccessToken: (token: string | null) => void;
   setIsLogin: (status: boolean) => void;
@@ -45,6 +47,10 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   // 액션
   setUser: (user) => set({ user }),
+  setUserImageUrl: (imageUrl) =>
+    set((state) => ({
+      user: { ...state.user, imageUrl },
+    })),
   setCurrentStudy: (study) =>
     set((state) => ({
       user: { ...state.user, currentStudy: study || undefined },
@@ -54,7 +60,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   setIsInitialized: (status) => set({ isInitialized: status }),
   reset: () =>
     set({
-      user: { nickname: '', imageKey: '' },
+      user: { nickname: '', imageKey: '', imageUrl: undefined },
       accessToken: null,
       isLogin: false,
     }),
