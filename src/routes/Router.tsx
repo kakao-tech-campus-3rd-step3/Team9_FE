@@ -6,7 +6,11 @@ import {
 } from 'react-router-dom';
 import { ROUTES } from '@/constants';
 import { Layout } from '@/components';
-import { StudyLayout } from '@/pages/(study)';
+import {
+  StudyLayout,
+  DocumentEditPage,
+  ProgressPage,
+} from '@/pages/(study)';
 import routes from './routeConfig';
 
 /**
@@ -91,7 +95,8 @@ const router = createBrowserRouter([
             path: ROUTES.STUDY.DOCUMENT_EDIT,
             element: <routes.StudyDocumentEdit />,
           },
-          { path: ROUTES.STUDY.PROGRESS, element: <routes.Example /> },
+          { path: ROUTES.STUDY.DOCUMENT_EDIT, element: <DocumentEditPage /> },
+          { path: ROUTES.STUDY.PROGRESS, element: <ProgressPage /> },
           {
             path: ROUTES.STUDY.SCHEDULE,
             element: <routes.Schedule />,
