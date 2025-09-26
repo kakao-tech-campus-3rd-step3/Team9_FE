@@ -1,1 +1,1 @@
-export type { LoginFormData } from '../schemas';
+export type { LoginPayload } from '../schemas';

@@ -15,12 +15,11 @@ export const INTERESTS = {
   EXAM: '고시/공무원',
   PROGRAMMING: '프로그래밍',
   HOBBY: '취미/교양',
-  ETC: '자율/기타',
+  AUTONOMY: '자율/기타',
 } as const;
 
 // 지역 옵션
 export const REGIONS = {
-  ONLINE: '온라인',
   SEOUL: '서울',
   GYEONGGI: '경기',
   INCHEON: '인천',

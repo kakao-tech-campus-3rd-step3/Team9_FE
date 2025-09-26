@@ -11,7 +11,6 @@ import {
   StudyDetailModal,
   RegionSelectModal,
 } from '../components';
-import Header from '@/components/layout/Header';
 import { SearchBar } from '@/components/common';
 
 const StudyExplorePage: React.FC = () => {
@@ -60,7 +59,6 @@ const StudyExplorePage: React.FC = () => {
 
   return (
     <div className='min-h-screen bg-background'>
-      <Header />
       <div className='px-6 py-4 border-b border-border bg-background'>
         <SearchBar
           searchTerm={inputValue}

@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import { Input } from '../../components';
 import { AUTH_TEXTS } from '../../constants';
 import type { SignupFormData, SignupStep } from '../types';
+import { useSendEmailCodeMutation, useVerifyEmailCodeMutation } from '../hooks';
 
 interface Step1FormProps {
   register: UseFormRegister<SignupFormData>;
@@ -28,6 +29,9 @@ export const Step1Form: React.FC<Step1FormProps> = ({
   const [isVerifyingCode, setIsVerifyingCode] = useState(false); // 인증번호 확인 중 상태
   const [isCodeSent, setIsCodeSent] = useState(false); // 인증번호 전송 완료 상태
   const [isCodeVerified, setIsCodeVerified] = useState(false); // 인증번호 확인 완료 상태
+  // 이메일 인증 관련 뮤테이션 훅
+  const sendCodeMutation = useSendEmailCodeMutation();
+  const verifyCodeMutation = useVerifyEmailCodeMutation();
 
   // 폼 데이터 감시
   const formData = watch();
@@ -42,11 +46,7 @@ export const Step1Form: React.FC<Step1FormProps> = ({
 
     setIsSendingCode(true);
     try {
-      // TODO: 실제 서버 연동 시 signupService.sendEmailCode 호출
-      // await signupService.sendEmailCode({ email: formData.email });
-
-      // 임시: 성공 시뮬레이션
-      console.log('이메일 인증코드 전송:', formData.email);
+      await sendCodeMutation.mutateAsync({ email: formData.email });
 
       setShowVerifyCode(true);
       setIsCodeSent(true);
@@ -69,14 +69,10 @@ export const Step1Form: React.FC<Step1FormProps> = ({
 
     setIsVerifyingCode(true);
     try {
-      // TODO: 실제 서버 연동 시 signupService.verifyEmailCode 호출
-      // await signupService.verifyEmailCode({
-      //   email: formData.email,
-      //   verification_code: formData.verifyCode,
-      // });
-
-      // 임시: 성공 시뮬레이션
-      console.log('이메일 인증코드 확인:', formData.verifyCode);
+      await verifyCodeMutation.mutateAsync({
+        email: formData.email,
+        verification_code: formData.verifyCode,
+      });
 
       setIsCodeVerified(true);
     } catch (error) {
