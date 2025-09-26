@@ -45,7 +45,7 @@ const Header: React.FC = () => {
       <header className='sticky top-0 left-0 right-0 z-50 h-20 bg-background/95 backdrop-blur-sm border-b border-border shadow-sm'>
         <div className='max-w-7xl mx-auto h-20 flex items-center'>
           {/* 로고 영역 - 항상 최소 크기 유지 */}
-          <div className='min-w-48 w-48 lg:w-64 flex items-center justify-center px-4 h-full'>
+          <div className='min-w-48 w-48 lg:w-64 flex items-center justify-center pl-4 pr-2 lg:px-4 h-full'>
             <Logo size='lg' />
           </div>
 
@@ -83,7 +83,7 @@ const Header: React.FC = () => {
           </div>
 
           {/* 모바일 햄버거 메뉴 버튼 */}
-          <div className='lg:hidden flex items-center px-4'>
+          <div className='lg:hidden flex items-center pl-2 pr-4'>
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className='p-2 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200'
@@ -110,7 +110,7 @@ const Header: React.FC = () => {
       {/* 모바일 메뉴 - 토글로 표시/숨김 */}
       {isMobileMenuOpen && (
         <div className='lg:hidden fixed top-20 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border shadow-lg'>
-          <div className='max-w-7xl mx-auto py-4 px-4 space-y-2'>
+          <div className='max-w-7xl mx-auto py-3 px-3 space-y-1'>
             {navItems.map((item) => {
               const IconComponent = item.icon;
               return (
@@ -118,7 +118,7 @@ const Header: React.FC = () => {
                   key={item.label}
                   to={item.to}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-200 ${
                     location.pathname === item.to
                       ? 'text-primary bg-primary/10'
                       : 'text-muted-foreground hover:text-primary hover:bg-primary/5'
@@ -129,7 +129,7 @@ const Header: React.FC = () => {
                 </Link>
               );
             })}
-            <div className='pt-2 border-t border-border px-4 py-3'>
+            <div className='pt-2 border-t border-border'>
               <UserProfileSection
                 variant='header'
                 onMobileMenuClose={() => setIsMobileMenuOpen(false)}

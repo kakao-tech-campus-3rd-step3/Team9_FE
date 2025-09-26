@@ -8,9 +8,7 @@ interface UserAvatarProps {
   imageKey?: string;
   /** 사용자 이름 (이미지가 없을 때 이니셜 생성용) */
   name: string;
-  /** 아바타 크기 */
-  size?: 'sm' | 'md' | 'lg';
-  /** 추가 클래스명 */
+  /** 추가 클래스명 (크기, 스타일 등 모든 스타일링) */
   className?: string;
   /** 전역 캐시 사용 여부 (기본: true) */
   useGlobalCache?: boolean;
@@ -22,23 +20,16 @@ interface UserAvatarProps {
  * - 이미지가 없으면 이름 기반 이니셜 아바타 표시
  * - 이미지 로드 실패 시 이니셜 아바타로 자동 대체
  * - 전역 캐시된 이미지 URL 우선 사용으로 깜빡임 최소화
+ * - 기본 스타일: 원형, 중앙 정렬, 반응형 크기
  */
 const UserAvatar: React.FC<UserAvatarProps> = ({
   imageKey,
   name,
-  size = 'md',
   className = '',
   useGlobalCache = true,
 }) => {
   const [hasImageError, setHasImageError] = React.useState(false);
   const { user } = useAuthStore();
-
-  // 크기별 클래스 정의
-  const sizeClasses = {
-    sm: 'w-6 h-6 text-xs',
-    md: 'w-8 h-8 text-sm',
-    lg: 'w-12 h-12 text-base',
-  };
 
   // 전역 캐시 사용 여부와 현재 사용자의 이미지인지 확인
   const isCurrentUserImage = useGlobalCache && user.imageKey === imageKey;
@@ -62,10 +53,12 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
   const bgColor = getNameBasedColor(name);
   const textColor = getTextColor();
 
-  // 통일된 컨테이너 구조로 개선
+  // 기본 스타일과 외부 className을 조합
+  const containerClasses = `rounded-full overflow-hidden flex items-center justify-center font-semibold ${className}`;
+
   return (
     <div
-      className={`${sizeClasses[size]} rounded-full overflow-hidden flex items-center justify-center font-semibold ${className}`}
+      className={containerClasses}
       style={{ backgroundColor: shouldShowImage ? 'transparent' : undefined }}
     >
       {shouldShowImage ? (
