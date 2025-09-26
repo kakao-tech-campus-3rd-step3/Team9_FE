@@ -1,6 +1,11 @@
-import axios, { AxiosError } from 'axios';
+import axios, {
+  AxiosError,
+  type AxiosRequestConfig,
+  type AxiosRequestHeaders,
+} from 'axios';
 import { toast } from 'react-toastify';
-import { accessTokenStorage } from '@/utils';
+import { useAuthStore } from '@/stores/auth';
+import { TokenManager } from '@/utils/auth';
 import { ROUTES } from '@/constants';
 
 // API 클라이언트 설정
@@ -33,7 +38,7 @@ declare module 'axios' {
 // 요청 인터셉터 - 인증 토큰 자동 추가 및 showToast 옵션 처리
 apiClient.interceptors.request.use(
   (config) => {
-    const accessToken = accessTokenStorage.get();
+    const accessToken = useAuthStore.getState().accessToken;
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
@@ -52,7 +57,7 @@ apiClient.interceptors.request.use(
 // 응답 인터셉터 - 에러 처리 및 토큰 관리
 apiClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError<{ message: string }>) => {
+  async (error: AxiosError<{ message: string }>) => {
     // 토스트 표시 여부 확인 (커스텀 헤더 사용, 기본값: true)
     const showToast = error.config?.headers?.['x-show-toast'] === '1';
 
@@ -69,7 +74,39 @@ apiClient.interceptors.response.use(
 
     // 401 인증 실패 처리
     if (status === 401) {
-      accessTokenStorage.remove();
+      const originalRequest = (error.config || {}) as AxiosRequestConfig & {
+        _retry?: boolean;
+      };
+
+      // 아직 재시도하지 않았다면 한 번만 재발급 시도
+      if (originalRequest && !originalRequest._retry) {
+        originalRequest._retry = true;
+        try {
+          // 토큰 재발급 시도
+          const newAccessToken = await TokenManager.getNewAccessToken();
+
+          if (newAccessToken) {
+            // 새로운 토큰을 store에 저장
+            const { setAccessToken } = useAuthStore.getState();
+            setAccessToken(newAccessToken);
+
+            // 새로운 토큰으로 원래 요청 재시도
+            if (!originalRequest.headers) {
+              originalRequest.headers = {} as AxiosRequestHeaders;
+            }
+            (originalRequest.headers as AxiosRequestHeaders).Authorization =
+              `Bearer ${newAccessToken}`;
+            return apiClient(originalRequest as AxiosRequestConfig);
+          }
+        } catch {
+          // 재발급 실패 시 아래 공통 처리로 이동
+        }
+      }
+
+      // 토큰 재발급 실패 시 로그아웃 처리 (명시적 상태 초기화)
+      const { reset, setIsLogin } = useAuthStore.getState();
+      setIsLogin(false);
+      reset();
       const authMessage =
         data?.message || '인증이 만료되었습니다. 다시 로그인해주세요.';
       if (showToast) {
@@ -88,3 +125,4 @@ apiClient.interceptors.response.use(
 );
 
 export default apiClient;
+export { default as publicClient } from './publicClient';

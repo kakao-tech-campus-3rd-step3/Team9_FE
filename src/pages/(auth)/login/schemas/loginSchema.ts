@@ -15,4 +15,4 @@ export const loginSchema = z.object({
     .min(8, '비밀번호는 8자 이상이어야 합니다.'),
 });
 
-export type LoginFormData = z.infer<typeof loginSchema>;
+export type LoginPayload = z.infer<typeof loginSchema>;

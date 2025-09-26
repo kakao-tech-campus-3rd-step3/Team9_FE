@@ -4,33 +4,14 @@ import {
   Navigate,
   RouterProvider,
 } from 'react-router-dom';
-import {
-  ExamplePage,
-  HomePage,
-  LoginPage,
-  ManagePage,
-  NotFoundPage,
-  SchedulePage,
-  StudyExplorePage,
-  StudyCreatePage,
-  SignupPage,
-  TunePage,
-} from '@/pages';
 import { ROUTES } from '@/constants';
 import { Layout } from '@/components';
 import {
-  DashboardPage,
   StudyLayout,
-  DocumentPage,
-  DocumentAddPage,
-  DocumentDetailPage,
   DocumentEditPage,
   ProgressPage,
-  AdminPage,
-  MemberManagement,
-  ApplicantManagement,
-  StudyInfoManagement,
 } from '@/pages/(study)';
+import routes from './routeConfig';
 
 /**
  * 애플리케이션 라우터 설정
@@ -38,14 +19,14 @@ import {
  * - 404 페이지는 레이아웃 없이 표시
  */
 const router = createBrowserRouter([
-  // 홈 페이지 (헤더만)
+  // 홈 페이지 (헤더만) - 인증 필요
   {
     path: ROUTES.HOME,
     element: <Layout layoutType='header-only' />,
     children: [
       {
         index: true,
-        element: <HomePage />,
+        element: <routes.Home />,
       },
     ],
   },
@@ -57,36 +38,36 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <ExamplePage />,
+        element: <routes.Example />,
       },
     ],
   },
 
-  // 로그인 페이지 (레이아웃 없음)
+  // 로그인 페이지 (레이아웃 없음) - 게스트만 접근 가능
   {
     path: ROUTES.LOGIN,
     element: <Layout layoutType='none' />,
     children: [
       {
         index: true,
-        element: <LoginPage />,
+        element: <routes.Login />,
       },
     ],
   },
 
-  // 회원가입 페이지 (레이아웃 없음)
+  // 회원가입 페이지 (레이아웃 없음) - 게스트만 접근 가능
   {
     path: ROUTES.SIGNUP,
     element: <Layout layoutType='none' />,
     children: [
       {
         index: true,
-        element: <SignupPage />,
+        element: <routes.Signup />,
       },
     ],
   },
 
-  // 스터디 - 전역 그룹 (study/...)
+  // 스터디 - 전역 그룹 (study/...) - 인증 필요
   {
     path: ROUTES.STUDY.ROOT,
     children: [
@@ -94,32 +75,51 @@ const router = createBrowserRouter([
       {
         element: <StudyLayout />,
         children: [
-          { path: ROUTES.STUDY.DASHBOARD, element: <DashboardPage /> },
-          { path: ROUTES.STUDY.DOCUMENT, element: <DocumentPage /> },
-          { path: ROUTES.STUDY.DOCUMENT_ADD, element: <DocumentAddPage /> },
+          {
+            path: ROUTES.STUDY.DASHBOARD,
+            element: <routes.StudyDashboard />,
+          },
+          {
+            path: ROUTES.STUDY.DOCUMENT,
+            element: <routes.StudyDocument />,
+          },
+          {
+            path: ROUTES.STUDY.DOCUMENT_ADD,
+            element: <routes.StudyDocumentAdd />,
+          },
           {
             path: ROUTES.STUDY.DOCUMENT_DETAIL,
-            element: <DocumentDetailPage />,
+            element: <routes.StudyDocumentDetail />,
+          },
+          {
+            path: ROUTES.STUDY.DOCUMENT_EDIT,
+            element: <routes.StudyDocumentEdit />,
           },
           { path: ROUTES.STUDY.DOCUMENT_EDIT, element: <DocumentEditPage /> },
           { path: ROUTES.STUDY.PROGRESS, element: <ProgressPage /> },
           {
             path: ROUTES.STUDY.SCHEDULE,
-            element: <SchedulePage />,
+            element: <routes.Schedule />,
             children: [
               {
                 index: true,
                 element: <Navigate to={ROUTES.SCHEDULE.MANAGE} replace />,
               },
-              { path: ROUTES.SCHEDULE.MANAGE, element: <ManagePage /> },
-              { path: ROUTES.SCHEDULE.TUNE, element: <TunePage /> },
+              {
+                path: ROUTES.SCHEDULE.MANAGE,
+                element: <routes.ScheduleManage />,
+              },
+              {
+                path: ROUTES.SCHEDULE.TUNE,
+                element: <routes.ScheduleTune />,
+              },
             ],
           },
-          { path: ROUTES.STUDY.QUIZ, element: <ExamplePage /> },
-          { path: ROUTES.STUDY.RETRO, element: <ExamplePage /> },
+          { path: ROUTES.STUDY.QUIZ, element: <routes.Example /> },
+          { path: ROUTES.STUDY.RETRO, element: <routes.Example /> },
           {
             path: ROUTES.STUDY.ADMIN.ROOT,
-            element: <AdminPage />,
+            element: <routes.StudyAdmin />,
             children: [
               {
                 index: true,
@@ -127,31 +127,36 @@ const router = createBrowserRouter([
               },
               {
                 path: 'members',
-                element: <MemberManagement />,
+                element: <routes.StudyAdminMembers />,
               },
               {
                 path: 'applicants',
-                element: <ApplicantManagement />,
+                element: <routes.StudyAdminApplicants />,
               },
               {
                 path: 'study-info',
-                element: <StudyInfoManagement />,
+                element: <routes.StudyAdminStudyInfo />,
               },
             ],
           },
         ],
       },
 
-      // 헤더만 사용하는 영역
+      // 헤더만 사용하는 영역 - 스터디 생성 (인증 필요)
       {
         element: <Layout layoutType='header-only' />,
-        children: [{ path: ROUTES.STUDY.CREATE, element: <StudyCreatePage /> }],
+        children: [
+          {
+            path: ROUTES.STUDY.CREATE,
+            element: <routes.StudyCreate />,
+          },
+        ],
       },
 
       // 커스텀 레이아웃을 사용하는 영역
       {
         path: ROUTES.STUDY.EXPLORE,
-        element: <StudyExplorePage />,
+        element: <routes.StudyExplore />,
       },
     ],
   },
@@ -161,7 +166,7 @@ const router = createBrowserRouter([
   // 404 페이지 (레이아웃 없음)
   {
     path: '*',
-    element: <NotFoundPage />,
+    element: <routes.NotFound />,
   },
 ]);
 
