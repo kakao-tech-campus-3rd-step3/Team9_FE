@@ -4,6 +4,8 @@ interface DropdownProps {
   trigger: ReactNode;
   position?: 'top' | 'bottom';
   align?: 'left' | 'right';
+  /** position에 따른 기본 간격을 덮어쓸 수 있는 클래스 (예: mt-4, mb-2) */
+  offsetClass?: string;
   onClose?: () => void;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
@@ -17,6 +19,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   trigger,
   position = 'bottom',
   align = 'right',
+  offsetClass,
   onClose,
   isOpen,
   onOpenChange,
@@ -42,8 +45,11 @@ const Dropdown: React.FC<DropdownProps> = ({
     }
   }, [isOpen, onOpenChange, onClose]);
 
+  const defaultOffsetClass = position === 'top' ? 'mb-1' : 'mt-2';
   const positionClass =
-    position === 'top' ? 'bottom-full mb-1' : 'top-full mt-2';
+    position === 'top'
+      ? `bottom-full ${offsetClass ?? defaultOffsetClass}`
+      : `top-full ${offsetClass ?? defaultOffsetClass}`;
   const alignClass = align === 'left' ? 'left-0' : 'right-0';
 
   return (

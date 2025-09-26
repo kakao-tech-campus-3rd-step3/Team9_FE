@@ -146,29 +146,6 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
     );
   };
 
-  // 사용자 정보 섹션 (드롭다운 내부용)
-  const UserInfo = () => (
-    <div className='px-4 py-3 border-b border-border bg-muted/20'>
-      <div className='flex items-center gap-3'>
-        <UserAvatar
-          imageKey={user.imageKey}
-          name={user.nickname}
-          className='w-10 h-10 text-sm'
-        />
-        <div className='flex-1 min-w-0'>
-          <p className='text-sm font-medium text-foreground truncate'>
-            {user.nickname}
-          </p>
-          {user.currentStudy && (
-            <p className='text-xs text-muted-foreground mt-0.5 truncate'>
-              {user.currentStudy.title}
-            </p>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-
   // 메뉴 아이템 렌더링 (개선된 디자인)
   const MenuItems = () => (
     <div className='py-2'>
@@ -205,12 +182,12 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
     <Dropdown
       position={dropdownConfig.position}
       align={dropdownConfig.align}
+      offsetClass={variant === 'header' ? 'mt-4' : undefined}
       isOpen={isDropdownOpen}
       onOpenChange={setIsDropdownOpen}
       onClose={onMobileMenuClose}
       trigger={<ProfileTrigger />}
     >
-      <UserInfo />
       <MenuItems />
     </Dropdown>
   );
