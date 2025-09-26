@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { User, LogOut } from 'lucide-react';
+import { User, Settings, LogOut } from 'lucide-react';
 import { useAuthStatus, useLogoutMutation } from '@/hooks';
 import { useAuthStore } from '@/stores/auth';
 import { ROUTES } from '@/constants';
@@ -35,7 +35,14 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
 
   // 프로필 관리 핸들러
   const handleProfileManage = () => {
-    // TODO: 프로필 페이지로 이동 구현
+    // TODO: 마이페이지로 이동 라우팅 연결
+    setIsDropdownOpen(false);
+    onMobileMenuClose?.();
+  };
+
+  // 설정 이동 핸들러
+  const handleOpenSettings = () => {
+    // TODO: 설정 페이지로 이동 라우팅 연결
     setIsDropdownOpen(false);
     onMobileMenuClose?.();
   };
@@ -82,12 +89,17 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
     );
   }
 
-  // 드롭다운 메뉴 아이템
+  // 드롭다운 메뉴 아이템 (마이페이지 / 설정 / 로그아웃)
   const menuItems = [
     {
       icon: <User className='w-4 h-4' />,
-      label: '프로필 관리',
+      label: '마이페이지',
       onClick: handleProfileManage,
+    },
+    {
+      icon: <Settings className='w-4 h-4' />,
+      label: '설정',
+      onClick: handleOpenSettings,
     },
     {
       icon: <LogOut className='w-4 h-4' />,
