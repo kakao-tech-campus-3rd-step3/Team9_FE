@@ -21,6 +21,8 @@ import {
   ApplicantManagement,
   StudyInfoManagement,
   StudyQuizPage,
+  StudyQuizSolvePage,
+  StudyQuizExplainPage,
 } from '@/pages/(study)';
 
 // TODO: 팀원과 논의 후 HOC 적용 결정 후 주석 제거
@@ -45,6 +47,8 @@ export const routes = {
   StudyDocumentDetail: DocumentDetailPage,
   StudyDocumentEdit: DocumentEditPage,
   StudyQuiz: StudyQuizPage,
+  StudyQuizSolve: StudyQuizSolvePage,
+  StudyQuizExplain: StudyQuizExplainPage,
   Schedule: SchedulePage,
   ScheduleManage: ManagePage,
   ScheduleTune: TunePage,

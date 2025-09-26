@@ -16,7 +16,11 @@ export const ROUTES = {
     DOCUMENT_EDIT: 'document/:id/edit',
     PROGRESS: 'progress',
     SCHEDULE: 'schedule',
-    QUIZ: 'quiz',
+    QUIZ: {
+      ROOT: 'quiz',
+      SOLVE: 'solve/:id',
+      EXPLAIN: 'explain/:id',
+    },
     RETRO: 'retro',
     ADMIN: {
       ROOT: 'admin',

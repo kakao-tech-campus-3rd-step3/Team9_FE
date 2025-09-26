@@ -1,7 +1,12 @@
+import { Outlet, useMatch } from 'react-router-dom';
 import { QuizCard } from './components';
 import { quizzes } from './mock/quizzes';
 
 const StudyQuizPage = () => {
+  if (!useMatch('/study/quiz')) {
+    return <Outlet />;
+  }
+
   return (
     <div className='h-full flex flex-col bg-background'>
       <div className='flex items-center justify-between px-6 py-6 border-b border-border bg-background'>
@@ -11,6 +16,7 @@ const StudyQuizPage = () => {
         {quizzes.map((quiz) => (
           <QuizCard
             key={quiz.quizId}
+            quizId={quiz.quizId}
             title={quiz.title}
             description={quiz.description}
             timeLimit={quiz.timeLimit}

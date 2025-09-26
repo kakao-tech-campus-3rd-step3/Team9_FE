@@ -71,7 +71,9 @@ const DashboardPage = () => {
           <RetrospectSection
             onClick={() => navigateToStudy(ROUTES.STUDY.RETRO)}
           />
-          <QuizSection onClick={() => navigateToStudy(ROUTES.STUDY.QUIZ)} />
+          <QuizSection
+            onClick={() => navigateToStudy(ROUTES.STUDY.QUIZ.ROOT)}
+          />
         </DashboardRow>
       </DashboardGrid>
     </div>

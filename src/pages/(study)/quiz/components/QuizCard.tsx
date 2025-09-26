@@ -6,6 +6,7 @@ import QuizCardCreating from './QuizCardCreating';
 import QuizCardFailed from './QuizCardFailed';
 
 type QuizCardProps = {
+  quizId: number;
   title: string;
   description: string;
   timeLimit: number;
@@ -15,6 +16,7 @@ type QuizCardProps = {
 };
 
 const QuizCard = ({
+  quizId,
   title,
   description,
   timeLimit,
@@ -50,9 +52,13 @@ const QuizCard = ({
         </div>
 
         <div className='flex items-center'>
-          {status === 'READY' && <QuizCardReady />}
+          {status === 'READY' && <QuizCardReady quizId={quizId.toString()} />}
           {status === 'COMPLETED' && score !== null && quizCount !== null && (
-            <QuizCardCompleted score={score} quizCount={quizCount} />
+            <QuizCardCompleted
+              quizId={quizId}
+              score={score}
+              quizCount={quizCount}
+            />
           )}
         </div>
       </div>
