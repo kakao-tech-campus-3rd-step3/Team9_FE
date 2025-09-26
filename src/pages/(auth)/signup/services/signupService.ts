@@ -7,20 +7,13 @@ import type {
   NicknameCheckPayload,
 } from '../types/signup';
 
-/**
- * 회원가입 관련 서비스
- * - 인터셉터를 우회하기 위해 publicClient 사용
- * - 인증이 필요 없는 API들 (이메일 인증, 닉네임 중복 확인, 회원가입)
- */
 export const signupService = {
   sendEmailCode: (payload: EmailVerifySendPayload) =>
     publicClient.post(AUTH_ENDPOINTS.EMAIL_SEND, payload),
   verifyEmailCode: (payload: EmailVerifyConfirmPayload) =>
     publicClient.post(AUTH_ENDPOINTS.EMAIL_VERIFY, payload),
   checkNickname: (payload: NicknameCheckPayload) =>
-    publicClient.get(AUTH_ENDPOINTS.NICKNAME_CHECK, {
-      params: payload,
-    }),
+    publicClient.get(AUTH_ENDPOINTS.NICKNAME_CHECK, { params: payload }),
   signup: (payload: SignupPayload) =>
     publicClient.post(AUTH_ENDPOINTS.SIGNUP, payload),
 } as const;

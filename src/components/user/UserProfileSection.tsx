@@ -1,0 +1,196 @@
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { User, Settings, LogOut } from 'lucide-react';
+import { useAuthStatus, useLogoutMutation } from '@/hooks';
+import { useAuthStore } from '@/stores/auth';
+import { ROUTES } from '@/constants';
+import Dropdown from '../common/Dropdown';
+import UserAvatar from './UserAvatar';
+
+interface UserProfileSectionProps {
+  // 컴포넌트 사용 위치에 따른 스타일 변형
+  variant?: 'header' | 'study-sidebar';
+  // 모바일 메뉴 닫기 콜백 (헤더 모바일 메뉴에서 사용)
+  onMobileMenuClose?: () => void;
+}
+
+/**
+ * 사용자 프로필 섹션 컴포넌트
+ */
+const UserProfileSection: React.FC<UserProfileSectionProps> = ({
+  variant = 'header',
+  onMobileMenuClose,
+}) => {
+  const { isAuthenticated, isAuthLoading } = useAuthStatus();
+  const { user } = useAuthStore();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const logoutMutation = useLogoutMutation();
+
+  // 로그아웃 핸들러
+  const handleLogout = () => {
+    logoutMutation.mutate();
+    setIsDropdownOpen(false);
+    onMobileMenuClose?.();
+  };
+
+  // 프로필 관리 핸들러
+  const handleProfileManage = () => {
+    // TODO: 마이페이지로 이동 라우팅 연결
+    setIsDropdownOpen(false);
+    onMobileMenuClose?.();
+  };
+
+  // 설정 이동 핸들러
+  const handleOpenSettings = () => {
+    // TODO: 설정 페이지로 이동 라우팅 연결
+    setIsDropdownOpen(false);
+    onMobileMenuClose?.();
+  };
+
+  // 로딩 상태
+  if (isAuthLoading) {
+    return (
+      <div
+        className={`flex items-center ${variant === 'study-sidebar' ? 'gap-3 p-4' : 'gap-2 px-3 py-2'}`}
+      >
+        <div
+          className={`${variant === 'study-sidebar' ? 'w-10 h-10' : 'w-8 h-8'} bg-muted rounded-full animate-pulse`}
+        />
+        <div className={variant === 'study-sidebar' ? 'flex-1' : ''}>
+          <div
+            className={`${variant === 'study-sidebar' ? 'h-4 mb-1' : 'h-4'} bg-muted rounded-md animate-pulse`}
+          />
+          {variant === 'study-sidebar' && (
+            <div className='h-3 bg-muted rounded-md animate-pulse w-2/3' />
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // 비로그인 상태
+  if (!isAuthenticated) {
+    const loginButton = (
+      <Link
+        to={ROUTES.LOGIN}
+        className={`flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-md hover:bg-primary-hover transition-colors font-medium ${
+          variant === 'study-sidebar' ? 'w-full px-4 py-2.5' : 'px-3 py-2'
+        }`}
+        onClick={onMobileMenuClose}
+      >
+        로그인
+      </Link>
+    );
+
+    return variant === 'study-sidebar' ? (
+      <div className='p-4'>{loginButton}</div>
+    ) : (
+      loginButton
+    );
+  }
+
+  // 드롭다운 메뉴 아이템 (마이페이지 / 설정 / 로그아웃)
+  const menuItems = [
+    {
+      icon: <User className='w-4 h-4' />,
+      label: '마이페이지',
+      onClick: handleProfileManage,
+    },
+    {
+      icon: <Settings className='w-4 h-4' />,
+      label: '설정',
+      onClick: handleOpenSettings,
+    },
+    {
+      icon: <LogOut className='w-4 h-4' />,
+      label: '로그아웃',
+      onClick: handleLogout,
+      destructive: true,
+    },
+  ];
+
+  // 통합된 프로필 버튼 컴포넌트
+  const ProfileTrigger = () => {
+    const isHeader = variant === 'header';
+    const avatarSize = isHeader ? 'w-8 h-8 text-sm' : 'w-10 h-10 text-sm';
+
+    return (
+      <button
+        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+        className={`flex items-center gap-3 px-4 py-3 text-sm rounded-lg transition-all duration-200 group w-full ${
+          isHeader
+            ? 'hover:bg-secondary/90 min-w-0'
+            : 'border-t border-border rounded-none bg-secondary/80 hover:bg-secondary/90'
+        } ${isDropdownOpen ? (isHeader ? 'bg-accent/30 border-border/50' : 'bg-secondary/90') : ''}`}
+      >
+        <div className='relative flex-shrink-0'>
+          <UserAvatar
+            imageKey={user.imageKey}
+            name={user.nickname}
+            className={`${avatarSize} ${isDropdownOpen ? 'ring-2 ring-primary/30' : ''}`}
+          />
+        </div>
+
+        {/* 사용자 정보 - 데스크톱과 모바일 통합 */}
+        <div className='flex flex-col items-start min-w-0 flex-1 text-left'>
+          <span className='font-medium text-foreground group-hover:text-accent-foreground transition-colors leading-tight text-sm'>
+            {user.nickname}
+          </span>
+          {user.currentStudy && (
+            <span className='text-xs text-muted-foreground mt-0.5 leading-relaxed'>
+              {user.currentStudy.title}
+            </span>
+          )}
+        </div>
+      </button>
+    );
+  };
+
+  // 메뉴 아이템 렌더링 (개선된 디자인)
+  const MenuItems = () => (
+    <div className='py-2'>
+      {menuItems.map((item, index) => (
+        <button
+          key={index}
+          onClick={item.onClick}
+          className={`flex items-center gap-3 w-full px-4 py-3 text-sm font-medium transition-all duration-200 hover:bg-accent/50 ${
+            item.destructive
+              ? 'text-destructive hover:text-destructive hover:bg-destructive/5'
+              : 'text-foreground hover:text-accent-foreground'
+          }`}
+        >
+          <span
+            className={`flex-shrink-0 w-4 h-4 transition-colors ${
+              item.destructive ? 'text-destructive' : 'text-muted-foreground'
+            }`}
+          >
+            {item.icon}
+          </span>
+          <span className='text-left flex-1'>{item.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+
+  // 드롭다운 설정
+  const dropdownConfig =
+    variant === 'study-sidebar'
+      ? { position: 'top' as const, align: 'left' as const }
+      : { position: 'bottom' as const, align: 'right' as const };
+
+  return (
+    <Dropdown
+      position={dropdownConfig.position}
+      align={dropdownConfig.align}
+      offsetClass={variant === 'header' ? 'mt-4' : undefined}
+      isOpen={isDropdownOpen}
+      onOpenChange={setIsDropdownOpen}
+      onClose={onMobileMenuClose}
+      trigger={<ProfileTrigger />}
+    >
+      <MenuItems />
+    </Dropdown>
+  );
+};
+
+export default UserProfileSection;

@@ -2,9 +2,9 @@ import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import type { LoginPayload } from '../types';
 import { ROUTES } from '@/constants';
-import { loginService } from '../services';
 import { useAuthStore } from '@/stores/auth';
-import { loadUserProfile } from '@/utils';
+import { useLoadUserProfile } from '@/hooks';
+import { loginService } from '../services';
 
 /**
  * 로그인 뮤테이션 훅
@@ -15,17 +15,18 @@ import { loadUserProfile } from '@/utils';
 export const useLoginMutation = () => {
   const navigate = useNavigate();
   const { setAccessToken } = useAuthStore();
+  const loadUserProfileMutation = useLoadUserProfile();
 
   return useMutation({
-    mutationFn: (data: LoginPayload) => loginService(data),
+    mutationFn: (payload: LoginPayload) => loginService(payload),
     onSuccess: async (result) => {
       // 액세스 토큰을 메모리에 저장 (리프레시 토큰은 HttpOnly 쿠키로 자동 관리)
       if (result?.accessToken) {
         setAccessToken(result.accessToken);
 
         try {
-          // 공통 프로필 로드 함수 사용
-          await loadUserProfile();
+          // 로그인 직후 프로필 쿼리 refetch로 동기화
+          await loadUserProfileMutation.refetch();
         } catch (error) {
           console.warn('프로필 로드 실패:', error);
           // 프로필 로드 실패해도 로그인은 유지

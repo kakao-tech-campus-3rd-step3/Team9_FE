@@ -12,11 +12,13 @@ interface SidebarHeaderProps {
  */
 function SidebarHeader({ studyName, studyImageUrl }: SidebarHeaderProps) {
   return (
-    <div className='border-b border-border flex flex-col items-start'>
-      <div className='w-full p-4'>
-        <Logo size='md' />
+    <div className='border-b border-border flex flex-col items-start bg-background'>
+      <div className='w-full p-4 sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80'>
+        <div className='flex items-center'>
+          <Logo size='md' />
+        </div>
       </div>
-      <div className='w-full p-4 flex items-center gap-3 min-w-0 border-t border-border bg-secondary'>
+      <div className='w-full p-4 flex items-center gap-3 min-w-0 border-t border-border bg-secondary/80'>
         {studyImageUrl ? (
           <img
             src={studyImageUrl}

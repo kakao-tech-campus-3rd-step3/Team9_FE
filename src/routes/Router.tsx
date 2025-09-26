@@ -148,10 +148,15 @@ const router = createBrowserRouter([
         ],
       },
 
-      // 커스텀 레이아웃을 사용하는 영역
+      // 헤더만 사용하는 영역 - 스터디 탐색
       {
-        path: ROUTES.STUDY.EXPLORE,
-        element: <routes.StudyExplore />,
+        element: <Layout layoutType='header-only' />,
+        children: [
+          {
+            path: ROUTES.STUDY.EXPLORE,
+            element: <routes.StudyExplore />,
+          },
+        ],
       },
     ],
   },
