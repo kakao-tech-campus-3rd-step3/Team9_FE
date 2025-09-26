@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Home, Search, BookOpen } from 'lucide-react';
-import { Logo, UserProfileSection } from '@/components/common';
+import { Logo } from '@/components/common';
+import { UserProfileSection } from '@/components/user';
 import { ROUTES } from '@/constants';
 
 /**

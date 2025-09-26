@@ -4,10 +4,10 @@ import { User, LogOut } from 'lucide-react';
 import { useAuthStatus, useLogoutMutation } from '@/hooks';
 import { useAuthStore } from '@/stores/auth';
 import { ROUTES } from '@/constants';
-import Dropdown from './Dropdown';
-import DropdownMenu from './DropdownMenu';
+import Dropdown from '../common/Dropdown';
 import ProfileButton from './ProfileButton';
 import UserAvatar from './UserAvatar';
+import UserInfoSection from './UserInfoSection';
 
 interface UserProfileSectionProps {
   /** 컴포넌트 사용 위치에 따른 스타일 변형 */
@@ -140,12 +140,32 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
           </button>
         }
       >
-        <DropdownMenu
-          showUserInfo
-          nickname={user.nickname}
-          currentStudyTitle={user.currentStudy?.title}
-          items={dropdownItems}
-        />
+        <div className='py-2'>
+          <UserInfoSection
+            nickname={user.nickname}
+            currentStudyTitle={user.currentStudy?.title}
+          />
+          <div className='py-1'>
+            {dropdownItems.map((item, index) => (
+              <button
+                key={index}
+                onClick={item.onClick}
+                className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
+                  item.destructive
+                    ? 'text-destructive hover:bg-destructive/10 hover:text-destructive'
+                    : 'text-foreground hover:bg-accent hover:text-accent-foreground'
+                }`}
+              >
+                <span
+                  className={`flex-shrink-0 ${item.destructive ? 'text-destructive' : 'text-muted-foreground'}`}
+                >
+                  {item.icon}
+                </span>
+                <span className='text-left'>{item.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
       </Dropdown>
     );
   }
@@ -166,12 +186,32 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
         />
       }
     >
-      <DropdownMenu
-        showUserInfo={true}
-        nickname={user.nickname}
-        currentStudyTitle={user.currentStudy?.title}
-        items={dropdownItems}
-      />
+      <div className='py-2'>
+        <UserInfoSection
+          nickname={user.nickname}
+          currentStudyTitle={user.currentStudy?.title}
+        />
+        <div className='py-1'>
+          {dropdownItems.map((item, index) => (
+            <button
+              key={index}
+              onClick={item.onClick}
+              className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
+                item.destructive
+                  ? 'text-destructive hover:bg-destructive/10 hover:text-destructive'
+                  : 'text-foreground hover:bg-accent hover:text-accent-foreground'
+              }`}
+            >
+              <span
+                className={`flex-shrink-0 ${item.destructive ? 'text-destructive' : 'text-muted-foreground'}`}
+              >
+                {item.icon}
+              </span>
+              <span className='text-left'>{item.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
     </Dropdown>
   );
 };

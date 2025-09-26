@@ -1,5 +1,5 @@
 import { mockStudy } from '@/pages/(study)/mock/sidebarData';
-import { UserProfileSection } from '@/components/common';
+import { UserProfileSection } from '@/components/user';
 import SidebarHeader from './SidebarHeader';
 import SidebarNav from './SidebarNav';
 
