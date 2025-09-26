@@ -7,20 +7,16 @@ import { ROUTES } from '@/constants';
 import Dropdown from '../common/Dropdown';
 import ProfileButton from './ProfileButton';
 import UserAvatar from './UserAvatar';
-import UserInfoSection from './UserInfoSection';
 
 interface UserProfileSectionProps {
-  /** 컴포넌트 사용 위치에 따른 스타일 변형 */
+  // 컴포넌트 사용 위치에 따른 스타일 변형
   variant?: 'header' | 'study-sidebar';
-  /** 모바일 메뉴 닫기 콜백 (헤더 모바일 메뉴에서 사용) */
+  // 모바일 메뉴 닫기 콜백 (헤더 모바일 메뉴에서 사용)
   onMobileMenuClose?: () => void;
 }
 
 /**
- * 범용 사용자 프로필 섹션 컴포넌트
- * - 로그인 상태에 따라 로그인 버튼 또는 사용자 프로필 표시
- * - 프로필 드롭다운 메뉴 지원 (로그아웃 포함)
- * - variant를 통해 헤더/스터디 사이드바에서 재사용 가능
+ * 사용자 프로필 섹션 컴포넌트
  */
 const UserProfileSection: React.FC<UserProfileSectionProps> = ({
   variant = 'header',
@@ -45,54 +41,50 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
     onMobileMenuClose?.();
   };
 
-  // 로딩 중일 때
+  // 로딩 상태
   if (isAuthLoading) {
-    if (variant === 'study-sidebar') {
-      return (
-        <div className='flex items-center gap-3 p-3'>
-          <div className='w-8 h-8 bg-muted rounded-full animate-pulse' />
-          <div className='flex-1'>
-            <div className='h-4 bg-muted rounded animate-pulse mb-1' />
-            <div className='h-3 bg-muted rounded animate-pulse w-2/3' />
-          </div>
-        </div>
-      );
-    }
     return (
-      <div className='flex items-center gap-2 px-3 py-2'>
-        <div className='w-8 h-8 bg-muted rounded-full animate-pulse' />
-        <div className='h-4 bg-muted rounded animate-pulse w-20' />
+      <div
+        className={`flex items-center ${variant === 'study-sidebar' ? 'gap-3 p-4' : 'gap-2 px-3 py-2'}`}
+      >
+        <div
+          className={`${variant === 'study-sidebar' ? 'w-10 h-10' : 'w-8 h-8'} bg-muted rounded-full animate-pulse`}
+        />
+        <div className={variant === 'study-sidebar' ? 'flex-1' : ''}>
+          <div
+            className={`${variant === 'study-sidebar' ? 'h-4 mb-1' : 'h-4'} bg-muted rounded-md animate-pulse`}
+          />
+          {variant === 'study-sidebar' && (
+            <div className='h-3 bg-muted rounded-md animate-pulse w-2/3' />
+          )}
+        </div>
       </div>
     );
   }
 
-  // 로그인하지 않은 경우
+  // 비로그인 상태
   if (!isAuthenticated) {
-    if (variant === 'study-sidebar') {
-      return (
-        <div className='p-3'>
-          <Link
-            to={ROUTES.LOGIN}
-            className='flex items-center justify-center gap-2 w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors'
-            onClick={onMobileMenuClose}
-          >
-            로그인
-          </Link>
-        </div>
-      );
-    }
-    return (
+    const loginButton = (
       <Link
         to={ROUTES.LOGIN}
-        className='flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors'
+        className={`flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-md hover:bg-primary-hover transition-colors font-medium ${
+          variant === 'study-sidebar' ? 'w-full px-4 py-2.5' : 'px-3 py-2'
+        }`}
+        onClick={onMobileMenuClose}
       >
         로그인
       </Link>
     );
+
+    return variant === 'study-sidebar' ? (
+      <div className='p-4'>{loginButton}</div>
+    ) : (
+      loginButton
+    );
   }
 
-  // 드롭다운 메뉴 아이템들
-  const dropdownItems = [
+  // 드롭다운 메뉴 아이템
+  const menuItems = [
     {
       icon: <User className='w-4 h-4' />,
       label: '프로필 관리',
@@ -106,6 +98,44 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
     },
   ];
 
+  // 사용자 정보 섹션 (인라인으로 단순화)
+  const UserInfo = () => (
+    <div className='px-4 py-3 border-b border-border bg-muted/50'>
+      <p className='text-sm font-semibold text-foreground'>{user.nickname}</p>
+      {user.currentStudy && (
+        <p className='text-xs text-muted-foreground mt-1'>
+          {user.currentStudy.title}
+        </p>
+      )}
+    </div>
+  );
+
+  // 메뉴 아이템 렌더링
+  const MenuItems = () => (
+    <div className='p-1'>
+      {menuItems.map((item, index) => (
+        <button
+          key={index}
+          onClick={item.onClick}
+          className={`flex items-center gap-3 w-full px-3 py-2.5 text-sm font-medium rounded-md transition-colors ${
+            item.destructive
+              ? 'text-destructive hover:bg-destructive/10'
+              : 'text-foreground hover:bg-accent hover:text-accent-foreground'
+          }`}
+        >
+          <span
+            className={`flex-shrink-0 w-4 h-4 ${
+              item.destructive ? 'text-destructive' : 'text-muted-foreground'
+            }`}
+          >
+            {item.icon}
+          </span>
+          <span className='text-left flex-1'>{item.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+
   // 스터디 사이드바 variant
   if (variant === 'study-sidebar') {
     return (
@@ -116,15 +146,15 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
         onOpenChange={setIsDropdownOpen}
         onClose={onMobileMenuClose}
         trigger={
-          <button className='flex items-center gap-3 p-4 w-full hover:bg-accent/50 transition-all duration-200 group border-t border-border/50'>
+          <button className='flex items-center gap-3 p-4 w-full hover:bg-accent transition-colors group border-t border-border'>
             <div className='relative'>
               <UserAvatar
                 imageKey={user.imageKey}
                 name={user.nickname}
-                className='w-10 h-10 shadow-md border border-background/50'
+                className='w-10 h-10 shadow-sm border-2 border-background'
               />
               {isDropdownOpen && (
-                <div className='absolute inset-0 rounded-full bg-primary/20 border-2 border-primary/30' />
+                <div className='absolute inset-0 rounded-full bg-primary/20 border-2 border-primary ring-2 ring-primary/20' />
               )}
             </div>
             <div className='flex-1 text-left min-w-0'>
@@ -132,7 +162,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
                 {user.nickname}
               </p>
               {user.currentStudy && (
-                <p className='text-xs text-muted-foreground truncate mt-0.5'>
+                <p className='text-xs text-muted-foreground truncate mt-1'>
                   {user.currentStudy.title}
                 </p>
               )}
@@ -140,32 +170,8 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
           </button>
         }
       >
-        <div className='py-2'>
-          <UserInfoSection
-            nickname={user.nickname}
-            currentStudyTitle={user.currentStudy?.title}
-          />
-          <div className='py-1'>
-            {dropdownItems.map((item, index) => (
-              <button
-                key={index}
-                onClick={item.onClick}
-                className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
-                  item.destructive
-                    ? 'text-destructive hover:bg-destructive/10 hover:text-destructive'
-                    : 'text-foreground hover:bg-accent hover:text-accent-foreground'
-                }`}
-              >
-                <span
-                  className={`flex-shrink-0 ${item.destructive ? 'text-destructive' : 'text-muted-foreground'}`}
-                >
-                  {item.icon}
-                </span>
-                <span className='text-left'>{item.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
+        <UserInfo />
+        <MenuItems />
       </Dropdown>
     );
   }
@@ -180,38 +186,13 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
       trigger={
         <ProfileButton
           user={user}
-          size='md'
           isDropdownOpen={isDropdownOpen}
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         />
       }
     >
-      <div className='py-2'>
-        <UserInfoSection
-          nickname={user.nickname}
-          currentStudyTitle={user.currentStudy?.title}
-        />
-        <div className='py-1'>
-          {dropdownItems.map((item, index) => (
-            <button
-              key={index}
-              onClick={item.onClick}
-              className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
-                item.destructive
-                  ? 'text-destructive hover:bg-destructive/10 hover:text-destructive'
-                  : 'text-foreground hover:bg-accent hover:text-accent-foreground'
-              }`}
-            >
-              <span
-                className={`flex-shrink-0 ${item.destructive ? 'text-destructive' : 'text-muted-foreground'}`}
-              >
-                {item.icon}
-              </span>
-              <span className='text-left'>{item.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
+      <UserInfo />
+      <MenuItems />
     </Dropdown>
   );
 };
