@@ -2,7 +2,7 @@
  * 스터디 정보 관리 컴포넌트
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { MapPin, Plus, X, Camera } from 'lucide-react';
 import RegionSelectModal from '../../components/RegionSelectModal';
@@ -24,6 +24,7 @@ export const StudyInfoManagement: React.FC = () => {
   const [isRegionModalOpen, setIsRegionModalOpen] = useState(false);
   const [conditionInput, setConditionInput] = useState('');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isComposing, setIsComposing] = useState(false);
 
   const { control, register, handleSubmit, setValue, watch } =
     useForm<StudyInfoFormData>({
@@ -35,30 +36,85 @@ export const StudyInfoManagement: React.FC = () => {
         maxMembers: MOCK_STUDY_INFO.maxMembers,
         schedule: MOCK_STUDY_INFO.schedule,
         region: MOCK_STUDY_INFO.region,
-        conditions: MOCK_STUDY_INFO.conditions,
+        conditions: [...MOCK_STUDY_INFO.conditions], // 배열 복사본으로 명시적 설정
       },
     });
 
   const watchedConditions = watch('conditions');
   const watchedRegion = watch('region');
 
+  // 컴포넌트 마운트 시 conditions를 정리하고 설정
+  useEffect(() => {
+    const currentConditions = watch('conditions');
+    let cleanConditions: string[] = [];
+
+    if (Array.isArray(currentConditions)) {
+      // 배열인 경우, 유효한 문자열만 필터링 (길이 1 이상, 의미있는 조건)
+      cleanConditions = currentConditions.filter(
+        (item: unknown) => typeof item === 'string' && item.trim().length > 1,
+      );
+    } else if (typeof currentConditions === 'string') {
+      const trimmed = (currentConditions as string).trim();
+      if (trimmed.length > 1) {
+        cleanConditions = [trimmed];
+      }
+    }
+
+    // 정리된 조건이 원본과 다르면 업데이트
+    if (JSON.stringify(cleanConditions) !== JSON.stringify(currentConditions)) {
+      setValue('conditions', cleanConditions);
+    }
+  }, [setValue, watch]);
+
   const handleConditionAdd = () => {
+    // 한글 입력 중이면 처리하지 않음
+    if (isComposing) return;
+
     const trimmedInput = conditionInput.trim();
-    if (trimmedInput && !watchedConditions.includes(trimmedInput)) {
-      setValue('conditions', [...watchedConditions, trimmedInput]);
+
+    // watchedConditions를 안전하게 배열로 변환
+    let currentConditions: string[] = [];
+
+    if (Array.isArray(watchedConditions)) {
+      // 배열인 경우, 각 요소가 문자열인지 확인
+      currentConditions = watchedConditions.filter(
+        (item: unknown) => typeof item === 'string' && item.length > 0,
+      );
+    } else if (typeof watchedConditions === 'string') {
+      // 문자열인 경우, 단일 요소 배열로 변환
+      if ((watchedConditions as string).length > 0) {
+        currentConditions = [watchedConditions];
+      }
+    }
+
+    if (trimmedInput && !currentConditions.includes(trimmedInput)) {
+      const newConditions = [...currentConditions, trimmedInput];
+      setValue('conditions', newConditions);
       setConditionInput('');
     }
   };
 
   const handleConditionRemove = (index: number) => {
-    const updatedConditions = watchedConditions.filter((_, i) => i !== index);
+    // watchedConditions가 문자열인 경우 배열로 변환
+    let currentConditions: string[];
+    if (Array.isArray(watchedConditions)) {
+      currentConditions = watchedConditions;
+    } else if (typeof watchedConditions === 'string') {
+      currentConditions = [watchedConditions];
+    } else {
+      currentConditions = [];
+    }
+
+    const updatedConditions = currentConditions.filter((_, i) => i !== index);
     setValue('conditions', updatedConditions);
   };
 
   const handleConditionKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !isComposing) {
       e.preventDefault();
       handleConditionAdd();
+      // 입력 필드를 완전히 비우기
+      setTimeout(() => setConditionInput(''), 0);
     }
   };
 
@@ -218,6 +274,8 @@ export const StudyInfoManagement: React.FC = () => {
                 value={conditionInput}
                 onChange={(e) => setConditionInput(e.target.value)}
                 onKeyDown={handleConditionKeyDown}
+                onCompositionStart={() => setIsComposing(true)}
+                onCompositionEnd={() => setIsComposing(false)}
                 className='flex-1 px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary'
                 placeholder='참여조건을 입력하세요'
               />
@@ -230,7 +288,12 @@ export const StudyInfoManagement: React.FC = () => {
               </button>
             </div>
             <div className='flex flex-wrap gap-2'>
-              {watchedConditions.map((condition, index) => (
+              {(Array.isArray(watchedConditions)
+                ? watchedConditions
+                : typeof watchedConditions === 'string'
+                  ? [watchedConditions]
+                  : []
+              ).map((condition, index) => (
                 <span
                   key={index}
                   className='flex items-center px-3 py-1 bg-secondary text-secondary-foreground rounded-full text-sm'
