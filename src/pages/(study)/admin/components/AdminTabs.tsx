@@ -12,26 +12,12 @@ interface AdminTabsProps {
 }
 
 export const AdminTabs: React.FC<AdminTabsProps> = ({ activeTab }) => {
-  // 탭 ID를 상대 URL로 매핑
-  const getTabUrl = (tabId: string) => {
-    switch (tabId) {
-      case 'members':
-        return 'members';
-      case 'applicants':
-        return 'applicants';
-      case 'study-info':
-        return 'study-info';
-      default:
-        return 'members';
-    }
-  };
-
   return (
     <div className='flex space-x-1 mb-6'>
       {ADMIN_TABS.map((tab) => (
         <Link
           key={tab.id}
-          to={getTabUrl(tab.id)}
+          to={tab.id ?? 'members'}
           className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
             activeTab === tab.id
               ? 'bg-primary text-primary-foreground'
