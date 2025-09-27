@@ -8,22 +8,28 @@ import { ADMIN_TABS } from '../constants';
 
 export const AdminTabs: React.FC = () => {
   return (
-    <div className='flex space-x-1 mb-6'>
+    <nav className='flex px-4 gap-2 border-b border-border mb-6'>
       {ADMIN_TABS.map((tab) => (
         <NavLink
           key={tab.id}
           to={tab.id ?? 'members'}
           className={({ isActive }) =>
-            `px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              isActive
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-            }`
+            `p-2 ${isActive ? 'border-primary border-b-2' : ''}`
           }
         >
-          {tab.label}
+          {({ isActive }) => (
+            <div
+              className={`px-4 py-2 border rounded-2xl min-w-30 text-center text-sm border-primary transition-colors ${
+                isActive
+                  ? 'font-bold bg-primary text-white'
+                  : 'font-medium text-muted-foreground hover:text-foreground hover:bg-accent'
+              }`}
+            >
+              {tab.label}
+            </div>
+          )}
         </NavLink>
       ))}
-    </div>
+    </nav>
   );
 };
