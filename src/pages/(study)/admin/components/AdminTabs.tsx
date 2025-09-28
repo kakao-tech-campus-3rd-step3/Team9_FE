@@ -3,44 +3,33 @@
  */
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { ADMIN_TABS } from '../constants';
-import type { AdminTabType } from '../types';
 
-interface AdminTabsProps {
-  activeTab: AdminTabType;
-}
-
-export const AdminTabs: React.FC<AdminTabsProps> = ({ activeTab }) => {
-  // 탭 ID를 상대 URL로 매핑
-  const getTabUrl = (tabId: string) => {
-    switch (tabId) {
-      case 'members':
-        return 'members';
-      case 'applicants':
-        return 'applicants';
-      case 'study-info':
-        return 'study-info';
-      default:
-        return 'members';
-    }
-  };
-
+export const AdminTabs: React.FC = () => {
   return (
-    <div className='flex space-x-1 mb-6'>
+    <nav className='flex px-4 gap-2 border-b border-border mb-6'>
       {ADMIN_TABS.map((tab) => (
-        <Link
+        <NavLink
           key={tab.id}
-          to={getTabUrl(tab.id)}
-          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-            activeTab === tab.id
-              ? 'bg-primary text-primary-foreground'
-              : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-          }`}
+          to={tab.id ?? 'members'}
+          className={({ isActive }) =>
+            `p-2 ${isActive ? 'border-primary border-b-2' : ''}`
+          }
         >
-          {tab.label}
-        </Link>
+          {({ isActive }) => (
+            <div
+              className={`px-4 py-2 border rounded-2xl min-w-30 text-center text-sm border-primary transition-colors ${
+                isActive
+                  ? 'font-bold bg-primary text-white'
+                  : 'font-medium text-muted-foreground hover:text-foreground hover:bg-accent'
+              }`}
+            >
+              {tab.label}
+            </div>
+          )}
+        </NavLink>
       ))}
-    </div>
+    </nav>
   );
 };
