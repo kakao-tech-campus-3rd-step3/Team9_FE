@@ -9,8 +9,9 @@ import { downloadImageService } from '@/services/images/downloadImage';
 export const useImageUrl = (imageKey?: string) => {
   const query = useQuery({
     queryKey: ['image-url', imageKey],
-    queryFn: () => downloadImageService.getImagePresignedUrl(imageKey!),
-    enabled: !!imageKey,
+    queryFn: () => downloadImageService.getImagePresignedUrl(imageKey || ''),
+    enabled: Boolean(imageKey && imageKey.trim().length > 0),
+    staleTime: 5 * 60 * 1000,
   });
 
   return {

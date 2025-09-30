@@ -3,4 +3,7 @@ export * from './useCurrentStudy';
 export * from './useImageUrl';
 export { useLogoutMutation } from './useLogoutMutation';
 export { useLoadUserProfile } from './useLoadUserProfile';
-export { useUploadMutation } from './useUploadMutation';
+export {
+  usePhotoUploadMutation,
+  useFileUploadMutation,
+} from './useUploadMutation';
