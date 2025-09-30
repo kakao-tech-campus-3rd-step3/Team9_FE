@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Plus, FileText, Trash2, X } from 'lucide-react';
 import { cn } from '@/pages/(study)/dashboard/utils';
@@ -9,9 +9,14 @@ import {
   WeekFilter,
   ConfirmDialog,
 } from './components';
-import { mockMaterials } from './mock';
-import { TOAST_MESSAGES } from './constants';
+import {
+  useMaterialsQuery,
+  useDeleteMaterialsMutation,
+} from './hooks/useMaterials';
+import { TOAST_MESSAGES, MATERIAL_CATEGORIES_KR } from './constants';
 import type { Material } from './types';
+import { LoadingSpinner } from '@/components/common';
+import { EmptyState } from './components/common';
 
 /**
  * 문서 관리 페이지
@@ -19,29 +24,39 @@ import type { Material } from './types';
 const DocumentPage = () => {
   const navigate = useNavigate();
 
-  // 상태 관리
-  const [materials] = useState<Material[]>(mockMaterials); // 자료 목록
+  // 상태 관리 (서버 필터만 사용, 로컬 목록 상태 없음)
+  const { study_id } = useParams<{ study_id: string }>();
+  // URL 동기화 제거로 쿼리 파라미터 사용하지 않음
   const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]); // 선택된 자료 ID 목록
   const [selectedWeeks, setSelectedWeeks] = useState<string[]>([]); // 선택된 주차 필터
   const [search, setSearch] = useState(''); // 검색어
   const [isConfirmOpen, setIsConfirmOpen] = useState(false); // 삭제 확인 다이얼로그 상태
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [page, setPage] = useState<number>(0);
+  const [size] = useState<number>(10);
+  const [sort, setSort] = useState<string>('createdAt,desc');
 
-  // 주차별 필터와 검색어에 따른 자료 목록 필터링
-  const filteredMaterials = useMemo(() => {
-    return materials.filter((material) => {
-      const matchesWeeks =
-        selectedWeeks.length === 0 || selectedWeeks.includes(material.category);
-      const matchesSearch =
-        search === '' ||
-        material.title.toLowerCase().includes(search.toLowerCase()) ||
-        material.content.toLowerCase().includes(search.toLowerCase());
-      return matchesWeeks && matchesSearch;
-    });
-  }, [materials, selectedWeeks, search]);
+  // 목록 로드 (TanStack Query)
+  const weekNumbers = selectedWeeks
+    .map((w) => parseInt(w.replace('week', '')))
+    .filter((n) => !Number.isNaN(n));
+  const studyIdNum = Number(study_id);
+  const materialsQuery = useMaterialsQuery(studyIdNum, {
+    week: weekNumbers.length > 0 ? weekNumbers : undefined,
+    category: selectedCategories.length > 0 ? selectedCategories : undefined,
+    keyword: search || undefined,
+    page,
+    size,
+    sort,
+  });
+
+  // 서버 필터만 사용 (추가 클라이언트 필터 없음)
+  const materialsFromQuery: Material[] =
+    (materialsQuery.data?.materials as Material[]) ?? [];
 
   // 네비게이션 핸들러
-  const handleMaterialClick = (id: string) => navigate(`/study/document/${id}`);
-  const handleAddMaterial = () => navigate('/study/document/add');
+  const handleMaterialClick = (id: string) => navigate(id);
+  const handleAddMaterial = () => navigate('add');
 
   // 자료 선택 관련 핸들러
   const handleSelectMaterial = (id: string) => {
@@ -53,12 +68,13 @@ const DocumentPage = () => {
   };
 
   const handleSelectAll = (selected: boolean) => {
-    setSelectedMaterials(selected ? filteredMaterials.map((m) => m.id) : []);
+    setSelectedMaterials(selected ? materialsFromQuery.map((m) => m.id) : []);
   };
 
   const handleClearSelection = () => setSelectedMaterials([]);
 
   // 액션 핸들러
+  // - 퀴즈 생성(토스트), 다중 삭제(확인 모달)
   const handleCreateQuiz = () => {
     toast.success(TOAST_MESSAGES.QUIZ_CREATE_SUCCESS);
     setSelectedMaterials([]);
@@ -68,10 +84,51 @@ const DocumentPage = () => {
     setIsConfirmOpen(true);
   };
 
-  const confirmDelete = () => {
-    toast.error(TOAST_MESSAGES.DELETE_MULTIPLE_SUCCESS);
-    setSelectedMaterials([]);
-    setIsConfirmOpen(false);
+  const deleteMutation = useDeleteMaterialsMutation(Number(study_id));
+  // 선택 삭제 확정: 삭제 → 토스트 → 선택 해제 → 첫 페이지로 이동
+  const confirmDelete = async () => {
+    try {
+      if (selectedMaterials.length === 0) return;
+      await deleteMutation.mutateAsync(
+        selectedMaterials.map((id) => Number(id)),
+      );
+      toast.error(TOAST_MESSAGES.DELETE_MULTIPLE_SUCCESS);
+      setSelectedMaterials([]);
+      setIsConfirmOpen(false);
+      // refresh list
+      setPage(0);
+    } catch {
+      toast.error('자료 삭제 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 카테고리 토글/초기화: 서버 쿼리 파라미터 갱신 유도
+  const toggleCategory = (cat: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat],
+    );
+    setPage(0);
+  };
+
+  const clearCategory = () => {
+    setSelectedCategories([]);
+    setPage(0);
+  };
+
+  // 정렬 토글: 최신순/오래된순 전환
+  const toggleSort = () => {
+    setSort((prev) =>
+      prev === 'createdAt,desc' ? 'createdAt,asc' : 'createdAt,desc',
+    );
+    setPage(0);
+  };
+
+  // 페이지 이동: 이전/다음
+  const goPrev = () => {
+    setPage((p) => Math.max(0, p - 1));
+  };
+  const goNext = () => {
+    if (materialsQuery.data?.hasNext) setPage((p) => p + 1);
   };
 
   return (
@@ -139,25 +196,105 @@ const DocumentPage = () => {
       <div className='flex-1 flex overflow-hidden'>
         {/* 주차별 필터 */}
         <WeekFilter
-          materials={materials}
+          materials={materialsFromQuery}
           selectedWeeks={selectedWeeks}
           onWeekChange={setSelectedWeeks}
         />
 
-        {/* 검색 + 테이블 영역 */}
+        {/* 검색 + 필터 + 테이블 영역 */}
         <div className='flex-1 flex flex-col overflow-hidden'>
           {/* 검색 */}
           <MaterialSearch searchTerm={search} onSearchChange={setSearch} />
 
-          {/* 테이블 */}
-          <div className='flex-1 overflow-y-auto bg-background p-4'>
-            <MaterialTable
-              materials={filteredMaterials}
-              selectedMaterials={selectedMaterials}
-              onSelectMaterial={handleSelectMaterial}
-              onSelectAll={handleSelectAll}
-              onMaterialClick={handleMaterialClick}
-            />
+          {/* 카테고리 필터 */}
+          <div className='px-4 py-2 flex items-center gap-2 flex-wrap'>
+            {MATERIAL_CATEGORIES_KR.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() =>
+                  cat.id === 'all' ? clearCategory() : toggleCategory(cat.id)
+                }
+                className={cn(
+                  'px-3 py-1 rounded-lg text-sm border',
+                  cat.id === 'all'
+                    ? 'border-muted-foreground text-muted-foreground hover:bg-accent'
+                    : selectedCategories.includes(cat.id)
+                      ? 'bg-primary/10 text-primary border-primary/30'
+                      : 'text-foreground border-border hover:bg-accent/50',
+                )}
+              >
+                {cat.name}
+              </button>
+            ))}
+            <div className='ml-auto flex items-center gap-2'>
+              <button
+                onClick={toggleSort}
+                className='px-3 py-1 rounded-lg text-sm border border-border hover:bg-accent/50'
+              >
+                {sort === 'createdAt,desc' ? '최신순' : '오래된순'}
+              </button>
+            </div>
+          </div>
+
+          {/* 테이블 / 로딩 / 에러 */}
+          <div className='flex-1 overflow-y-auto bg-background p-4 relative'>
+            {materialsQuery.isLoading ? (
+              <div className='h-full flex items-center justify-center'>
+                <LoadingSpinner />
+              </div>
+            ) : materialsQuery.isError ? (
+              <div className='h-full flex items-center justify-center'>
+                <EmptyState
+                  title='오류가 발생했습니다'
+                  description={'목록을 불러오는 중 오류가 발생했습니다.'}
+                  action={{
+                    label: '다시 시도',
+                    onClick: () => materialsQuery.refetch(),
+                  }}
+                />
+              </div>
+            ) : (
+              <MaterialTable
+                materials={materialsFromQuery}
+                selectedMaterials={selectedMaterials}
+                onSelectMaterial={handleSelectMaterial}
+                onSelectAll={handleSelectAll}
+                onMaterialClick={handleMaterialClick}
+              />
+            )}
+          </div>
+
+          {/* 페이지네이션 */}
+          <div className='px-4 py-3 flex items-center justify-between border-t border-border'>
+            <div className='text-sm text-muted-foreground'>
+              페이지 {page + 1}
+            </div>
+            <div className='flex items-center gap-2'>
+              <button
+                onClick={goPrev}
+                disabled={page === 0}
+                className={cn(
+                  'px-3 py-1.5 rounded-lg text-sm border',
+                  page === 0
+                    ? 'border-muted-foreground/30 text-muted-foreground/50'
+                    : 'border-border hover:bg-accent/50',
+                )}
+              >
+                이전
+              </button>
+              <button
+                onClick={goNext}
+                disabled={!materialsQuery.data?.hasNext}
+                className={cn(
+                  'px-3 py-1.5 rounded-lg text-sm border',
+                  !materialsQuery.data?.hasNext
+                    ? 'border-muted-foreground/30 text-muted-foreground/50'
+                    : 'border-border hover:bg-accent/50',
+                )}
+              >
+                다음
+              </button>
+            </div>
           </div>
         </div>
       </div>

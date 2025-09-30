@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { ROUTE_BUILDERS } from '@/constants';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { ArrowLeft, Edit, Trash2 } from 'lucide-react';
 import { cn } from '@/pages/(study)/dashboard/utils';
@@ -7,31 +8,75 @@ import { MaterialDetail } from './components';
 import { EmptyState } from './components/common';
 import { TOAST_MESSAGES, NAVIGATION_DELAY } from './constants';
 import type { Material } from './types';
-import { mockMaterials } from './mock';
+import { mapApiListItemToMaterial, type ApiMaterialListItem } from './utils';
+import {
+  useMaterialDetailQuery,
+  useDeleteMaterialsMutation,
+} from './hooks/useMaterials';
+import { LoadingSpinner } from '@/components/common';
 
 /**
  * 자료 상세 페이지
  */
 const DocumentDetailPage = () => {
   const { id } = useParams<{ id: string }>();
+  const { study_id } = useParams<{ study_id: string }>();
   const navigate = useNavigate();
 
-  // URL 파라미터로 받은 ID로 자료 찾기
-  const [material] = useState<Material | undefined>(
-    mockMaterials.find((m) => m.id === id),
-  );
+  const [material, setMaterial] = useState<Material | undefined>(undefined);
+
+  const materialId = Number(id);
+  const detailQuery = useMaterialDetailQuery(materialId);
+  useEffect(() => {
+    if (detailQuery.data) {
+      const item =
+        (detailQuery.data as ApiMaterialListItem) ||
+        ({} as ApiMaterialListItem);
+      const mapped = mapApiListItemToMaterial({
+        id: item.id,
+        title: item.title,
+        content: item.content,
+        week: item.week,
+        category: item.category,
+        files: item.files,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+      });
+      setMaterial(mapped);
+    }
+    if (detailQuery.isError) {
+      setMaterial(undefined);
+    }
+  }, [detailQuery.data, detailQuery.isError]);
 
   // 네비게이션 핸들러
-  const handleBack = () => navigate('/study/document');
-  const handleEdit = () =>
-    material && navigate(`/study/document/${material.id}/edit`);
+  const handleBack = () =>
+    navigate(ROUTE_BUILDERS.study.document.list(String(study_id)));
+  const handleEdit = () => material && navigate('edit');
 
   // 자료 삭제 핸들러
-  const handleDelete = () => {
+  const deleteMutation = useDeleteMaterialsMutation(Number(study_id));
+  const handleDelete = async () => {
     if (!material) return;
-    toast.error(TOAST_MESSAGES.DELETE_SUCCESS);
-    setTimeout(() => navigate('/study/document'), NAVIGATION_DELAY);
+    try {
+      await deleteMutation.mutateAsync([Number(material.id)]);
+      toast.error(TOAST_MESSAGES.DELETE_SUCCESS);
+      setTimeout(
+        () => navigate(ROUTE_BUILDERS.study.document.list(String(study_id))),
+        NAVIGATION_DELAY,
+      );
+    } catch {
+      toast.error('자료 삭제 중 오류가 발생했습니다.');
+    }
   };
+
+  if (detailQuery.isLoading) {
+    return (
+      <div className='h-full flex items-center justify-center'>
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   if (!material) {
     return (
@@ -50,8 +95,8 @@ const DocumentDetailPage = () => {
 
         <div className='flex-1 flex items-center justify-center'>
           <EmptyState
-            title='자료를 찾을 수 없습니다'
-            description='요청하신 자료가 존재하지 않거나 삭제되었습니다.'
+            title={'자료를 찾을 수 없습니다'}
+            description={'요청하신 자료가 존재하지 않거나 삭제되었습니다.'}
             action={{
               label: '목록으로 돌아가기',
               onClick: handleBack,

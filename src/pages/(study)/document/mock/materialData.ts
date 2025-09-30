@@ -6,7 +6,8 @@ export const mockMaterials: Material[] = [
     id: '1',
     title: '1차시 학습 자료',
     content: '1차시 학습 내용입니다.',
-    category: 'week1',
+    week: 1,
+    category: '학습자료',
     attachments: [
       {
         id: 'att1',
@@ -30,7 +31,8 @@ export const mockMaterials: Material[] = [
     id: '2',
     title: '2차시 학습 자료',
     content: '2차시 학습 내용입니다.',
-    category: 'week1',
+    week: 1,
+    category: '공지',
     attachments: [
       {
         id: 'att2-2',
@@ -54,7 +56,8 @@ export const mockMaterials: Material[] = [
     id: '3',
     title: '3차시 학습 자료',
     content: '3차시 학습 내용입니다.',
-    category: 'week2',
+    week: 2,
+    category: '학습자료',
     attachments: [],
     createdAt: '2025-01-20T14:15:00Z',
     updatedAt: '2025-01-20T14:15:00Z',
@@ -63,7 +66,8 @@ export const mockMaterials: Material[] = [
     id: '4',
     title: '4차시 학습 자료',
     content: '4차시 학습 내용입니다.',
-    category: 'week2',
+    week: 2,
+    category: '학습자료',
     attachments: [
       {
         id: 'att4',
@@ -80,7 +84,8 @@ export const mockMaterials: Material[] = [
     id: '5',
     title: '5차시 학습 자료',
     content: '5차시 학습 내용입니다.',
-    category: 'week3',
+    week: 3,
+    category: '공지',
     attachments: [
       {
         id: 'att5',

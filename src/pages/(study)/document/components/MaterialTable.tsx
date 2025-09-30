@@ -1,9 +1,9 @@
 import { FileText, Paperclip, Check } from 'lucide-react';
 import { cn } from '@/pages/(study)/dashboard/utils';
-import { formatDate } from '../utils';
+import { formatDate, getWeekNameById, getCategoryKrName } from '../utils';
 import type { Material } from '../types';
-import { MATERIAL_CATEGORIES } from '../constants';
 
+// 자료 목록 테이블: 선택/클릭 콜백을 부모로 위임
 interface MaterialTableProps {
   materials: Material[];
   selectedMaterials: string[];
@@ -22,13 +22,6 @@ const MaterialTable = ({
   onSelectAll,
   onMaterialClick,
 }: MaterialTableProps) => {
-  const getCategoryName = (categoryId: string) => {
-    return (
-      MATERIAL_CATEGORIES.find((cat) => cat.id === categoryId)?.name ||
-      categoryId
-    );
-  };
-
   const isAllSelected =
     materials.length > 0 && selectedMaterials.length === materials.length;
   const isPartiallySelected =
@@ -86,6 +79,9 @@ const MaterialTable = ({
               </th>
               <th className='px-4 py-3 text-left font-semibold text-foreground min-w-16'>
                 주차
+              </th>
+              <th className='px-4 py-3 text-left font-semibold text-foreground min-w-16'>
+                카테고리
               </th>
               <th className='px-4 py-3 text-left font-semibold text-foreground min-w-12 whitespace-nowrap'>
                 첨부
@@ -148,7 +144,12 @@ const MaterialTable = ({
                   </td>
                   <td className='px-4 py-3 min-w-16'>
                     <span className='inline-flex items-center px-2.5 py-1 rounded-lg text-sm font-semibold bg-primary/10 text-primary whitespace-nowrap'>
-                      {getCategoryName(material.category)}
+                      {getWeekNameById(`week${material.week}`)}
+                    </span>
+                  </td>
+                  <td className='px-4 py-3 min-w-16'>
+                    <span className='inline-flex items-center px-2.5 py-1 rounded-lg text-sm font-semibold bg-muted text-foreground whitespace-nowrap'>
+                      {getCategoryKrName(material.category)}
                     </span>
                   </td>
                   <td className='px-4 py-3 min-w-12'>
