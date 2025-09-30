@@ -1,9 +1,14 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 import { Upload, Trash2 } from 'lucide-react';
 import { cn } from '@/pages/(study)/dashboard/utils';
 import { formatFileSize } from '../utils';
-import type { MaterialFormData } from '../types';
-import { MATERIAL_CATEGORIES } from '../constants';
+import type { MaterialFormData, UploadFileItem } from '../types';
+import { useFileUploadMutation } from '@/hooks/useUploadMutation';
+import {
+  MATERIAL_CATEGORY_OPTIONS,
+  MATERIAL_CATEGORY_TO_API,
+} from '../constants';
 
 interface MaterialFormProps {
   formData: MaterialFormData;
@@ -23,16 +28,50 @@ function MaterialForm({
   submitButtonText,
   onCancel,
 }: MaterialFormProps) {
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<UploadFileItem[]>(
+    formData.files || [],
+  );
+  const fileUploadMutation = useFileUploadMutation();
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  /**
+   * 파일 업로드 핸들러
+   * - presigned 업로드 후 반환된 file_key를 파일 항목에 반영
+   */
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    setUploadedFiles((prev) => [...prev, ...files]);
+    // presigned 업로드 후 file_key 반영
+    const uploaded: UploadFileItem[] = [];
+    for (const f of files) {
+      try {
+        const key = await fileUploadMutation.mutateAsync(f);
+        uploaded.push({
+          id: null,
+          name: f.name,
+          key,
+          size: f.size,
+          file_type: `.${(f.name.split('.').pop() || '').toLowerCase()}`,
+        });
+      } catch {
+        // 업로드 실패 알림
+        toast.error(`파일 업로드 실패: ${f.name}`);
+      }
+    }
+    const next = [...uploadedFiles, ...uploaded];
+    setUploadedFiles(next);
+    onFormDataChange({ ...formData, files: next });
   };
 
+  /** 업로드 목록에서 파일을 제거 */
   const handleFileRemove = (index: number) => {
-    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
+    const next = uploadedFiles.filter((_, i) => i !== index);
+    setUploadedFiles(next);
+    onFormDataChange({ ...formData, files: next });
   };
+
+  // 외부 폼 상태 변경 시 내부 업로드 목록 동기화 (수정 화면 진입 시 기존 첨부 표시)
+  useEffect(() => {
+    setUploadedFiles(formData.files || []);
+  }, [formData.files]);
 
   return (
     <div className='flex-1 overflow-y-auto px-6 py-6'>
@@ -60,10 +99,38 @@ function MaterialForm({
             />
           </div>
 
+          {/* 주차: 카테고리가 LEARNING일 때만 노출, 숫자 입력 */
+          /* 서버 규칙: LEARNING=숫자 필수, NOTICE/ASSIGNMENT=주차 숨김 */}
+          {MATERIAL_CATEGORY_TO_API[formData.category] === 'LEARNING' && (
+            <div>
+              <label className='block text-base font-semibold text-foreground mb-3'>
+                주차 <span className='text-destructive'>*</span>
+              </label>
+              <input
+                type='number'
+                min={1}
+                value={formData.week}
+                onChange={(e) =>
+                  onFormDataChange({
+                    ...formData,
+                    week: Number(e.target.value),
+                  })
+                }
+                className={cn(
+                  'w-full px-4 py-3 border-2 border-border rounded-lg text-base',
+                  'bg-background text-foreground',
+                  'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary',
+                  'transition-all duration-200 hover:border-primary/50',
+                )}
+                required
+              />
+            </div>
+          )}
+
           {/* 카테고리 */}
           <div>
             <label className='block text-base font-semibold text-foreground mb-3'>
-              주차 <span className='text-destructive'>*</span>
+              카테고리 <span className='text-destructive'>*</span>
             </label>
             <select
               value={formData.category}
@@ -78,13 +145,11 @@ function MaterialForm({
               )}
               required
             >
-              {MATERIAL_CATEGORIES.filter((cat) => cat.id !== 'all').map(
-                (category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ),
-              )}
+              {MATERIAL_CATEGORY_OPTIONS.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
             </select>
           </div>
 

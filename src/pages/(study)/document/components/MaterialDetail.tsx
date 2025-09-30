@@ -1,5 +1,6 @@
 import { Download, Calendar, FileText, Clock, Tag } from 'lucide-react';
 import { formatFileSize } from '../utils';
+import { downloadImageService } from '@/services/images/downloadImage';
 import type { Material } from '../types';
 import { MATERIAL_CATEGORIES } from '../constants';
 
@@ -27,9 +28,46 @@ function MaterialDetail({ material }: MaterialDetailProps) {
     });
   };
 
-  const handleFileDownload = (attachment: { name: string; url: string }) => {
-    // 실제 구현에서는 파일 다운로드 로직을 추가
-    console.log('Download file:', attachment.name);
+  const handleFileDownload = async (attachment: {
+    name: string;
+    url: string;
+  }) => {
+    // presign용 안전 파일명(ASCII) 생성: S3 서명/인코딩 이슈 회피
+    const ext = `.${(attachment.name.split('.').pop() || '').toLowerCase()}`;
+    const base = attachment.name.replace(/\.[^/.]+$/, '');
+    const safeBase =
+      base
+        .normalize('NFKD')
+        .replace(/[^A-Za-z0-9-_ ]+/g, '')
+        .trim()
+        .replace(/\s+/g, '_')
+        .slice(0, 100) || 'file';
+    const safeName = `${safeBase}${ext}`;
+
+    // 파일 presign 사용 (서버에는 안전한 파일명 전달)
+    const presignedUrl = await downloadImageService.getFilePresignedUrl(
+      attachment.url,
+      safeName,
+    );
+    if (!presignedUrl) return;
+
+    // 파일명 강제 저장: Blob 다운로드 → a.download 파일명 지정
+    try {
+      const res = await fetch(presignedUrl, { method: 'GET' });
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      // 실제 저장 파일명은 원래 이름 유지
+      a.download = attachment.name || safeName || 'download';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      // fallback: 새 탭 오픈 (S3 Content-Disposition이 지정돼있다면 해당 이름 사용)
+      window.open(presignedUrl, '_blank');
+    }
   };
 
   return (
