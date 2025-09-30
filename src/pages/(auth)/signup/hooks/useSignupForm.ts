@@ -8,7 +8,7 @@ import { signupSchema } from '../schemas';
 import type { SignupFormData, SignupStep } from '../types';
 import { DEFAULT_FORM_VALUES } from '../constants';
 import { ROUTES } from '@/constants';
-import { useUploadMutation } from '@/hooks';
+import { usePhotoUploadMutation } from '@/hooks';
 import { useSignupMutationApi } from './mutations/useSignupMutation';
 import type { SignupPayload } from '../types';
 import type { InterestKey, RegionKey } from '@/constants';
@@ -24,7 +24,7 @@ import { INTERESTS, REGIONS } from '@/constants';
  */
 export const useSignupForm = () => {
   const navigate = useNavigate();
-  const uploadMutation = useUploadMutation();
+  const uploadMutation = usePhotoUploadMutation();
 
   // 회원가입 뮤테이션 훅 사용
   const signupApiMutation = useSignupMutationApi();
