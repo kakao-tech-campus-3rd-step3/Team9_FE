@@ -101,26 +101,25 @@ export const AuthInitializer = {
           setUser(authUser);
           setIsLogin(true);
 
-          // 이미지 키가 있으면 이미지 URL도 로드
-          if (authUser.imageKey) {
+          // 이미지 키가 유효할 때만 presigned URL 요청 (빈 문자열/"null" 방지)
+          const imgKey = String(authUser.imageKey || '').trim();
+          if (imgKey && imgKey.toLowerCase() !== 'null' && imgKey.length > 5) {
             try {
-              const imageUrl = await downloadImageService.getImagePresignedUrl(
-                authUser.imageKey,
-              );
+              const imageUrl =
+                await downloadImageService.getImagePresignedUrl(imgKey);
               setUserImageUrl(imageUrl);
-            } catch (error) {
-              console.warn('이미지 URL 로드 실패:', error);
+            } catch {
+              void 0;
             }
           }
-        } catch (profileError) {
-          console.warn('프로필 로드 실패:', profileError);
+        } catch {
           // 프로필 로드 실패해도 토큰은 유효하므로 로그인 상태 유지
           const { setIsLogin } = useAuthStore.getState();
           setIsLogin(true);
         }
       }
-    } catch (error) {
-      console.log('인증 초기화 실패:', error);
+    } catch {
+      void 0;
     } finally {
       setIsInitialized(true);
       isInitializing = false;

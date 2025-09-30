@@ -16,6 +16,7 @@ const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {
+    Accept: 'application/json',
     'Content-Type': 'application/json',
   },
 });
@@ -49,7 +50,6 @@ apiClient.interceptors.request.use(
     return config;
   },
   (error) => {
-    console.error('Request Interceptor Error:', error);
     return Promise.reject(error);
   },
 );
