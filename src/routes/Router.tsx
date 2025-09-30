@@ -4,7 +4,7 @@ import {
   Navigate,
   RouterProvider,
 } from 'react-router-dom';
-import { ROUTES } from '@/constants';
+import { ROUTES, ROUTE_PARAMS } from '@/constants';
 import { Layout } from '@/components';
 import { StudyLayout } from '@/pages/(study)';
 import routes from './routeConfig';
@@ -63,9 +63,9 @@ const router = createBrowserRouter([
     ],
   },
 
-  // 스터디 - 전역 그룹 (study/...) - 인증 필요
+  // 스터디 - 전역 그룹 (study/:study_id/...) - 인증 필요
   {
-    path: ROUTES.STUDY.ROOT,
+    path: `${ROUTES.STUDY.ROOT}/:${ROUTE_PARAMS.studyId}`,
     children: [
       // 스터디 연관 사이드바 사용하는 영역
       {

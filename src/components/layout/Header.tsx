@@ -4,6 +4,7 @@ import { Menu, X, Home, Search, BookOpen } from 'lucide-react';
 import { Logo } from '@/components/common';
 import { UserProfileSection } from '@/components/user';
 import { ROUTES } from '@/constants';
+import { STUDY_ID_DEV } from '@/constants/common';
 
 /**
  * 헤더 컴포넌트
@@ -16,7 +17,7 @@ const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   // 상수 기반 절대 경로 생성
   const explorePath = `/${ROUTES.STUDY.ROOT}/${ROUTES.STUDY.EXPLORE}`;
-  const dashboardPath = `/${ROUTES.STUDY.ROOT}/${ROUTES.STUDY.DASHBOARD}`;
+  const dashboardPath = `/${ROUTES.STUDY.ROOT}/${STUDY_ID_DEV}/${ROUTES.STUDY.DASHBOARD}`;
 
   // 네비게이션 메뉴 항목
   const navItems = [
