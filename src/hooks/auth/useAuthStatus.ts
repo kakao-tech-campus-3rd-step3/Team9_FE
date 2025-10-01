@@ -50,5 +50,3 @@ export const useAuthStatus = () => {
     isStudyMember: isStudyMember(userRole),
   };
 };
-
-export default useAuthStatus;

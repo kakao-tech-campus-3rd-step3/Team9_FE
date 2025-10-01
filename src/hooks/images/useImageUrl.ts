@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { downloadImageService } from '@/services/images/downloadImage';
-import { imageUrlKeys } from '@/constants/queryKeys';
+import { imageKeys } from '@/constants/queryKeys';
 
 /**
  * 이미지 키를 presigned URL로 변환하는 훅 (TanStack Query 사용)
@@ -9,7 +9,7 @@ import { imageUrlKeys } from '@/constants/queryKeys';
  */
 export const useImageUrl = (imageKey?: string) => {
   const query = useQuery({
-    queryKey: imageUrlKeys.byKey(imageKey!),
+    queryKey: imageKeys.urlByKey(imageKey!),
     queryFn: () => downloadImageService.getImagePresignedUrl(imageKey!),
     enabled: !!imageKey,
   });

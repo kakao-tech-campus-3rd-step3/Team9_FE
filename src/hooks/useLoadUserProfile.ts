@@ -4,7 +4,7 @@ import { getUserProfile } from '@/services/users/getUserProfile';
 import { useAuthStore } from '@/stores/auth';
 import { mapUserProfileToAuthUser } from '@/utils/mappers';
 import { downloadImageService } from '@/services/images/downloadImage';
-import { userProfileKeys } from '@/constants/queryKeys';
+import { userKeys } from '@/constants/queryKeys';
 import type { UserProfile } from '@/types';
 
 /**
@@ -18,7 +18,7 @@ export const useLoadUserProfile = () => {
 
   // 사용자 프로필 조회 (select로 데이터 변환, TanStack Query 최대 활용)
   const profileQuery = useQuery({
-    queryKey: userProfileKeys.profile(),
+    queryKey: userKeys.profile(),
     queryFn: async (): Promise<UserProfile> => getUserProfile(),
     select: (data: UserProfile) => mapUserProfileToAuthUser(data), // 데이터 변환을 쿼리 레벨에서
     staleTime: 5 * 60 * 1000, // 5분
