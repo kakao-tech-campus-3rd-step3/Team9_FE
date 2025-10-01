@@ -12,14 +12,13 @@ import { ROUTES } from '@/constants';
  */
 export const useLogoutMutation = () => {
   const navigate = useNavigate();
-  const { reset, setIsLogin } = useAuthStore();
+  const { reset } = useAuthStore();
 
   return useMutation({
     mutationFn: async () => {
       try {
         await apiClient.post(AUTH_ENDPOINTS.LOGOUT, {}, { showToast: false });
       } finally {
-        setIsLogin(false);
         reset();
       }
     },
