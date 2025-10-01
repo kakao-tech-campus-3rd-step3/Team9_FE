@@ -15,7 +15,8 @@ import {
 
 // 인증 상태 및 권한 관리 훅
 export const useAuthStatus = () => {
-  const { isLogin, isInitialized, user } = useAuthStore();
+  const { accessToken, isInitialized, user } = useAuthStore();
+  const isLogin = !!accessToken;
 
   // 스터디 문맥이 있으면 스터디 역할 우선, 없으면 로그인 기반 기본 역할
   const userRole: UserRole = user.currentStudy?.role
@@ -49,5 +50,3 @@ export const useAuthStatus = () => {
     isStudyMember: isStudyMember(userRole),
   };
 };
-
-export default useAuthStatus;

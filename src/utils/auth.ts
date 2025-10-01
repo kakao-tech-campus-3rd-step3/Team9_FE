@@ -75,17 +75,20 @@ export const TokenManager = {
 /**
  * 인증 초기화 관리
  */
-let isInitializing = false;
-
 export const AuthInitializer = {
   init: async (): Promise<void> => {
-    if (isInitializing) return;
-    isInitializing = true;
+    const {
+      setIsInitialized,
+      isInitialized,
+      isInitializing,
+      setIsInitializing,
+    } = useAuthStore.getState();
 
-    const { setIsInitialized, isInitialized } = useAuthStore.getState();
+    if (isInitializing) return;
+    setIsInitializing(true);
 
     if (isInitialized) {
-      isInitializing = false;
+      setIsInitializing(false);
       return;
     }
 
@@ -94,12 +97,10 @@ export const AuthInitializer = {
       if (refreshSuccess) {
         // 토큰 재발급 성공 시 프로필도 로드
         try {
-          const { setUser, setUserImageUrl, setIsLogin } =
-            useAuthStore.getState();
+          const { setUser, setUserImageUrl } = useAuthStore.getState();
           const profile = await getUserProfile();
           const authUser = mapUserProfileToAuthUser(profile);
           setUser(authUser);
-          setIsLogin(true);
 
           // 이미지 키가 유효할 때만 presigned URL 요청 (빈 문자열/"null" 방지)
           const imgKey = String(authUser.imageKey || '').trim();
@@ -112,17 +113,15 @@ export const AuthInitializer = {
               void 0;
             }
           }
-        } catch {
-          // 프로필 로드 실패해도 토큰은 유효하므로 로그인 상태 유지
-          const { setIsLogin } = useAuthStore.getState();
-          setIsLogin(true);
+        } catch (profileError) {
+          console.warn('프로필 로드 실패:', profileError);
         }
       }
     } catch {
       void 0;
     } finally {
       setIsInitialized(true);
-      isInitializing = false;
+      setIsInitializing(false);
     }
   },
 } as const;

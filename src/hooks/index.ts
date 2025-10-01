@@ -1,7 +1,7 @@
-export { default as useAuthStatus } from './useAuthStatus';
-export * from './useCurrentStudy';
-export * from './useImageUrl';
-export { useLogoutMutation } from './useLogoutMutation';
+export * from './auth/useAuthStatus';
+export * from './auth/mutations/useLogoutMutation';
+export * from './study/useCurrentStudy';
+export * from './images/useImageUrl';
 export { useLoadUserProfile } from './useLoadUserProfile';
 export {
   usePhotoUploadMutation,
