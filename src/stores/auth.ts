@@ -24,16 +24,16 @@ type AuthState = {
   accessToken: string | null;
 
   // 인증 상태
-  isLogin: boolean;
   isInitialized: boolean;
+  isInitializing: boolean;
 
   // 액션
   setUser: (user: AuthUser) => void;
   setUserImageUrl: (imageUrl: string) => void;
   setCurrentStudy: (study: AuthUser['currentStudy'] | null) => void;
   setAccessToken: (token: string | null) => void;
-  setIsLogin: (status: boolean) => void;
   setIsInitialized: (status: boolean) => void;
+  setIsInitializing: (status: boolean) => void;
   reset: () => void;
 };
 
@@ -42,8 +42,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   // 초기 상태
   user: { nickname: '', imageKey: '' },
   accessToken: null,
-  isLogin: false,
   isInitialized: false,
+  isInitializing: false,
 
   // 액션
   setUser: (user) => set({ user }),
@@ -56,12 +56,12 @@ export const useAuthStore = create<AuthState>((set) => ({
       user: { ...state.user, currentStudy: study || undefined },
     })),
   setAccessToken: (token) => set({ accessToken: token }),
-  setIsLogin: (status) => set({ isLogin: status }),
   setIsInitialized: (status) => set({ isInitialized: status }),
+  setIsInitializing: (status) => set({ isInitializing: status }),
   reset: () =>
     set({
       user: { nickname: '', imageKey: '', imageUrl: undefined },
       accessToken: null,
-      isLogin: false,
+      isInitializing: false,
     }),
 }));
