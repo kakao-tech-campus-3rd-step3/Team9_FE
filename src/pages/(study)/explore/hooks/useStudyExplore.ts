@@ -45,7 +45,7 @@ export const useStudyExplore = (searchTerm: string) => {
     // TODO: 실제 서버 연동 시 아래 주석 해제
     // enabled: true,
     // 실제 서버 연동 전까지는 목업 데이터 사용
-    enabled: false,
+    enabled: true,
   });
 
   // 필터링된 스터디 목록 (클라이언트 사이드 필터링은 유지)
