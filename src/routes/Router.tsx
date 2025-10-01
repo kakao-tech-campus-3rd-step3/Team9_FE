@@ -63,6 +63,22 @@ const router = createBrowserRouter([
     ],
   },
 
+  // 스터디 탐색 - 헤더만 사용하는 영역 (전역)
+  {
+    path: ROUTES.STUDY.ROOT,
+    element: <Layout layoutType='header-only' />,
+    children: [
+      {
+        path: ROUTES.STUDY.EXPLORE,
+        element: <routes.StudyExplore />,
+      },
+      {
+        path: ROUTES.STUDY.CREATE,
+        element: <routes.StudyCreate />,
+      },
+    ],
+  },
+
   // 스터디 - 전역 그룹 (study/:study_id/...) - 인증 필요
   {
     path: `${ROUTES.STUDY.ROOT}/:${ROUTE_PARAMS.studyId}`,
@@ -76,20 +92,22 @@ const router = createBrowserRouter([
             element: <routes.StudyDashboard />,
           },
           {
-            path: ROUTES.STUDY.DOCUMENT,
-            element: <routes.StudyDocument />,
-          },
-          {
-            path: ROUTES.STUDY.DOCUMENT_ADD,
-            element: <routes.StudyDocumentAdd />,
-          },
-          {
-            path: ROUTES.STUDY.DOCUMENT_DETAIL,
-            element: <routes.StudyDocumentDetail />,
-          },
-          {
-            path: ROUTES.STUDY.DOCUMENT_EDIT,
-            element: <routes.StudyDocumentEdit />,
+            path: ROUTES.STUDY.DOCUMENT.ROOT,
+            children: [
+              { index: true, element: <routes.StudyDocument /> },
+              {
+                path: ROUTES.STUDY.DOCUMENT.ADD,
+                element: <routes.StudyDocumentAdd />,
+              },
+              {
+                path: ROUTES.STUDY.DOCUMENT.DETAIL,
+                element: <routes.StudyDocumentDetail />,
+              },
+              {
+                path: ROUTES.STUDY.DOCUMENT.EDIT,
+                element: <routes.StudyDocumentEdit />,
+              },
+            ],
           },
           { path: ROUTES.STUDY.PROGRESS, element: <routes.StudyProgress /> },
           {
@@ -118,43 +136,21 @@ const router = createBrowserRouter([
             children: [
               {
                 index: true,
-                element: <Navigate to='members' replace />,
+                element: <Navigate to={ROUTES.STUDY.ADMIN.MEMBERS} replace />,
               },
               {
-                path: 'members',
+                path: ROUTES.STUDY.ADMIN.MEMBERS,
                 element: <routes.StudyAdminMembers />,
               },
               {
-                path: 'applicants',
+                path: ROUTES.STUDY.ADMIN.APPLICANTS,
                 element: <routes.StudyAdminApplicants />,
               },
               {
-                path: 'study-info',
+                path: ROUTES.STUDY.ADMIN.STUDY_INFO,
                 element: <routes.StudyAdminStudyInfo />,
               },
             ],
-          },
-        ],
-      },
-
-      // 헤더만 사용하는 영역 - 스터디 생성 (인증 필요)
-      {
-        element: <Layout layoutType='header-only' />,
-        children: [
-          {
-            path: ROUTES.STUDY.CREATE,
-            element: <routes.StudyCreate />,
-          },
-        ],
-      },
-
-      // 헤더만 사용하는 영역 - 스터디 탐색
-      {
-        element: <Layout layoutType='header-only' />,
-        children: [
-          {
-            path: ROUTES.STUDY.EXPLORE,
-            element: <routes.StudyExplore />,
           },
         ],
       },

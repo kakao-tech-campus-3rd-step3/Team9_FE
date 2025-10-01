@@ -1,7 +1,7 @@
 // 라우터에서 사용하는 동적 파라미터 키 상수
 export const ROUTE_PARAMS = {
   studyId: 'study_id',
-  materialId: 'id',
+  materialId: 'document_id',
 } as const;
 
 // 애플리케이션 라우트 경로 상수
@@ -16,19 +16,21 @@ export const ROUTES = {
     CREATE: 'create',
     DETAIL: `:${ROUTE_PARAMS.studyId}`,
     DASHBOARD: 'dashboard',
-    DOCUMENT: 'document',
-    DOCUMENT_ADD: 'document/add',
-    DOCUMENT_DETAIL: `document/:${ROUTE_PARAMS.materialId}`,
-    DOCUMENT_EDIT: `document/:${ROUTE_PARAMS.materialId}/edit`,
+    DOCUMENT: {
+      ROOT: 'document',
+      ADD: 'add',
+      DETAIL: `:${ROUTE_PARAMS.materialId}`,
+      EDIT: `:${ROUTE_PARAMS.materialId}/edit`,
+    },
     PROGRESS: 'progress',
     SCHEDULE: 'schedule',
     QUIZ: 'quiz',
     RETRO: 'retro',
     ADMIN: {
       ROOT: 'admin',
-      MEMBERS: 'admin/members',
-      APPLICANTS: 'admin/applicants',
-      STUDY_INFO: 'admin/study-info',
+      MEMBERS: 'members',
+      APPLICANTS: 'applicants',
+      STUDY_INFO: 'study-info',
     },
   },
   SCHEDULE: {
@@ -44,13 +46,13 @@ export const ROUTE_BUILDERS = {
     root: (studyId: string | number) => `/${ROUTES.STUDY.ROOT}/${studyId}`,
     document: {
       list: (studyId: string | number) =>
-        `/${ROUTES.STUDY.ROOT}/${studyId}/${ROUTES.STUDY.DOCUMENT}`,
+        `/${ROUTES.STUDY.ROOT}/${studyId}/${ROUTES.STUDY.DOCUMENT.ROOT}`,
       add: (studyId: string | number) =>
-        `/${ROUTES.STUDY.ROOT}/${studyId}/${ROUTES.STUDY.DOCUMENT_ADD}`,
+        `/${ROUTES.STUDY.ROOT}/${studyId}/${ROUTES.STUDY.DOCUMENT.ROOT}/${ROUTES.STUDY.DOCUMENT.ADD}`,
       detail: (studyId: string | number, materialId: string | number) =>
-        `/${ROUTES.STUDY.ROOT}/${studyId}/document/${materialId}`,
+        `/${ROUTES.STUDY.ROOT}/${studyId}/${ROUTES.STUDY.DOCUMENT.ROOT}/${materialId}`,
       edit: (studyId: string | number, materialId: string | number) =>
-        `/${ROUTES.STUDY.ROOT}/${studyId}/document/${materialId}/edit`,
+        `/${ROUTES.STUDY.ROOT}/${studyId}/${ROUTES.STUDY.DOCUMENT.ROOT}/${materialId}/edit`,
     },
   },
 } as const;

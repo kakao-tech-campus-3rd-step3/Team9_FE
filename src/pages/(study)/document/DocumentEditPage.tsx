@@ -27,7 +27,7 @@ import {
  * - 상세 조회 결과로 폼 초기화 후 수정 요청을 보냄
  */
 const DocumentEditPage = () => {
-  const { id } = useParams<{ id: string }>();
+  const { document_id: id } = useParams<{ document_id: string }>();
   const { study_id } = useParams<{ study_id: string }>();
   const navigate = useNavigate();
 

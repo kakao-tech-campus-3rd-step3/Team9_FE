@@ -67,7 +67,7 @@ const DashboardPage = () => {
                 ? []
                 : mockDocuments
             }
-            onClick={() => navigateToStudy(ROUTES.STUDY.DOCUMENT)}
+            onClick={() => navigateToStudy(ROUTES.STUDY.DOCUMENT.ROOT)}
             onItemClick={goToDocumentDetail}
           />
           <ProgressSection

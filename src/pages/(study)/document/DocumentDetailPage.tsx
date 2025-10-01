@@ -19,7 +19,7 @@ import { LoadingSpinner } from '@/components/common';
  * 자료 상세 페이지
  */
 const DocumentDetailPage = () => {
-  const { id } = useParams<{ id: string }>();
+  const { document_id: id } = useParams<{ document_id: string }>();
   const { study_id } = useParams<{ study_id: string }>();
   const navigate = useNavigate();
 
