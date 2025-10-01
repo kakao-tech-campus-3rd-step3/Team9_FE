@@ -1,77 +1,131 @@
 /**
- * 토큰 관리 유틸리티
- * 세션 스토리지 기반 + 선택적 쿠키 저장
+ * 인증 관련 유틸리티
+ * - 쿠키 관리, 토큰 관리, 인증 초기화를 통합 관리
  */
 import dayjs from 'dayjs';
-import { TOKEN_KEYS, REMEMBER_ME } from '@/constants';
+import { REMEMBER_ME } from '@/constants';
+import { refreshTokenService } from '@/pages/(auth)/login/services/refreshService';
+import { getUserProfile } from '@/services/users/getUserProfile';
+import { downloadImageService } from '@/services/images/downloadImage';
+import { useAuthStore } from '@/stores/auth';
+import { mapUserProfileToAuthUser } from '@/utils/mappers';
 
 /**
- * 쿠키 유틸 (객체 기반)
- * - 단순 쿠키 set/get/remove를 제공
- * - 보안 옵션은 필요 시 확장(예: Secure, domain) 가능
+ * 쿠키 관리
  */
-export const cookieStorage = {
-  // 쿠키 저장 (기본 만료: 30일)
+export const CookieManager = {
   set: (name: string, value: string, days: number = 30): void => {
     const expires = dayjs().add(days, 'day').toDate();
     document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Strict`;
   },
-  // 쿠키 조회 (없으면 null)
   get: (name: string): string | null => {
     const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
     return match ? match[2] : null;
   },
-  // 쿠키 삭제 (즉시 만료 처리)
   remove: (name: string): void => {
     document.cookie = `${name}=;expires=${dayjs(0).toDate().toUTCString()};path=/;`;
   },
-};
+} as const;
 
 /**
- * 토큰 관리 (세션 스토리지)
- * - 세션 스토리지에 액세스 토큰 저장/조회/삭제 제공
- * - 사용처: 로그인 성공 시 저장, API 요청 인터셉터에서 조회/401 시 삭제
+ * 아이디 기억하기 관리
  */
-export const accessTokenStorage = {
-  // 액세스 토큰 저장
-  set: (token: string): void => {
-    sessionStorage.setItem(TOKEN_KEYS.ACCESS, token);
-  },
-  // 액세스 토큰 조회 (없으면 null)
-  get: (): string | null => {
-    return sessionStorage.getItem(TOKEN_KEYS.ACCESS);
-  },
-  // 액세스 토큰 삭제
-  remove: (): void => {
-    sessionStorage.removeItem(TOKEN_KEYS.ACCESS);
-  },
-  // 저장 여부
-  has: (): boolean => {
-    return Boolean(accessTokenStorage.get()?.trim());
-  },
-};
-
-/**
- * 아이디 기억하기 (쿠키)
- * - 쿠키 기반으로 이메일 저장/조회/삭제
- * - 키/만료일: REMEMBER_ME 상수 사용
- * - 사용처: 로그인 폼 기본값, '아이디 기억하기' 체크 처리
- */
-export const rememberedEmailStorage = {
-  // 이메일 저장 (쿠키)
+export const RememberedEmail = {
   set: (email: string): void => {
-    cookieStorage.set(REMEMBER_ME.EMAIL_KEY, email, REMEMBER_ME.EXPIRY_DAYS);
+    CookieManager.set(REMEMBER_ME.EMAIL_KEY, email, REMEMBER_ME.EXPIRY_DAYS);
   },
-  // 이메일 조회 (없으면 null)
-  get: (): string | null => {
-    return cookieStorage.get(REMEMBER_ME.EMAIL_KEY);
+  get: (): string | null => CookieManager.get(REMEMBER_ME.EMAIL_KEY),
+  remove: (): void => CookieManager.remove(REMEMBER_ME.EMAIL_KEY),
+  has: (): boolean => Boolean(RememberedEmail.get()?.trim()),
+} as const;
+
+/**
+ * 토큰 관리
+ */
+export const TokenManager = {
+  /**
+   * 토큰 새로고침 (스토어 업데이트 포함)
+   */
+  refreshAccessToken: async (): Promise<boolean> => {
+    try {
+      const result = await refreshTokenService();
+      if (result?.accessToken) {
+        useAuthStore.getState().setAccessToken(result.accessToken);
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
   },
-  // 이메일 삭제
-  remove: (): void => {
-    cookieStorage.remove(REMEMBER_ME.EMAIL_KEY);
+
+  /**
+   * 새 액세스 토큰 요청 (스토어 업데이트 없이 토큰만 반환)
+   */
+  getNewAccessToken: async (): Promise<string | null> => {
+    try {
+      const result = await refreshTokenService();
+      return result?.accessToken || null;
+    } catch {
+      return null;
+    }
   },
-  // 저장 여부
-  has: (): boolean => {
-    return Boolean(rememberedEmailStorage.get()?.trim());
+} as const;
+
+/**
+ * 인증 초기화 관리
+ */
+let isInitializing = false;
+
+export const AuthInitializer = {
+  init: async (): Promise<void> => {
+    if (isInitializing) return;
+    isInitializing = true;
+
+    const { setIsInitialized, isInitialized } = useAuthStore.getState();
+
+    if (isInitialized) {
+      isInitializing = false;
+      return;
+    }
+
+    try {
+      const refreshSuccess = await TokenManager.refreshAccessToken();
+      if (refreshSuccess) {
+        // 토큰 재발급 성공 시 프로필도 로드
+        try {
+          const { setUser, setUserImageUrl, setIsLogin } =
+            useAuthStore.getState();
+          const profile = await getUserProfile();
+          const authUser = mapUserProfileToAuthUser(profile);
+          setUser(authUser);
+          setIsLogin(true);
+
+          // 이미지 키가 있으면 이미지 URL도 로드
+          if (authUser.imageKey) {
+            try {
+              const imageUrl = await downloadImageService.getImagePresignedUrl(
+                authUser.imageKey,
+              );
+              setUserImageUrl(imageUrl);
+            } catch (error) {
+              console.warn('이미지 URL 로드 실패:', error);
+            }
+          }
+        } catch (profileError) {
+          console.warn('프로필 로드 실패:', profileError);
+          // 프로필 로드 실패해도 토큰은 유효하므로 로그인 상태 유지
+          const { setIsLogin } = useAuthStore.getState();
+          setIsLogin(true);
+        }
+      }
+    } catch (error) {
+      console.log('인증 초기화 실패:', error);
+    } finally {
+      setIsInitialized(true);
+      isInitializing = false;
+    }
   },
-};
+} as const;
+
+// loadUserProfile 함수는 useLoadUserProfile 훅으로 대체됨
