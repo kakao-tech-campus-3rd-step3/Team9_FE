@@ -76,10 +76,6 @@ const router = createBrowserRouter([
     element: <Layout layoutType='header-only' />,
     children: [
       {
-        index: true,
-        element: <Navigate to={ROUTES.STUDY.EXPLORE} replace />,
-      },
-      {
         path: ROUTES.STUDY.EXPLORE,
         element: <routes.StudyExplore />,
       },
