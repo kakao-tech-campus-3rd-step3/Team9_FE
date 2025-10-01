@@ -9,7 +9,7 @@ import type { SignupFormData, SignupStep } from '../types';
 import { DEFAULT_FORM_VALUES } from '../constants';
 import { ROUTES } from '@/constants';
 import { useUploadMutation } from '@/hooks';
-import { useSignupMutationApi } from './mutations/useSignupMutation';
+import { useSignupMutation } from './mutations/useSignupMutation';
 import type { SignupPayload } from '../types';
 import type { InterestKey, RegionKey } from '@/constants';
 import { INTERESTS, REGIONS } from '@/constants';
@@ -27,7 +27,7 @@ export const useSignupForm = () => {
   const uploadMutation = useUploadMutation();
 
   // 회원가입 뮤테이션 훅 사용
-  const signupApiMutation = useSignupMutationApi();
+  const signupApiMutation = useSignupMutation();
 
   // React Hook Form 설정
   const {

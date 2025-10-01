@@ -104,8 +104,7 @@ apiClient.interceptors.response.use(
       }
 
       // 토큰 재발급 실패 시 로그아웃 처리 (명시적 상태 초기화)
-      const { reset, setIsLogin } = useAuthStore.getState();
-      setIsLogin(false);
+      const { reset } = useAuthStore.getState();
       reset();
       const authMessage =
         data?.message || '인증이 만료되었습니다. 다시 로그인해주세요.';

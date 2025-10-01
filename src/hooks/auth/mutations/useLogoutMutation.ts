@@ -13,7 +13,7 @@ import { ROUTES } from '@/constants';
  */
 export const useLogoutMutation = () => {
   const navigate = useNavigate();
-  const { reset, setIsLogin } = useAuthStore();
+  const { reset } = useAuthStore();
 
   return useMutation({
     mutationFn: async () => {
@@ -23,7 +23,6 @@ export const useLogoutMutation = () => {
           withCredentials: true,
         });
       } finally {
-        setIsLogin(false);
         reset();
       }
     },
