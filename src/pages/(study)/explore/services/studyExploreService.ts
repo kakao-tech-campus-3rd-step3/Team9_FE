@@ -20,7 +20,7 @@ export const studyExploreService = {
         locations: params.locations?.join(','),
       },
     });
-    return data;
+    return data.studies;
   },
 
   // 스터디 상세 조회
