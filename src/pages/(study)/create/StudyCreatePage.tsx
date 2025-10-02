@@ -20,6 +20,10 @@ const StudyCreatePage: React.FC = () => {
     isCompleteModalOpen,
     currentStudyTitle,
 
+    // React Query 상태
+    isCreating,
+    createError,
+
     // 핸들러
     handleCategoryToggle,
     handleImageUpload,
@@ -62,6 +66,8 @@ const StudyCreatePage: React.FC = () => {
                 toast.success(message);
               }
             }}
+            isCreating={isCreating}
+            createError={createError}
           />
         </div>
       </div>
