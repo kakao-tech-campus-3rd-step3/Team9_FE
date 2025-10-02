@@ -18,3 +18,15 @@ export interface ToastState {
   type: 'success' | 'error' | 'info';
   message: string;
 }
+
+export interface CreateStudyRequest {
+  title: string;
+  description: string;
+  short_description: string;
+  category: string;
+  max_members: number;
+  schedule: string;
+  region: string;
+  conditions: string[];
+  file_key?: string; // 이미지 파일 키 (스웨거 방식)
+}

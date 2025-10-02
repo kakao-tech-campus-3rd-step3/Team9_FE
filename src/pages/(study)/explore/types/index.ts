@@ -22,3 +22,16 @@ export interface ToastState {
   type: 'success' | 'error' | 'info';
   message: string;
 }
+
+export interface StudyListParams {
+  page?: number;
+  size?: number;
+  keyword?: string;
+  interests?: string[];
+  locations?: string[];
+}
+
+export interface StudyApplyRequest {
+  study_id: number;
+  message?: string;
+}
