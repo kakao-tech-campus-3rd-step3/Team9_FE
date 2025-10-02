@@ -14,6 +14,8 @@ export const useStudyCreate = () => {
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
   const [currentStudyTitle, setCurrentStudyTitle] = useState<string>('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [createdStudyData, setCreatedStudyData] =
+    useState<StudyFormData | null>(null);
 
   const handleCategoryToggle = (category: string) => {
     setSelectedCategories((prev) => {
@@ -49,6 +51,7 @@ export const useStudyCreate = () => {
     setImagePreview(null);
     setCurrentStudyTitle('');
     setSelectedFile(null);
+    setCreatedStudyData(null);
   };
 
   // React Query로 스터디 생성
@@ -100,6 +103,8 @@ export const useStudyCreate = () => {
     onSuccess: (data, variables) => {
       // 현재 스터디 제목 저장
       setCurrentStudyTitle(variables.title);
+      // 생성된 스터디 데이터 저장 (탐색 페이지에서 사용)
+      setCreatedStudyData(variables);
 
       console.log('스터디 생성 성공:', data);
       toast.success('스터디가 성공적으로 생성되었습니다!');
@@ -123,6 +128,7 @@ export const useStudyCreate = () => {
     imagePreview,
     isCompleteModalOpen,
     currentStudyTitle,
+    createdStudyData,
 
     // React Query 상태
     isCreating: createStudyMutation.isPending,

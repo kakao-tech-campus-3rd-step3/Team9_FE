@@ -6,6 +6,7 @@ export interface Study {
   id: number;
   title: string;
   description: string;
+  shortDescription?: string;
   category: string;
   currentMembers: number;
   maxMembers: number;

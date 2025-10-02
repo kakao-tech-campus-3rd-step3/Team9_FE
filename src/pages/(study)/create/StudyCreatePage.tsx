@@ -19,6 +19,7 @@ const StudyCreatePage: React.FC = () => {
     imagePreview,
     isCompleteModalOpen,
     currentStudyTitle,
+    createdStudyData,
 
     // React Query 상태
     isCreating,
@@ -34,20 +35,30 @@ const StudyCreatePage: React.FC = () => {
 
   const handleCompleteModalCloseWithNavigation = () => {
     handleCompleteModalClose();
+
+    if (!createdStudyData) return;
+
     // 스터디 탐색 페이지로 이동 (새로 생성한 스터디 정보 포함)
-    const studyInfo = {
-      title: currentStudyTitle,
+    // 로컬 스토리지에 스터디 데이터 저장 (이미지 포함)
+    const studyData = {
+      title: createdStudyData.title,
       category: selectedCategories[0] || '기타',
-      region: '온라인', // 기본값
-      description: '새로 생성된 스터디입니다.',
-      maxMembers: 4,
-      currentMembers: 1,
+      description: createdStudyData.description,
+      shortDescription: createdStudyData.shortDescription,
+      region: createdStudyData.region,
+      maxMembers: createdStudyData.maxMembers,
+      schedule: createdStudyData.schedule,
+      conditions: createdStudyData.conditions,
+      imageUrl: imagePreview || '',
     };
+
+    console.log('저장할 이미지 데이터:', imagePreview);
+    console.log('저장할 스터디 데이터:', studyData);
+
+    localStorage.setItem('newlyCreatedStudy', JSON.stringify(studyData));
 
     const params = new URLSearchParams({
       newStudy: 'true',
-      studyTitle: studyInfo.title,
-      studyCategory: studyInfo.category,
     });
 
     navigate(
