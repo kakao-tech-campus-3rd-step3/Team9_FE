@@ -180,6 +180,8 @@ export const useStudyExplore = (searchTerm: string) => {
     setActiveModal,
 
     // 신청 관련
-    applyStudy: applyStudyMutation.mutate,
+    applyStudy: (studyId: number, message: string) => {
+      applyStudyMutation.mutate({ studyId, message });
+    },
   };
 };

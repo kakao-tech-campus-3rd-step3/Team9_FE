@@ -6,7 +6,7 @@
 import React from 'react';
 import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { StudyCard } from './';
+import { StudyCard, StudyCardSkeleton, StudyErrorState } from './';
 import { ROUTES } from '@/constants';
 import type { Study } from '../types';
 
@@ -16,6 +16,9 @@ interface StudyExploreMainContentProps {
   onCardClick: (study: Study) => void;
   onApplyClick: (study: Study) => void;
   onRegionSelectClick: () => void;
+  isLoading?: boolean;
+  error?: Error | null;
+  onRetry?: () => void;
 }
 
 const StudyExploreMainContent: React.FC<StudyExploreMainContentProps> = ({
@@ -24,6 +27,9 @@ const StudyExploreMainContent: React.FC<StudyExploreMainContentProps> = ({
   onCardClick,
   onApplyClick,
   onRegionSelectClick,
+  isLoading = false,
+  error = null,
+  onRetry,
 }) => {
   const navigate = useNavigate();
 
@@ -47,26 +53,43 @@ const StudyExploreMainContent: React.FC<StudyExploreMainContentProps> = ({
           </button>
         </div>
 
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-          {filteredStudies.map((study: Study) => (
-            <StudyCard
-              key={study.id}
-              study={study}
-              onCardClick={onCardClick}
-              onApplyClick={onApplyClick}
-            />
-          ))}
-        </div>
+        {/* 에러 상태 */}
+        {error && <StudyErrorState error={error} onRetry={onRetry} />}
 
-        {filteredStudies.length === 0 && (
-          <div className='text-center py-12'>
-            <p className='text-foreground text-lg'>
-              해당 조건에 맞는 스터디가 없습니다.
-            </p>
-            <p className='text-foreground text-sm mt-2'>
-              다른 지역이나 카테고리를 선택해보세요.
-            </p>
+        {/* 로딩 상태 */}
+        {isLoading && !error && (
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+            {Array.from({ length: 6 }).map((_, index) => (
+              <StudyCardSkeleton key={index} />
+            ))}
           </div>
+        )}
+
+        {/* 스터디 목록 */}
+        {!isLoading && !error && (
+          <>
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+              {filteredStudies.map((study: Study) => (
+                <StudyCard
+                  key={study.id}
+                  study={study}
+                  onCardClick={onCardClick}
+                  onApplyClick={onApplyClick}
+                />
+              ))}
+            </div>
+
+            {filteredStudies.length === 0 && (
+              <div className='text-center py-12'>
+                <p className='text-foreground text-lg'>
+                  해당 조건에 맞는 스터디가 없습니다.
+                </p>
+                <p className='text-foreground text-sm mt-2'>
+                  다른 지역이나 카테고리를 선택해보세요.
+                </p>
+              </div>
+            )}
+          </>
         )}
       </div>
 
