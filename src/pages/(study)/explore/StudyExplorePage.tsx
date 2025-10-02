@@ -90,6 +90,7 @@ const StudyExplorePage: React.FC = () => {
         isOpen={activeModal === 'apply'}
         onClose={handleModalClose}
         studyTitle={selectedStudy?.title || ''}
+        studyId={selectedStudy?.id || 0}
       />
 
       {/* 스터디 상세 모달 */}
