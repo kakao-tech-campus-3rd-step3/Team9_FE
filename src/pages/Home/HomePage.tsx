@@ -12,17 +12,6 @@ import { studyColor } from '@/utils';
  * - 메인 페이지 컨텐츠를 표시
  */
 const HomePage: React.FC = () => {
-  const studyTitles = useMemo(
-    () =>
-      mainDashboard.flatMap((dashboard) =>
-        dashboard.studies.map((study) => ({
-          id: study.study_id,
-          title: study.title,
-          color: studyColor(study.study_id),
-        })),
-      ),
-    [],
-  );
   const schedules = useMemo(
     () =>
       mainDashboard.flatMap((dashboard) =>
@@ -39,7 +28,7 @@ const HomePage: React.FC = () => {
   return (
     <div className='h-full bg-background p-8 text-center flex flex-col justify-center items-center'>
       <div className='flex w-full flex-col px-8 pb-4 items-center'>
-        <StudyListSection studies={studyTitles} />
+        <StudyListSection />
       </div>
       <div className='flex gap-4 w-full h-full px-8 justify-center'>
         <CalendarSection schedules={schedules} />

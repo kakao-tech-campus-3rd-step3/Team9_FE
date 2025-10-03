@@ -1,14 +1,17 @@
+import { useStudyMeQuery } from '../hooks/useStudyMeQuery';
 import StudyList from './StudyList';
 import StudyNothing from './StudyNothing';
 import { useState } from 'react';
 
-type StudyListSectionProps = {
-  studies: { id: number; title: string; color: string }[];
-};
-
-const StudyListSection = ({ studies }: StudyListSectionProps) => {
+const StudyListSection = () => {
+  const { data: studies, isPending } = useStudyMeQuery();
   const [page, setPage] = useState(0);
   const pageSize = 3;
+
+  if (isPending || !studies) {
+    return <div>Loading...</div>;
+  }
+
   const totalPages = Math.ceil(studies.length / pageSize);
   const pagedStudies = studies.slice(page * pageSize, (page + 1) * pageSize);
 
