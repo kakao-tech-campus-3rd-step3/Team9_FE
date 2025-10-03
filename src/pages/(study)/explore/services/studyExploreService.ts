@@ -1,6 +1,38 @@
 import apiClient from '@/api';
 import { STUDY_ENDPOINTS } from '@/api/constants';
-import type { StudyListParams, StudyApplyRequest } from '../types';
+import type { StudyListParams, StudyApplyRequest, Study } from '../types';
+
+// API 응답 타입 정의
+interface ApiStudyResponse {
+  id: number;
+  title: string;
+  description: string;
+  file_key?: string;
+  detail_description?: string;
+  interests?: string[];
+  region?: string;
+  study_time?: string;
+  conditions?: string[];
+  current_members?: number;
+  max_members?: number;
+}
+
+// API 응답을 프론트엔드 타입으로 변환하는 매퍼 함수
+const mapApiResponseToStudy = (apiStudy: ApiStudyResponse): Study => ({
+  id: apiStudy.id,
+  title: apiStudy.title,
+  description: apiStudy.description,
+  category: apiStudy.interests?.[0] || '프로그래밍', // 첫 번째 interest를 카테고리로 사용
+  currentMembers: apiStudy.current_members || 1,
+  maxMembers: apiStudy.max_members || 10,
+  region: apiStudy.region || '전체',
+  imageUrl: apiStudy.file_key
+    ? `https://gogumalatte.site/api/download/photos/${apiStudy.file_key}`
+    : undefined,
+  detailedDescription: apiStudy.detail_description || apiStudy.description,
+  schedule: apiStudy.study_time,
+  requirements: apiStudy.conditions,
+});
 
 /**
  * 스터디 탐색 서비스
@@ -20,7 +52,23 @@ export const studyExploreService = {
         locations: params.locations?.join(','),
       },
     });
-    return data.studies;
+
+    // 각 스터디의 상세 정보를 병렬로 조회
+    const studiesWithDetails = await Promise.all(
+      data.studies.map(async (study: ApiStudyResponse) => {
+        try {
+          const detailResponse = await apiClient.get(
+            STUDY_ENDPOINTS.STUDY_DETAIL(study.id),
+          );
+          return { ...study, ...detailResponse.data } as ApiStudyResponse;
+        } catch (error) {
+          console.warn(`Failed to fetch details for study ${study.id}:`, error);
+          return study; // 상세 정보 조회 실패 시 기본 정보만 반환
+        }
+      }),
+    );
+
+    return studiesWithDetails.map(mapApiResponseToStudy);
   },
 
   // 스터디 상세 조회

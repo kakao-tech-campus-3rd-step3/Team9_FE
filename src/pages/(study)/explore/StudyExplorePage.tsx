@@ -30,7 +30,6 @@ const StudyExplorePage: React.FC = () => {
     // React Query 상태
     isLoading,
     error,
-    isApplying,
 
     // 핸들러
     handleApplyClick,
@@ -41,9 +40,6 @@ const StudyExplorePage: React.FC = () => {
     handleCategoryToggle,
     handleRegionToggle,
     setActiveModal,
-
-    // 신청 관련
-    applyStudy,
   } = useStudyExplore(searchTerm);
 
   // URL의 searchTerm이 변경될 때 inputValue 동기화
@@ -101,9 +97,6 @@ const StudyExplorePage: React.FC = () => {
         isOpen={activeModal === 'apply'}
         onClose={handleModalClose}
         studyTitle={selectedStudy?.title || ''}
-        studyId={selectedStudy?.id || 0}
-        onApply={applyStudy}
-        isApplying={isApplying}
       />
 
       {/* 스터디 상세 모달 */}
