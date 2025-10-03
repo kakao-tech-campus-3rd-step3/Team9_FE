@@ -1,5 +1,6 @@
 import apiClient from '@/api';
 import { STUDY_ENDPOINTS } from '@/api/constants';
+import { downloadImageService } from '@/services/images';
 import type { StudyListParams, StudyApplyRequest, Study } from '../types';
 
 // API 응답 타입 정의
@@ -18,21 +19,35 @@ interface ApiStudyResponse {
 }
 
 // API 응답을 프론트엔드 타입으로 변환하는 매퍼 함수
-const mapApiResponseToStudy = (apiStudy: ApiStudyResponse): Study => ({
-  id: apiStudy.id,
-  title: apiStudy.title,
-  description: apiStudy.description,
-  category: apiStudy.interests?.[0] || '프로그래밍', // 첫 번째 interest를 카테고리로 사용
-  currentMembers: apiStudy.current_members || 1,
-  maxMembers: apiStudy.max_members || 10,
-  region: apiStudy.region || '전체',
-  imageUrl: apiStudy.file_key
-    ? `https://gogumalatte.site/api/download/photos/${apiStudy.file_key}`
-    : undefined,
-  detailedDescription: apiStudy.detail_description || apiStudy.description,
-  schedule: apiStudy.study_time,
-  requirements: apiStudy.conditions,
-});
+const mapApiResponseToStudy = async (
+  apiStudy: ApiStudyResponse,
+): Promise<Study> => {
+  // file_key가 있으면 실제 이미지 URL 가져오기
+  let imageUrl: string | undefined = undefined;
+  if (apiStudy.file_key) {
+    try {
+      imageUrl = await downloadImageService.getImagePresignedUrl(
+        apiStudy.file_key,
+      );
+    } catch (error) {
+      console.warn(`이미지 URL 생성 실패 (study ${apiStudy.id}):`, error);
+    }
+  }
+
+  return {
+    id: apiStudy.id,
+    title: apiStudy.title,
+    description: apiStudy.description,
+    category: apiStudy.interests?.[0] || '프로그래밍', // 첫 번째 interest를 카테고리로 사용
+    currentMembers: apiStudy.current_members || 1,
+    maxMembers: apiStudy.max_members || 10,
+    region: apiStudy.region || '전체',
+    imageUrl,
+    detailedDescription: apiStudy.detail_description || apiStudy.description,
+    schedule: apiStudy.study_time,
+    requirements: apiStudy.conditions,
+  };
+};
 
 /**
  * 스터디 탐색 서비스
@@ -68,7 +83,12 @@ export const studyExploreService = {
       }),
     );
 
-    return studiesWithDetails.map(mapApiResponseToStudy);
+    // 각 스터디에 대해 이미지 URL을 포함한 완전한 데이터 생성
+    const studiesWithImages = await Promise.all(
+      studiesWithDetails.map(mapApiResponseToStudy),
+    );
+
+    return studiesWithImages;
   },
 
   // 스터디 상세 조회
