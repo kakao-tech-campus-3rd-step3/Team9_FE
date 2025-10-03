@@ -7,7 +7,6 @@ import React from 'react';
 import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { StudyCard, StudyCardSkeleton, StudyErrorState } from './';
-import { SearchBar } from '@/components/common';
 import { ROUTES } from '@/constants';
 import type { Study } from '../types';
 
@@ -20,10 +19,10 @@ interface StudyExploreMainContentProps {
   isLoading?: boolean;
   error?: Error | null;
   onRetry?: () => void;
-  // 검색 관련 props 추가
-  searchTerm: string;
-  onSearchChange: (value: string) => void;
-  onSearch: () => void;
+  // 검색 관련 props (현재 사용하지 않음)
+  searchTerm?: string;
+  onSearchChange?: (value: string) => void;
+  onSearch?: () => void;
 }
 
 const StudyExploreMainContent: React.FC<StudyExploreMainContentProps> = ({
@@ -35,25 +34,12 @@ const StudyExploreMainContent: React.FC<StudyExploreMainContentProps> = ({
   isLoading = false,
   error = null,
   onRetry,
-  searchTerm,
-  onSearchChange,
-  onSearch,
 }) => {
   const navigate = useNavigate();
 
   return (
     <div className='flex-1 p-6'>
       <div className='max-w-6xl mx-auto'>
-        {/* 검색창 섹션 */}
-        <div className='mb-6'>
-          <SearchBar
-            searchTerm={searchTerm}
-            onSearchChange={onSearchChange}
-            onSearch={onSearch}
-            placeholder='스터디를 검색해보세요'
-          />
-        </div>
-
         {/* 헤더 섹션 */}
         <div className='flex items-center justify-between mb-6'>
           <h1 className='text-xl font-semibold text-foreground'>

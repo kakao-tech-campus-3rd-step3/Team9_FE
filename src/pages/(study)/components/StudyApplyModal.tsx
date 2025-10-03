@@ -6,14 +6,15 @@ interface StudyApplyModalProps {
   isOpen: boolean;
   onClose: () => void;
   studyTitle: string;
-  studyId: number;
+  studyId?: number;
+  onApply?: (studyId: number, message: string) => void;
+  isApplying?: boolean;
 }
 
 const StudyApplyModal: React.FC<StudyApplyModalProps> = ({
   isOpen,
   onClose,
   studyTitle,
-  studyId: _studyId,
 }) => {
   const [message, setMessage] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);

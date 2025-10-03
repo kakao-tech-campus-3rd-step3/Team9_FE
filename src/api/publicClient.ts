@@ -6,7 +6,7 @@ import axios from 'axios';
 
 // API 기본 URL 설정
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+  import.meta.env.VITE_API_BASE_URL || 'https://gogumalatte.site';
 
 // 공개 API 클라이언트 (인증 불필요한 API용)
 export const publicClient = axios.create({
