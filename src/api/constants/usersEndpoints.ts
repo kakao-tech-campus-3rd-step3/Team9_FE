@@ -4,10 +4,9 @@ export const USERS_ENDPOINTS = {
   PROFILE: '/api/users/me',
   // 현재 로그인한 사용자 세부 프로필 정보
   PROFILE_DETAIL: '/api/users/me/detail',
+  STUDY_ME: '/api/users/me/studies',
   // 특정 스터디 정보 (path: study_id, int64)
   STUDY_BY_ID: (study_id: number) => `/api/users/me/studies/${study_id}`,
   // 현재 로그인한 사용자의 스터디 신청 목록
   STUDY_APPLICATIONS: '/api/users/me/studies/applications',
-  // 내 스터디 정보
-  STUDY_ME: '/api/users/me/studies',
 } as const;
