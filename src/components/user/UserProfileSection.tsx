@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { User, Settings, LogOut } from 'lucide-react';
 import { useAuthStatus, useLogoutMutation } from '@/hooks';
 import { useAuthStore } from '@/stores/auth';
 import { ROUTES } from '@/constants';
+import { getStudyRoleLabel, getRoleColorClass } from '@/utils';
 import Dropdown from '../common/Dropdown';
 import UserAvatar from './UserAvatar';
 
@@ -25,6 +26,12 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
   const { user } = useAuthStore();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const logoutMutation = useLogoutMutation();
+  const location = useLocation();
+
+  // 스터디 페이지인지 확인 (스터디 페이지에서만 역할 표시)
+  const isStudyPage =
+    location.pathname.startsWith(`/${ROUTES.STUDY.ROOT}/`) &&
+    !location.pathname.includes(`/${ROUTES.STUDY.EXPLORE}`);
 
   // 로그아웃 핸들러
   const handleLogout = () => {
@@ -47,25 +54,9 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
     onMobileMenuClose?.();
   };
 
-  // 로딩 상태
+  // 로딩 상태 (Suspense가 처리하므로 기본적인 로딩만 처리)
   if (isAuthLoading) {
-    return (
-      <div
-        className={`flex items-center ${variant === 'study-sidebar' ? 'gap-3 p-4' : 'gap-2 px-3 py-2'}`}
-      >
-        <div
-          className={`${variant === 'study-sidebar' ? 'w-10 h-10' : 'w-8 h-8'} bg-muted rounded-full animate-pulse`}
-        />
-        <div className={variant === 'study-sidebar' ? 'flex-1' : ''}>
-          <div
-            className={`${variant === 'study-sidebar' ? 'h-4 mb-1' : 'h-4'} bg-muted rounded-md animate-pulse`}
-          />
-          {variant === 'study-sidebar' && (
-            <div className='h-3 bg-muted rounded-md animate-pulse w-2/3' />
-          )}
-        </div>
-      </div>
-    );
+    return null;
   }
 
   // 비로그인 상태
@@ -132,13 +123,15 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
         </div>
 
         {/* 사용자 정보 - 데스크톱과 모바일 통합 */}
-        <div className='flex flex-col items-start min-w-0 flex-1 text-left'>
+        <div className='flex items-center justify-between min-w-0 flex-1 text-left'>
           <span className='font-medium text-foreground group-hover:text-accent-foreground transition-colors leading-tight text-sm'>
             {user.nickname}
           </span>
-          {user.currentStudy && (
-            <span className='text-xs text-muted-foreground mt-0.5 leading-relaxed'>
-              {user.currentStudy.title}
+          {isStudyPage && user.currentStudy && (
+            <span
+              className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium ${getRoleColorClass(user.currentStudy.role)} flex-shrink-0`}
+            >
+              {getStudyRoleLabel(user.currentStudy.role)}
             </span>
           )}
         </div>
