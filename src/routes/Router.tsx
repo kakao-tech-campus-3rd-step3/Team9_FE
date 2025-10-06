@@ -8,23 +8,30 @@ import { ROUTES, ROUTE_PARAMS } from '@/constants';
 import { Layout } from '@/components';
 import { StudyLayout } from '@/pages/(study)';
 import routes from './routeConfig';
+import { useAuthStatus } from '@/hooks';
 
 /**
  * 애플리케이션 라우터 설정
  * - 각 페이지별로 다른 레이아웃 타입 적용
  * - 404 페이지는 레이아웃 없이 표시
  */
+
+// 인증 여부에 따른 루트 경로
+const RootIndexRoute: React.FC = () => {
+  const { isAuthenticated } = useAuthStatus();
+  return isAuthenticated ? (
+    <routes.Home />
+  ) : (
+    <Navigate to={`/${ROUTES.STUDY.ROOT}/${ROUTES.STUDY.EXPLORE}`} replace />
+  );
+};
+
 const router = createBrowserRouter([
   // 홈 페이지 (헤더만) - 인증 필요
   {
     path: ROUTES.HOME,
     element: <Layout layoutType='header-only' />,
-    children: [
-      {
-        index: true,
-        element: <routes.Home />,
-      },
-    ],
+    children: [{ index: true, element: <RootIndexRoute /> }],
   },
 
   // 예시 페이지 (사이드바만)
@@ -68,6 +75,10 @@ const router = createBrowserRouter([
     path: ROUTES.STUDY.ROOT,
     element: <Layout layoutType='header-only' />,
     children: [
+      {
+        index: true,
+        element: <Navigate to={ROUTES.STUDY.EXPLORE} replace />,
+      },
       {
         path: ROUTES.STUDY.EXPLORE,
         element: <routes.StudyExplore />,
