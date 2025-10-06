@@ -67,6 +67,7 @@ const DashboardPage = () => {
                 ? []
                 : mockDocuments
             }
+            isLoading={recentQuery.isLoading}
             onClick={() => navigateToStudy(ROUTES.STUDY.DOCUMENT.ROOT)}
             onItemClick={goToDocumentDetail}
           />
