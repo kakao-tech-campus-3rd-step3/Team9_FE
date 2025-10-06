@@ -34,5 +34,9 @@ export const useCurrentStudy = (studyId?: number) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [studyInfo, query.error, setCurrentStudy]);
 
-  return { loading: query.isLoading, error: query.error } as const;
+  return {
+    data: studyInfo,
+    loading: query.isLoading,
+    error: query.error,
+  } as const;
 };
