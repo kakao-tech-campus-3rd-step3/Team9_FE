@@ -3,17 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Plus, FileText, Trash2, X } from 'lucide-react';
 import { cn } from '@/pages/(study)/dashboard/utils';
-import {
-  MaterialSearch,
-  MaterialTable,
-  WeekFilter,
-  ConfirmDialog,
-} from './components';
+import { MaterialTable, ConfirmDialog, FilterBar } from './components';
 import {
   useMaterialsQuery,
   useDeleteMaterialsMutation,
 } from './hooks/useMaterials';
-import { TOAST_MESSAGES, MATERIAL_CATEGORIES_KR } from './constants';
+import { TOAST_MESSAGES } from './constants';
 import type { Material } from './types';
 import { SkeletonTable } from '@/components/common';
 import { EmptyState } from './components/common';
@@ -47,6 +42,15 @@ const DocumentPage = () => {
     keyword: search || undefined,
     page,
     size,
+    sort,
+  });
+
+  // 주차 드롭다운 옵션 계산용: 주차 필터만 제거하여 전체 주차를 보존
+  const weekSourceQuery = useMaterialsQuery(studyIdNum, {
+    category: selectedCategories.length > 0 ? selectedCategories : undefined,
+    keyword: search || undefined,
+    page: 0,
+    size: 1000,
     sort,
   });
 
@@ -112,6 +116,18 @@ const DocumentPage = () => {
 
   const clearCategory = () => {
     setSelectedCategories([]);
+    setPage(0);
+  };
+
+  // 주차 변경 시 페이지 초기화하여 일관된 서버 필터링 보장
+  const handleChangeWeeks = (weeks: string[]) => {
+    setSelectedWeeks(weeks);
+    setPage(0);
+  };
+
+  // 검색 변경 시 첫 페이지로 이동 (디바운스는 상위에서 필요 시 적용)
+  const handleChangeSearch = (term: string) => {
+    setSearch(term);
     setPage(0);
   };
 
@@ -193,108 +209,81 @@ const DocumentPage = () => {
       </div>
 
       {/* 메인 컨텐츠 영역 */}
-      <div className='flex-1 flex overflow-hidden'>
-        {/* 주차별 필터 */}
-        <WeekFilter
+      <div className='flex-1 flex flex-col overflow-hidden'>
+        {/* 통합 필터 바 */}
+        <FilterBar
           materials={materialsFromQuery}
+          weekSourceMaterials={
+            (weekSourceQuery.data?.materials as Material[]) ??
+            materialsFromQuery
+          }
           selectedWeeks={selectedWeeks}
-          onWeekChange={setSelectedWeeks}
+          onChangeWeeks={handleChangeWeeks}
+          selectedCategories={selectedCategories}
+          onToggleCategory={toggleCategory}
+          onClearCategory={clearCategory}
+          sort={sort}
+          onToggleSort={toggleSort}
+          search={search}
+          onChangeSearch={handleChangeSearch}
         />
 
-        {/* 검색 + 필터 + 테이블 영역 */}
-        <div className='flex-1 flex flex-col overflow-hidden'>
-          {/* 검색 */}
-          <MaterialSearch searchTerm={search} onSearchChange={setSearch} />
-
-          {/* 카테고리 필터 */}
-          <div className='px-4 py-2 flex items-center gap-2 flex-wrap'>
-            {MATERIAL_CATEGORIES_KR.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() =>
-                  cat.id === 'all' ? clearCategory() : toggleCategory(cat.id)
-                }
-                className={cn(
-                  'px-3 py-1 rounded-lg text-sm border',
-                  cat.id === 'all'
-                    ? 'border-muted-foreground text-muted-foreground hover:bg-accent'
-                    : selectedCategories.includes(cat.id)
-                      ? 'bg-primary/10 text-primary border-primary/30'
-                      : 'text-foreground border-border hover:bg-accent/50',
-                )}
-              >
-                {cat.name}
-              </button>
-            ))}
-            <div className='ml-auto flex items-center gap-2'>
-              <button
-                onClick={toggleSort}
-                className='px-3 py-1 rounded-lg text-sm border border-border hover:bg-accent/50'
-              >
-                {sort === 'createdAt,desc' ? '최신순' : '오래된순'}
-              </button>
+        {/* 테이블 / 로딩 / 에러 */}
+        <div className='flex-1 overflow-y-auto bg-background p-4 relative'>
+          {materialsQuery.isLoading ? (
+            <div className='h-full p-4'>
+              <SkeletonTable rows={5} columns={4} />
             </div>
-          </div>
-
-          {/* 테이블 / 로딩 / 에러 */}
-          <div className='flex-1 overflow-y-auto bg-background p-4 relative'>
-            {materialsQuery.isLoading ? (
-              <div className='h-full p-4'>
-                <SkeletonTable rows={5} columns={4} />
-              </div>
-            ) : materialsQuery.isError ? (
-              <div className='h-full flex items-center justify-center'>
-                <EmptyState
-                  title='오류가 발생했습니다'
-                  description={'목록을 불러오는 중 오류가 발생했습니다.'}
-                  action={{
-                    label: '다시 시도',
-                    onClick: () => materialsQuery.refetch(),
-                  }}
-                />
-              </div>
-            ) : (
-              <MaterialTable
-                materials={materialsFromQuery}
-                selectedMaterials={selectedMaterials}
-                onSelectMaterial={handleSelectMaterial}
-                onSelectAll={handleSelectAll}
-                onMaterialClick={handleMaterialClick}
+          ) : materialsQuery.isError ? (
+            <div className='h-full flex items-center justify-center'>
+              <EmptyState
+                title='오류가 발생했습니다'
+                description={'목록을 불러오는 중 오류가 발생했습니다.'}
+                action={{
+                  label: '다시 시도',
+                  onClick: () => materialsQuery.refetch(),
+                }}
               />
-            )}
-          </div>
+            </div>
+          ) : (
+            <MaterialTable
+              materials={materialsFromQuery}
+              selectedMaterials={selectedMaterials}
+              onSelectMaterial={handleSelectMaterial}
+              onSelectAll={handleSelectAll}
+              onMaterialClick={handleMaterialClick}
+            />
+          )}
+        </div>
 
-          {/* 페이지네이션 */}
-          <div className='px-4 py-3 flex items-center justify-between border-t border-border'>
-            <div className='text-sm text-muted-foreground'>
-              페이지 {page + 1}
-            </div>
-            <div className='flex items-center gap-2'>
-              <button
-                onClick={goPrev}
-                disabled={page === 0}
-                className={cn(
-                  'px-3 py-1.5 rounded-lg text-sm border',
-                  page === 0
-                    ? 'border-muted-foreground/30 text-muted-foreground/50'
-                    : 'border-border hover:bg-accent/50',
-                )}
-              >
-                이전
-              </button>
-              <button
-                onClick={goNext}
-                disabled={!materialsQuery.data?.hasNext}
-                className={cn(
-                  'px-3 py-1.5 rounded-lg text-sm border',
-                  !materialsQuery.data?.hasNext
-                    ? 'border-muted-foreground/30 text-muted-foreground/50'
-                    : 'border-border hover:bg-accent/50',
-                )}
-              >
-                다음
-              </button>
-            </div>
+        {/* 페이지네이션 */}
+        <div className='px-4 py-3 flex items-center justify-between border-t border-border'>
+          <div className='text-sm text-muted-foreground'>페이지 {page + 1}</div>
+          <div className='flex items-center gap-2'>
+            <button
+              onClick={goPrev}
+              disabled={page === 0}
+              className={cn(
+                'px-3 py-1.5 rounded-lg text-sm border',
+                page === 0
+                  ? 'border-muted-foreground/30 text-muted-foreground/50'
+                  : 'border-border hover:bg-accent/50',
+              )}
+            >
+              이전
+            </button>
+            <button
+              onClick={goNext}
+              disabled={!materialsQuery.data?.hasNext}
+              className={cn(
+                'px-3 py-1.5 rounded-lg text-sm border',
+                !materialsQuery.data?.hasNext
+                  ? 'border-muted-foreground/30 text-muted-foreground/50'
+                  : 'border-border hover:bg-accent/50',
+              )}
+            >
+              다음
+            </button>
           </div>
         </div>
       </div>

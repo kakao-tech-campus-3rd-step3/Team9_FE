@@ -111,6 +111,21 @@ export interface ApiMaterialListItem {
   week: number | string;
   category: string;
   files?: ApiFileItem[];
+  // 대체 스키마: 프론트가 이미 정규화한 응답을 다시 소비하는 경우
+  attachments?: Array<{
+    id?: string | number;
+    name: string;
+    size?: number | string;
+    type?: string;
+    url?: string;
+  }>;
+  // 스웨거 스키마: 파일 키 배열만 제공되는 경우
+  file_keys?: string[];
+  nickname?: string; // 업로더명
+  userId?: number | string;
+  // 백엔드가 배열 대신 개수만 주는 경우 대비
+  file_count?: number | string;
+  files_count?: number | string;
   created_at?: string;
   createdAt?: string;
   updated_at?: string;
@@ -120,22 +135,59 @@ export interface ApiMaterialListItem {
 export const mapApiListItemToMaterial = (
   item: ApiMaterialListItem,
 ): Material => {
+  const krCategory = API_CATEGORY_TO_KR[item.category] ?? item.category;
+  const filesFromApi = Array.isArray(item.files) ? item.files : [];
+  const attachmentsFromApi = Array.isArray(item.attachments)
+    ? item.attachments.map((a) => ({
+        id: String(a.id ?? ''),
+        name: a.name,
+        size: Number(a.size ?? 0) || 0,
+        type: a.type ?? '',
+        url: a.url ?? '',
+      }))
+    : [];
+  const attachmentsFromKeys = Array.isArray(item.file_keys)
+    ? item.file_keys.map((key, idx) => ({
+        id: String(idx),
+        name: key.split('/').pop() || '첨부파일',
+        size: 0,
+        type: '',
+        url: key,
+      }))
+    : [];
+  const fallbackCount = Number(item.file_count ?? item.files_count ?? 0) || 0;
+  const attachments =
+    attachmentsFromApi.length > 0
+      ? attachmentsFromApi
+      : attachmentsFromKeys.length > 0
+        ? attachmentsFromKeys
+        : filesFromApi.length > 0
+          ? filesFromApi.map((f) => ({
+              id: String(f.id ?? ''),
+              name: f.name,
+              size: Number(f.size) || 0,
+              type: f.file_type,
+              url: f.key, // 다운로드 유틸에 key 전달
+            }))
+          : fallbackCount > 0
+            ? // 파일 상세가 없고 개수만 제공되는 경우, 표시 목적의 플레이스홀더 생성
+              Array.from({ length: fallbackCount }).map((_, idx) => ({
+                id: String(idx),
+                name: '첨부파일',
+                size: 0,
+                type: '',
+                url: '',
+              }))
+            : [];
+
   return {
     id: String(item.id),
     title: item.title,
     content: item.content ?? '',
     week: Number(item.week) || 0,
     // 서버 코드를 폼 표시용 한글로 역매핑
-    category: API_CATEGORY_TO_KR[item.category] ?? item.category,
-    attachments: Array.isArray(item.files)
-      ? item.files.map((f) => ({
-          id: String(f.id ?? ''),
-          name: f.name,
-          size: Number(f.size) || 0,
-          type: f.file_type,
-          url: f.key, // 다운로드 유틸에 key 전달
-        }))
-      : [],
+    category: krCategory,
+    attachments,
     createdAt: item.created_at ?? item.createdAt ?? new Date().toISOString(),
     updatedAt: item.updated_at ?? item.updatedAt ?? new Date().toISOString(),
   };

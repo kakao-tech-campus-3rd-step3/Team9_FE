@@ -143,9 +143,14 @@ const MaterialTable = ({
                     </div>
                   </td>
                   <td className='px-4 py-3 min-w-16'>
-                    <span className='inline-flex items-center px-2.5 py-1 rounded-lg text-sm font-semibold bg-primary/10 text-primary whitespace-nowrap'>
-                      {getWeekNameById(`week${material.week}`)}
-                    </span>
+                    {getCategoryKrName(material.category) === '학습자료' &&
+                    material.week > 0 ? (
+                      <span className='inline-flex items-center px-2.5 py-1 rounded-lg text-sm font-semibold bg-primary/10 text-primary whitespace-nowrap'>
+                        {getWeekNameById(`week${material.week}`)}
+                      </span>
+                    ) : (
+                      <span className='text-sm text-muted-foreground'>-</span>
+                    )}
                   </td>
                   <td className='px-4 py-3 min-w-16'>
                     <span className='inline-flex items-center px-2.5 py-1 rounded-lg text-sm font-semibold bg-muted text-foreground whitespace-nowrap'>

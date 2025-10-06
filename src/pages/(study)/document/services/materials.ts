@@ -53,14 +53,17 @@ export const MaterialsService = {
       // 공지 카테고리 등 일부 조합에서 서버가 400을 반환할 수 있어 토스트는 숨김
       showToast: false,
     });
-    // 백엔드 응답 형태 호환 처리: { materials: [] } | { json: [] } | []
+    // 백엔드 응답 형태 호환 처리:
+    // { materials: [] } | { json: [] } | { json: { materials: [] } } | []
     const materials = Array.isArray(data?.materials)
       ? data.materials
       : Array.isArray(data?.json)
         ? data.json
-        : Array.isArray(data)
-          ? data
-          : [];
+        : Array.isArray(data?.json?.materials)
+          ? data.json.materials
+          : Array.isArray(data)
+            ? data
+            : [];
     return {
       materials,
       has_next: Boolean(data?.has_next),

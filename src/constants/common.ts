@@ -45,4 +45,4 @@ export type InterestKey = keyof typeof INTERESTS;
 export type RegionKey = keyof typeof REGIONS;
 
 // 개발용 임시 스터디 ID (백엔드 연동 전까지 사용)
-export const STUDY_ID_DEV = 3 as const;
+export const STUDY_ID_DEV = 2 as const;
