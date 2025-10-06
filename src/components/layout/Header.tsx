@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Home, Search, BookOpen } from 'lucide-react';
-import { Logo } from '@/components/common';
+import { Logo, ProfileSkeleton } from '@/components/common';
 import { UserProfileSection } from '@/components/user';
 import { ROUTES } from '@/constants';
 import { STUDY_ID_DEV } from '@/constants/common';
@@ -103,7 +103,11 @@ const Header: React.FC = () => {
 
           {/* 데스크톱 로그인/프로필 영역 */}
           <div className='hidden lg:flex w-40 items-center justify-center px-4 h-full'>
-            <UserProfileSection variant='header' />
+            <Suspense
+              fallback={<ProfileSkeleton variant='header' showRole={false} />}
+            >
+              <UserProfileSection variant='header' />
+            </Suspense>
           </div>
         </div>
       </header>
@@ -131,10 +135,14 @@ const Header: React.FC = () => {
               );
             })}
             <div className='pt-2 border-t border-border'>
-              <UserProfileSection
-                variant='header'
-                onMobileMenuClose={() => setIsMobileMenuOpen(false)}
-              />
+              <Suspense
+                fallback={<ProfileSkeleton variant='header' showRole={false} />}
+              >
+                <UserProfileSection
+                  variant='header'
+                  onMobileMenuClose={() => setIsMobileMenuOpen(false)}
+                />
+              </Suspense>
             </div>
           </div>
         </div>
