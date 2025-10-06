@@ -2,6 +2,7 @@ import { useMemo, useState, useCallback } from 'react';
 import BaseModal from '@/components/common/BaseModal';
 import { cn } from '@/pages/(study)/dashboard/utils';
 import type { Material, Attachment } from '../types';
+import { aggregateAttachments } from '../utils/attachments';
 
 interface QuizCreateModalProps {
   isOpen: boolean;
@@ -132,6 +133,7 @@ const QuizCreateModal = ({
                         'flex items-center justify-between px-4 py-2',
                         isSelected && 'bg-primary/5',
                       )}
+                      onClick={() => toggleAttachment(String(a.id))}
                     >
                       <div className='min-w-0'>
                         <div className='text-sm font-medium text-foreground truncate'>
