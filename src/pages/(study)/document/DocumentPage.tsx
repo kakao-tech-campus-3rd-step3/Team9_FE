@@ -15,7 +15,7 @@ import {
 } from './hooks/useMaterials';
 import { TOAST_MESSAGES, MATERIAL_CATEGORIES_KR } from './constants';
 import type { Material } from './types';
-import { LoadingSpinner } from '@/components/common';
+import { SkeletonTable } from '@/components/common';
 import { EmptyState } from './components/common';
 
 /**
@@ -239,8 +239,8 @@ const DocumentPage = () => {
           {/* 테이블 / 로딩 / 에러 */}
           <div className='flex-1 overflow-y-auto bg-background p-4 relative'>
             {materialsQuery.isLoading ? (
-              <div className='h-full flex items-center justify-center'>
-                <LoadingSpinner />
+              <div className='h-full p-4'>
+                <SkeletonTable rows={5} columns={4} />
               </div>
             ) : materialsQuery.isError ? (
               <div className='h-full flex items-center justify-center'>
