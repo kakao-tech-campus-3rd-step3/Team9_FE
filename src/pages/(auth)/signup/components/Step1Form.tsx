@@ -36,6 +36,9 @@ export const Step1Form: React.FC<Step1FormProps> = ({
   // 폼 데이터 감시
   const formData = watch();
 
+  // 다음 버튼 클릭 후 인증 요구 에러 표시 여부
+  const [showVerifyRequirement, setShowVerifyRequirement] = useState(false);
+
   /**
    * 인증번호 전송/재전송 처리 함수
    * - 이메일 유효성 검증 후 인증번호 전송
@@ -84,10 +87,14 @@ export const Step1Form: React.FC<Step1FormProps> = ({
     }
   };
 
+  // 인증을 시작했는지 여부(코드 전송/입력 노출)
+  const hasStartedVerification = showVerifyCode || isCodeSent;
+  const nextButtonLabel = AUTH_TEXTS.SIGNUP.STEP1.NEXT_BUTTON;
+
   return (
     <div className='space-y-6'>
       {/* 이메일 입력 및 인증 */}
-      <div className='flex gap-2'>
+      <div className='flex gap-2 items-start'>
         <Input
           type='email'
           id='email'
@@ -98,6 +105,11 @@ export const Step1Form: React.FC<Step1FormProps> = ({
           error={errors.email?.message}
           {...register('email')}
         />
+        {isCodeVerified && (
+          <span className='inline-flex items-center gap-1 px-2 py-1 rounded-md bg-green-100 text-green-700 text-xs'>
+            <ShieldCheck className='w-3 h-3' /> 인증 완료
+          </span>
+        )}
         <button
           type='button'
           onClick={handleSendCode}
@@ -167,51 +179,86 @@ export const Step1Form: React.FC<Step1FormProps> = ({
         </div>
       )}
 
-      {/* 비밀번호 입력 */}
-      <Input
-        type='password'
-        id='password'
-        placeholder={AUTH_TEXTS.SIGNUP.STEP1.PASSWORD_PLACEHOLDER}
-        autoComplete='new-password'
-        aria-invalid={!!errors.password || undefined}
-        error={errors.password?.message}
-        {...register('password')}
-      />
+      {/* 인증 플로우 시작 전에는 비밀번호 입력을 숨김 */}
+      {hasStartedVerification && (
+        <>
+          {/* 비밀번호 입력 */}
+          <Input
+            type='password'
+            id='password'
+            placeholder={AUTH_TEXTS.SIGNUP.STEP1.PASSWORD_PLACEHOLDER}
+            autoComplete='new-password'
+            aria-invalid={!!errors.password || undefined}
+            error={errors.password?.message}
+            {...register('password')}
+          />
 
-      {/* 비밀번호 확인 */}
-      <Input
-        type='password'
-        id='confirmPassword'
-        placeholder={AUTH_TEXTS.SIGNUP.STEP1.CONFIRM_PASSWORD_PLACEHOLDER}
-        autoComplete='new-password'
-        aria-invalid={!!errors.confirmPassword || undefined}
-        error={errors.confirmPassword?.message}
-        success={
-          formData.password &&
-          formData.confirmPassword &&
-          formData.password === formData.confirmPassword &&
-          !errors.confirmPassword
-            ? '비밀번호가 일치합니다'
-            : undefined
-        }
-        {...register('confirmPassword')}
-      />
+          {/* 비밀번호 확인 */}
+          <Input
+            type='password'
+            id='confirmPassword'
+            placeholder={AUTH_TEXTS.SIGNUP.STEP1.CONFIRM_PASSWORD_PLACEHOLDER}
+            autoComplete='new-password'
+            aria-invalid={!!errors.confirmPassword || undefined}
+            error={errors.confirmPassword?.message}
+            success={
+              formData.password &&
+              formData.confirmPassword &&
+              formData.password === formData.confirmPassword &&
+              !errors.confirmPassword
+                ? '비밀번호가 일치합니다'
+                : undefined
+            }
+            {...register('confirmPassword')}
+          />
+        </>
+      )}
 
       {/* 다음 단계 버튼 */}
       <button
         type='button'
-        onClick={() => handleStepChange(2)}
+        onClick={() => {
+          // 인증 미완료 시 클릭하면 안내 표시
+          if (!isCodeVerified) {
+            setShowVerifyRequirement(true);
+            return;
+          }
+          // 인증 완료 후에는 비밀번호 유효성 확인
+          if (
+            hasStartedVerification &&
+            (!formData.password ||
+              !formData.confirmPassword ||
+              formData.password !== formData.confirmPassword)
+          ) {
+            return;
+          }
+          handleStepChange(2);
+        }}
         disabled={
+          // 이메일은 항상 필요
           !formData.email ||
-          !formData.password ||
-          !formData.confirmPassword ||
-          formData.password !== formData.confirmPassword
+          // 인증을 시작한 뒤에는 비밀번호 필수 및 일치 필요
+          (hasStartedVerification &&
+            (!formData.password ||
+              !formData.confirmPassword ||
+              formData.password !== formData.confirmPassword))
         }
         className='w-full bg-primary text-primary-foreground py-2 px-3 mt-4 rounded-lg hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-all duration-200 font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
         aria-label='다음 단계로 이동'
+        aria-describedby={
+          showVerifyRequirement ? 'email-verify-help' : undefined
+        }
       >
-        {AUTH_TEXTS.SIGNUP.STEP1.NEXT_BUTTON}
+        {nextButtonLabel}
       </button>
+      {showVerifyRequirement && (
+        <p
+          id='email-verify-help'
+          className='text-xs text-muted-foreground text-center'
+        >
+          다음 단계로 이동하려면 이메일 인증을 완료해주세요.
+        </p>
+      )}
     </div>
   );
 };
