@@ -3,7 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Plus, FileText, Trash2, X } from 'lucide-react';
 import { cn } from '@/pages/(study)/dashboard/utils';
-import { MaterialTable, ConfirmDialog, FilterBar } from './components';
+import {
+  MaterialTable,
+  ConfirmDialog,
+  FilterBar,
+  QuizCreateModal,
+} from './components';
 import {
   useMaterialsQuery,
   useDeleteMaterialsMutation,
@@ -26,6 +31,7 @@ const DocumentPage = () => {
   const [selectedWeeks, setSelectedWeeks] = useState<string[]>([]); // 선택된 주차 필터
   const [search, setSearch] = useState(''); // 검색어
   const [isConfirmOpen, setIsConfirmOpen] = useState(false); // 삭제 확인 다이얼로그 상태
+  const [isQuizModalOpen, setIsQuizModalOpen] = useState(false); // 퀴즈 생성 모달 상태
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [page, setPage] = useState<number>(0);
   const [size] = useState<number>(10);
@@ -80,8 +86,8 @@ const DocumentPage = () => {
   // 액션 핸들러
   // - 퀴즈 생성(토스트), 다중 삭제(확인 모달)
   const handleCreateQuiz = () => {
-    toast.success(TOAST_MESSAGES.QUIZ_CREATE_SUCCESS);
-    setSelectedMaterials([]);
+    // 모달 오픈으로 변경
+    setIsQuizModalOpen(true);
   };
 
   const handleDeleteMaterials = () => {
@@ -295,6 +301,33 @@ const DocumentPage = () => {
         message={`선택된 ${selectedMaterials.length}개의 자료를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`}
         onConfirm={confirmDelete}
         onCancel={() => setIsConfirmOpen(false)}
+      />
+
+      {/* 퀴즈 생성 모달 */}
+      <QuizCreateModal
+        isOpen={isQuizModalOpen}
+        onClose={() => setIsQuizModalOpen(false)}
+        materials={(
+          (weekSourceQuery.data?.materials as Material[]) ?? materialsFromQuery
+        ).filter((m) => selectedMaterials.includes(m.id))}
+        onSubmit={() => {
+          // TODO: 실제 API 요청 연결 (주석 해제 시 동작)
+          // import { QuizzesService } from './services/quizzes';
+          // (async () => {
+          //   try {
+          //     const fileIds = attachmentIds.map((id) => Number(id)).filter((n) => Number.isFinite(n));
+          //     await QuizzesService.create(studyIdNum, { title, fileIds });
+          //     toast.success('퀴즈가 생성되었습니다.');
+          //   } catch (e) {
+          //     toast.error('퀴즈 생성 중 오류가 발생했습니다.');
+          //   }
+          // })();
+
+          // 현재는 토스트만 표시
+          toast.success(TOAST_MESSAGES.QUIZ_CREATE_SUCCESS);
+          setSelectedMaterials([]);
+          setIsQuizModalOpen(false);
+        }}
       />
     </div>
   );

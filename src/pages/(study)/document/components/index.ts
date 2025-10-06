@@ -5,6 +5,7 @@ export { default as MaterialForm } from './MaterialForm';
 export { default as ConfirmDialog } from './ConfirmDialog';
 export { default as WeekFilter } from './WeekFilter';
 export { default as FilterBar } from './FilterBar';
+export { default as QuizCreateModal } from './QuizCreateModal';
 
 // Common components
 export * from './common';
