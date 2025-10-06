@@ -22,6 +22,13 @@ import {
   ApplicantManagement,
   StudyInfoManagement,
 } from '@/pages/(study)';
+
+import {
+  ReflectionPage,
+  ReflectionDetailPage,
+  ReflectionViewPage,
+} from '@/pages/(study)/reflection';
+
 import { auth, guest, role } from './routeHelpers';
 
 /**
@@ -39,7 +46,10 @@ export const routes = {
   // 공개/기타 페이지
   Example: ExamplePage,
   NotFound: NotFoundPage,
+
+  // 스터디 탐색 페이지
   StudyExplore: StudyExplorePage,
+  StudyCreate: auth(StudyCreatePage),
 
   // 인증 관련 페이지 (비로그인 사용자만 접근)
   Login: guest(LoginPage), // 로그인 페이지
@@ -58,12 +68,16 @@ export const routes = {
   StudyAdminMembers: role(MemberManagement, 'STUDY_LEADER'), // 멤버 관리
   StudyAdminApplicants: role(ApplicantManagement, 'STUDY_LEADER'), // 신청자 관리
   StudyAdminStudyInfo: role(StudyInfoManagement, 'STUDY_LEADER'), // 스터디 정보 관리
-  StudyCreate: role(StudyCreatePage, 'STUDY_LEADER'), // 스터디 생성
 
   // 일정 관리 페이지 (모든 로그인 사용자 접근)
   Schedule: auth(SchedulePage), // 일정 메인
   ScheduleManage: auth(ManagePage), // 일정 관리
   ScheduleTune: auth(TunePage), // 일정 조정
+
+  // 진척도 페이지 (모든 로그인 사용자 접근)
+  StudyReflection: auth(ReflectionPage),
+  StudyReflectionDetail: auth(ReflectionDetailPage),
+  StudyReflectionView: auth(ReflectionViewPage),
 } as const;
 
 export default routes;
