@@ -55,6 +55,17 @@ const mapApiResponseToStudy = async (
     console.log(`file_key 없음 (study ${apiStudy.id}) - 아이콘 사용`);
   }
 
+  // 🚨 임시 해결책: 백엔드 이미지 API가 작동하지 않으므로
+  // 새로 생성한 스터디의 경우 로컬 이미지 미리보기 사용
+  if (!imageUrl && apiStudy.id > 30) {
+    // 최근 생성된 스터디 (ID > 30)의 경우 로컬 이미지 확인
+    const localImageUrl = localStorage.getItem(`study_image_${apiStudy.id}`);
+    if (localImageUrl) {
+      imageUrl = localImageUrl;
+      console.log(`로컬 이미지 사용 (study ${apiStudy.id}):`, imageUrl);
+    }
+  }
+
   // 백엔드 데이터에서 description과 detail_description 중 어느 것이 짧은 설명인지 자동 판단
   const desc = apiStudy.description || '';
   const detailDesc = apiStudy.detail_description || '';

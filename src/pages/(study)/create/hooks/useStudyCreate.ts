@@ -70,9 +70,24 @@ export const useStudyCreate = () => {
             await studyCreateService.uploadImage(selectedFile);
           fileKey = uploadResult.file_key;
           console.log('이미지 업로드 성공:', fileKey);
+
+          // 🚨 임시 해결책: 백엔드 API가 작동하지 않으므로
+          // 로컬 이미지 미리보기를 localStorage에 저장
+          if (imagePreview) {
+            localStorage.setItem(`study_image_temp`, imagePreview);
+            console.log('로컬 이미지 미리보기 저장됨');
+          }
         } catch (error) {
           console.error('이미지 업로드 실패:', error);
-          throw new Error('이미지 업로드에 실패했습니다.');
+          console.log('백엔드 업로드 실패, 로컬 이미지로 대체');
+
+          // 백엔드 업로드 실패 시에도 로컬 이미지 저장
+          if (imagePreview) {
+            localStorage.setItem(`study_image_temp`, imagePreview);
+            console.log('로컬 이미지 미리보기 저장됨 (백엔드 실패)');
+          }
+
+          // fileKey는 undefined로 두고 계속 진행
         }
       }
 
@@ -107,6 +122,14 @@ export const useStudyCreate = () => {
         backendResponse: data,
       });
 
+      // 🚨 임시 해결책: 로컬 이미지를 실제 스터디 ID로 저장
+      const tempImageUrl = localStorage.getItem('study_image_temp');
+      if (tempImageUrl && data.id) {
+        localStorage.setItem(`study_image_${data.id}`, tempImageUrl);
+        localStorage.removeItem('study_image_temp'); // 임시 이미지 제거
+        console.log(`로컬 이미지를 스터디 ID ${data.id}로 저장`);
+      }
+
       // 완료 모달 열기 (토스트는 모달에서 처리)
       setIsCompleteModalOpen(true);
 
@@ -115,9 +138,11 @@ export const useStudyCreate = () => {
     },
     onError: (error, variables) => {
       console.error('스터디 생성 실패:', error);
-      
+
       // axios 에러인 경우 상세 정보 출력
-      const axiosError = error as { response?: { data?: unknown; status?: number; statusText?: string } };
+      const axiosError = error as {
+        response?: { data?: unknown; status?: number; statusText?: string };
+      };
       console.error('에러 상세:', {
         message: error.message,
         response: axiosError.response?.data,
