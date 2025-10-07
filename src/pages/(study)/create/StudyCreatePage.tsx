@@ -42,7 +42,8 @@ const StudyCreatePage: React.FC = () => {
     // 로컬 스토리지에 스터디 데이터 저장 (이미지 포함)
     const studyData = {
       title: createdStudyData.title,
-      category: selectedCategories[0] || '기타',
+      category: selectedCategories[0] || '기타', // 첫 번째 카테고리 (호환성)
+      interests: selectedCategories, // 모든 선택된 카테고리
       description: createdStudyData.description,
       shortDescription: createdStudyData.shortDescription,
       region: createdStudyData.region,

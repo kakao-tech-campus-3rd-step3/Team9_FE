@@ -2,7 +2,7 @@
  * 스터디 탐색 페이지 로직을 관리하는 훅
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import { useSearchParams } from 'react-router-dom';
@@ -50,18 +50,39 @@ export const useStudyExplore = (searchTerm: string) => {
 
   // 필터링된 스터디 목록 (클라이언트 사이드 필터링은 유지)
   // 새로 생성한 스터디를 맨 앞에 추가
+  // localStorage에서 영구 저장된 스터디들 불러오기
+  const persistentStudies = useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem('persistentStudies') || '[]');
+    } catch (error) {
+      console.error('영구 저장된 스터디 로드 실패:', error);
+      return [];
+    }
+  }, []);
+
   const allStudies = [
     ...newlyCreatedStudies,
+    ...persistentStudies,
     ...(studies.length > 0 ? studies : MOCK_STUDIES),
   ];
 
   const filteredStudies = allStudies.filter((study: Study) => {
     // 카테고리 필터
-    if (
-      !selectedCategories.includes('전체') &&
-      !selectedCategories.includes(study.category)
-    ) {
-      return false;
+    if (!selectedCategories.includes('전체')) {
+      // interests 배열이 있으면 interests로 필터링, 없으면 category로 필터링
+      const studyCategories =
+        study.interests && study.interests.length > 0
+          ? study.interests
+          : [study.category];
+
+      // 선택된 카테고리 중 하나라도 스터디의 카테고리/관심사와 일치하는지 확인
+      const hasMatchingCategory = selectedCategories.some((selectedCategory) =>
+        studyCategories.includes(selectedCategory),
+      );
+
+      if (!hasMatchingCategory) {
+        return false;
+      }
     }
     // 지역 필터
     if (
@@ -185,6 +206,7 @@ export const useStudyExplore = (searchTerm: string) => {
             id: Date.now(), // 간단한 ID
             title: studyData.title,
             category: studyData.category,
+            interests: studyData.interests || [studyData.category], // interests 배열이 있으면 사용, 없으면 category를 배열로 변환
             region: studyData.region || '온라인',
             description: studyData.description || '새로 생성된 스터디입니다.',
             shortDescription: studyData.shortDescription || undefined,
@@ -198,6 +220,16 @@ export const useStudyExplore = (searchTerm: string) => {
 
           console.log('생성된 스터디 데이터:', newStudyData);
           setNewlyCreatedStudies((prev) => [newStudyData, ...prev]);
+
+          // localStorage에 영구 저장 (새로고침해도 유지)
+          const existingStudies = JSON.parse(
+            localStorage.getItem('persistentStudies') || '[]',
+          );
+          const updatedStudies = [newStudyData, ...existingStudies];
+          localStorage.setItem(
+            'persistentStudies',
+            JSON.stringify(updatedStudies),
+          );
 
           // 로컬 스토리지에서 데이터 제거 (중복 방지)
           localStorage.removeItem('newlyCreatedStudy');

@@ -15,7 +15,7 @@ export const studyCreateService = {
       title: payload.title,
       description: payload.description,
       detail_description: payload.short_description,
-      interests: [payload.category], // 카테고리를 interests 배열로 변환
+      interests: payload.interests, // 이미 배열로 전달됨
       region: payload.region,
       study_time: payload.schedule,
       max_members: payload.max_members,

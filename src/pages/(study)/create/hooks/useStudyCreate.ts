@@ -81,7 +81,7 @@ export const useStudyCreate = () => {
         title: data.title,
         description: data.description,
         short_description: data.shortDescription,
-        category: selectedCategories[0], // 첫 번째 카테고리 사용
+        interests: selectedCategories, // 선택된 모든 카테고리
         max_members: data.maxMembers,
         schedule: data.schedule,
         region: data.region,

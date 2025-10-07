@@ -42,6 +42,22 @@ const StudyCard: React.FC<StudyCardProps> = ({
           <p className='text-sm text-foreground mb-3'>
             {study.shortDescription || study.description}
           </p>
+          <div className='flex flex-wrap gap-1 mb-2'>
+            {study.interests && study.interests.length > 0 ? (
+              study.interests.map((interest, index) => (
+                <span
+                  key={index}
+                  className='inline-block px-2 py-1 text-xs bg-primary/10 text-primary rounded-full'
+                >
+                  {interest}
+                </span>
+              ))
+            ) : (
+              <span className='inline-block px-2 py-1 text-xs bg-primary/10 text-primary rounded-full'>
+                {study.category}
+              </span>
+            )}
+          </div>
           <p className='text-xs text-muted-foreground'>📍 {study.region}</p>
         </div>
       </div>
