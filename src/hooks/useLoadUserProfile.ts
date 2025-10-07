@@ -23,7 +23,7 @@ export const useLoadUserProfile = () => {
     select: (data: UserProfile) => mapUserProfileToAuthUser(data), // 데이터 변환을 쿼리 레벨에서
     staleTime: 5 * 60 * 1000, // 5분
     gcTime: 10 * 60 * 1000, // 10분
-    enabled: false, // 필요 시 명시적으로 refetch
+    enabled: false, // 백엔드 서버 문제로 임시 비활성화
   });
 
   // 변환된 데이터를 메모이제이션

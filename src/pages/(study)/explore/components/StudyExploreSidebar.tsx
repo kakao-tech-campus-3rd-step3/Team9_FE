@@ -16,7 +16,7 @@ const StudyExploreSidebar: React.FC<StudyExploreSidebarProps> = ({
   onCategoryToggle,
 }) => {
   return (
-    <div className='w-64 bg-white shadow-sm border-r border-border min-h-screen'>
+    <div className='w-64 bg-white shadow-sm border-r border-border h-[calc(100vh-4rem)] fixed left-0 top-20 overflow-y-auto z-10'>
       <div className='p-6'>
         <h2 className='text-xl font-semibold text-foreground mb-6'>
           스터디 탐색

@@ -20,6 +20,7 @@ export const INTERESTS = {
 
 // 지역 옵션
 export const REGIONS = {
+  ONLINE: '온라인',
   SEOUL: '서울',
   GYEONGGI: '경기',
   INCHEON: '인천',

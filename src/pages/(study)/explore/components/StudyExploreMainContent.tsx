@@ -38,7 +38,7 @@ const StudyExploreMainContent: React.FC<StudyExploreMainContentProps> = ({
   const navigate = useNavigate();
 
   return (
-    <div className='flex-1 p-6'>
+    <div className='flex-1 p-6 ml-64'>
       <div className='max-w-6xl mx-auto'>
         {/* 헤더 섹션 */}
         <div className='flex items-center justify-between mb-6'>

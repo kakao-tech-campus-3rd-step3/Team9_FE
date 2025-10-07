@@ -69,9 +69,7 @@ const StudyDetailModal: React.FC<StudyDetailModalProps> = ({
               <h3 className='text-2xl font-bold text-foreground mb-2'>
                 {study.title}
               </h3>
-              <p className='text-muted-foreground mb-3'>
-                {study.shortDescription || study.description}
-              </p>
+              <p className='text-muted-foreground mb-3'>{study.description}</p>
             </div>
             <div className='flex items-center text-sm text-muted-foreground bg-secondary px-3 py-1 rounded-full'>
               <Users className='h-4 w-4 mr-1' />
@@ -116,7 +114,8 @@ const StudyDetailModal: React.FC<StudyDetailModalProps> = ({
           </h4>
           <div className='bg-accent/30 p-4 rounded-lg'>
             <p className='text-foreground leading-relaxed'>
-              {study.detailedDescription ||
+              {study.shortDescription ||
+                study.detailedDescription ||
                 `미시경제학의 기본 개념부터 응용 문제까지 깊이 파고드는 스터디입니다. 
                   각자 예습한 내용을 공유하고, 토론하며 어려운 이론도 함께 해결해 나갑니다. 
                   복습과 퀴즈로 이해도를 높여 학기 성적과 실무 감각을 동시에 잡는 것을 목표로 합니다.`}
@@ -130,18 +129,20 @@ const StudyDetailModal: React.FC<StudyDetailModalProps> = ({
             참여 조건
           </h4>
           <div className='space-y-2'>
-            {(
-              study.requirements || [
-                '해당 분야에 대한 기본적인 관심',
-                '정기적인 참여 가능',
-                '적극적인 소통과 협력',
-              ]
-            ).map((requirement, index) => (
-              <div key={index} className='flex items-start text-sm'>
-                <span className='text-primary mr-2'>•</span>
-                <span className='text-foreground'>{requirement}</span>
+            {study.requirements && study.requirements.length > 0 ? (
+              study.requirements.map((requirement, index) => (
+                <div key={index} className='flex items-start text-sm'>
+                  <span className='text-primary mr-2'>•</span>
+                  <span className='text-foreground'>{requirement}</span>
+                </div>
+              ))
+            ) : (
+              <div className='flex items-start text-sm'>
+                <span className='text-muted-foreground italic'>
+                  모집 게시자가 참여 조건을 작성하지 않았습니다.
+                </span>
               </div>
-            ))}
+            )}
           </div>
         </div>
 

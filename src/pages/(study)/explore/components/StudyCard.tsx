@@ -22,11 +22,23 @@ const StudyCard: React.FC<StudyCardProps> = ({
       <div className='p-6 flex-1'>
         <div className='mb-4'>
           <div className='w-full h-32 bg-primary-light rounded-lg mb-4 flex items-center justify-center overflow-hidden'>
-            {study.imageUrl && study.imageUrl.startsWith('data:') ? (
+            {study.imageUrl ? (
               <img
                 src={study.imageUrl}
                 alt={study.title}
                 className='w-full h-full object-cover rounded-lg'
+                onError={(e) => {
+                  // 이미지 로드 실패 시 아이콘으로 대체
+                  e.currentTarget.style.display = 'none';
+                  const parent = e.currentTarget.parentElement;
+                  if (parent) {
+                    parent.innerHTML = `
+                    <div class="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
+                      <span class="text-primary-foreground text-lg font-bold">${study.title.charAt(0)}</span>
+                    </div>
+                  `;
+                  }
+                }}
               />
             ) : (
               <div className='w-12 h-12 bg-primary rounded-lg flex items-center justify-center'>
@@ -39,22 +51,43 @@ const StudyCard: React.FC<StudyCardProps> = ({
           <h3 className='text-lg font-semibold text-foreground mb-2'>
             {study.title}
           </h3>
-          <p className='text-sm text-foreground mb-3'>
-            {study.shortDescription || study.description}
-          </p>
+          <p className='text-sm text-foreground mb-3'>{study.description}</p>
           <div className='flex flex-wrap gap-1 mb-2'>
             {study.interests && study.interests.length > 0 ? (
-              study.interests.map((interest, index) => (
-                <span
-                  key={index}
-                  className='inline-block px-2 py-1 text-xs bg-primary/10 text-primary rounded-full'
-                >
-                  {interest}
-                </span>
-              ))
+              study.interests.map((interest, index) => {
+                // 카테고리 매핑 (백엔드 DB의 category를 프론트엔드 카테고리로 변환)
+                const categoryMapping: { [key: string]: string } = {
+                  개발: '프로그래밍',
+                  어학: '어학',
+                  취업: '취업',
+                  '고시/공무원': '고시/공무원',
+                  '취미/교양': '취미/교양',
+                  '자율/기타': '자율/기타',
+                };
+                const mappedInterest = categoryMapping[interest] || interest;
+                return (
+                  <span
+                    key={index}
+                    className='inline-block px-2 py-1 text-xs bg-primary/10 text-primary rounded-full'
+                  >
+                    {mappedInterest}
+                  </span>
+                );
+              })
             ) : (
               <span className='inline-block px-2 py-1 text-xs bg-primary/10 text-primary rounded-full'>
-                {study.category}
+                {(() => {
+                  // 카테고리 매핑 (백엔드 DB의 category를 프론트엔드 카테고리로 변환)
+                  const categoryMapping: { [key: string]: string } = {
+                    개발: '프로그래밍',
+                    어학: '어학',
+                    취업: '취업',
+                    '고시/공무원': '고시/공무원',
+                    '취미/교양': '취미/교양',
+                    '자율/기타': '자율/기타',
+                  };
+                  return categoryMapping[study.category] || study.category;
+                })()}
               </span>
             )}
           </div>
