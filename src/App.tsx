@@ -6,7 +6,7 @@ import ErrorBoundary from '@/components/common/ErrorBoundary';
 function App() {
   return (
     <ErrorBoundary>
-      <Suspense fallback={<LoadingSpinner message='로딩 중...' />}>
+      <Suspense fallback={<LoadingSpinner fullScreen message='로딩 중...' />}>
         <Router />
       </Suspense>
     </ErrorBoundary>

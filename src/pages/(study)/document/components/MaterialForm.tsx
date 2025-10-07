@@ -10,12 +10,13 @@ import {
   MATERIAL_CATEGORY_TO_API,
 } from '../constants';
 
-interface MaterialFormProps {
+export interface MaterialFormProps {
   formData: MaterialFormData;
   onFormDataChange: (data: MaterialFormData) => void;
   onSubmit: (e: React.FormEvent) => void;
   submitButtonText: string;
   onCancel: () => void;
+  isLoading?: boolean;
 }
 
 /**
@@ -27,6 +28,7 @@ function MaterialForm({
   onSubmit,
   submitButtonText,
   onCancel,
+  isLoading = false,
 }: MaterialFormProps) {
   const [uploadedFiles, setUploadedFiles] = useState<UploadFileItem[]>(
     formData.files || [],
@@ -73,6 +75,8 @@ function MaterialForm({
     setUploadedFiles(formData.files || []);
   }, [formData.files]);
 
+  // 로딩 상태는 개별 필드에서 처리
+
   return (
     <div className='flex-1 overflow-y-auto px-6 py-6'>
       <div className='max-w-3xl mx-auto'>
@@ -82,21 +86,25 @@ function MaterialForm({
             <label className='block text-base font-semibold text-foreground mb-3'>
               제목 <span className='text-destructive'>*</span>
             </label>
-            <input
-              type='text'
-              value={formData.title}
-              onChange={(e) =>
-                onFormDataChange({ ...formData, title: e.target.value })
-              }
-              placeholder='자료 제목을 입력하세요'
-              className={cn(
-                'w-full px-4 py-3 border-2 border-border rounded-lg text-base',
-                'bg-background text-foreground placeholder:text-muted-foreground',
-                'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary',
-                'transition-all duration-200 hover:border-primary/50',
-              )}
-              required
-            />
+            {isLoading ? (
+              <div className='h-12 bg-muted animate-pulse rounded' />
+            ) : (
+              <input
+                type='text'
+                value={formData.title}
+                onChange={(e) =>
+                  onFormDataChange({ ...formData, title: e.target.value })
+                }
+                placeholder='자료 제목을 입력하세요'
+                className={cn(
+                  'w-full px-4 py-3 border-2 border-border rounded-lg text-base',
+                  'bg-background text-foreground placeholder:text-muted-foreground',
+                  'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary',
+                  'transition-all duration-200 hover:border-primary/50',
+                )}
+                required
+              />
+            )}
           </div>
 
           {/* 주차: 카테고리가 LEARNING일 때만 노출, 숫자 입력 */
@@ -106,24 +114,28 @@ function MaterialForm({
               <label className='block text-base font-semibold text-foreground mb-3'>
                 주차 <span className='text-destructive'>*</span>
               </label>
-              <input
-                type='number'
-                min={1}
-                value={formData.week}
-                onChange={(e) =>
-                  onFormDataChange({
-                    ...formData,
-                    week: Number(e.target.value),
-                  })
-                }
-                className={cn(
-                  'w-full px-4 py-3 border-2 border-border rounded-lg text-base',
-                  'bg-background text-foreground',
-                  'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary',
-                  'transition-all duration-200 hover:border-primary/50',
-                )}
-                required
-              />
+              {isLoading ? (
+                <div className='h-12 bg-muted animate-pulse rounded' />
+              ) : (
+                <input
+                  type='number'
+                  min={1}
+                  value={formData.week}
+                  onChange={(e) =>
+                    onFormDataChange({
+                      ...formData,
+                      week: Number(e.target.value),
+                    })
+                  }
+                  className={cn(
+                    'w-full px-4 py-3 border-2 border-border rounded-lg text-base',
+                    'bg-background text-foreground',
+                    'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary',
+                    'transition-all duration-200 hover:border-primary/50',
+                  )}
+                  required
+                />
+              )}
             </div>
           )}
 
@@ -132,25 +144,29 @@ function MaterialForm({
             <label className='block text-base font-semibold text-foreground mb-3'>
               카테고리 <span className='text-destructive'>*</span>
             </label>
-            <select
-              value={formData.category}
-              onChange={(e) =>
-                onFormDataChange({ ...formData, category: e.target.value })
-              }
-              className={cn(
-                'w-full px-4 py-3 border-2 border-border rounded-lg text-base',
-                'bg-background text-foreground',
-                'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary',
-                'transition-all duration-200 hover:border-primary/50',
-              )}
-              required
-            >
-              {MATERIAL_CATEGORY_OPTIONS.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
-              ))}
-            </select>
+            {isLoading ? (
+              <div className='h-12 bg-muted animate-pulse rounded' />
+            ) : (
+              <select
+                value={formData.category}
+                onChange={(e) =>
+                  onFormDataChange({ ...formData, category: e.target.value })
+                }
+                className={cn(
+                  'w-full px-4 py-3 border-2 border-border rounded-lg text-base',
+                  'bg-background text-foreground',
+                  'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary',
+                  'transition-all duration-200 hover:border-primary/50',
+                )}
+                required
+              >
+                {MATERIAL_CATEGORY_OPTIONS.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           {/* 내용 */}
@@ -158,21 +174,25 @@ function MaterialForm({
             <label className='block text-base font-semibold text-foreground mb-3'>
               내용 <span className='text-destructive'>*</span>
             </label>
-            <textarea
-              value={formData.content}
-              onChange={(e) =>
-                onFormDataChange({ ...formData, content: e.target.value })
-              }
-              placeholder='자료 내용을 입력하세요'
-              rows={6}
-              className={cn(
-                'w-full px-4 py-3 border-2 border-border rounded-lg text-base',
-                'bg-background text-foreground placeholder:text-muted-foreground',
-                'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary',
-                'transition-all duration-200 hover:border-primary/50 resize-none',
-              )}
-              required
-            />
+            {isLoading ? (
+              <div className='h-32 bg-muted animate-pulse rounded' />
+            ) : (
+              <textarea
+                value={formData.content}
+                onChange={(e) =>
+                  onFormDataChange({ ...formData, content: e.target.value })
+                }
+                placeholder='자료 내용을 입력하세요'
+                rows={6}
+                className={cn(
+                  'w-full px-4 py-3 border-2 border-border rounded-lg text-base',
+                  'bg-background text-foreground placeholder:text-muted-foreground',
+                  'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary',
+                  'transition-all duration-200 hover:border-primary/50 resize-none',
+                )}
+                required
+              />
+            )}
           </div>
 
           {/* 첨부파일 */}

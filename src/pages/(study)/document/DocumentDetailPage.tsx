@@ -13,7 +13,6 @@ import {
   useMaterialDetailQuery,
   useDeleteMaterialsMutation,
 } from './hooks/useMaterials';
-import { LoadingSpinner } from '@/components/common';
 
 /**
  * 자료 상세 페이지
@@ -70,13 +69,7 @@ const DocumentDetailPage = () => {
     }
   };
 
-  if (detailQuery.isLoading) {
-    return (
-      <div className='h-full flex items-center justify-center'>
-        <LoadingSpinner />
-      </div>
-    );
-  }
+  // 로딩 상태는 MaterialDetail 내부에서 처리
 
   if (!material) {
     return (
@@ -151,7 +144,7 @@ const DocumentDetailPage = () => {
 
       {/* 컨텐츠 */}
       <div className='flex-1 overflow-y-auto'>
-        <MaterialDetail material={material} />
+        <MaterialDetail material={material} isLoading={detailQuery.isLoading} />
       </div>
     </div>
   );

@@ -1,4 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from '@tanstack/react-query';
 import { QUERY_KEYS } from './queryKeys';
 import { MaterialsService } from '../services';
 import { mapApiListItemToMaterial } from '../utils';
@@ -31,12 +36,49 @@ export const useMaterialsQuery = (
     staleTime: 60 * 1000,
   });
 };
+
+// 목록 조회 (Suspense 버전)
+export const useMaterialsQuerySuspense = (
+  studyId: number,
+  params: {
+    week?: number[];
+    category?: string[];
+    keyword?: string;
+    page?: number;
+    size?: number;
+    sort?: string;
+  },
+) => {
+  return useSuspenseQuery({
+    queryKey: QUERY_KEYS.materials(studyId, params),
+    queryFn: async () => {
+      const res = await MaterialsService.list({ studyId, ...params });
+      const items = Array.isArray(res.materials) ? res.materials : [];
+      return {
+        materials: items.map(mapApiListItemToMaterial),
+        hasNext: Boolean(res.has_next),
+        page: res.page ?? params.page ?? 0,
+        size: res.size ?? params.size ?? 10,
+      };
+    },
+    staleTime: 60 * 1000,
+  });
+};
 // 상세 조회: materialId 기반
 export const useMaterialDetailQuery = (materialId: number) => {
   return useQuery({
     queryKey: QUERY_KEYS.materialDetail(materialId),
     queryFn: async () => MaterialsService.detail(materialId),
     enabled: Number.isFinite(materialId) && materialId > 0,
+    staleTime: 60 * 1000,
+  });
+};
+
+// 상세 조회 (Suspense 버전)
+export const useMaterialDetailQuerySuspense = (materialId: number) => {
+  return useSuspenseQuery({
+    queryKey: QUERY_KEYS.materialDetail(materialId),
+    queryFn: async () => MaterialsService.detail(materialId),
     staleTime: 60 * 1000,
   });
 };
@@ -61,6 +103,29 @@ export const useRecentMaterialsQuery = (studyId: number) => {
       }>;
     },
     enabled: Number.isFinite(studyId) && studyId > 0,
+    staleTime: 60 * 1000,
+  });
+};
+
+// 최신 학습 자료 조회 (Suspense 버전)
+export const useRecentMaterialsQuerySuspense = (studyId: number) => {
+  return useSuspenseQuery({
+    queryKey: QUERY_KEYS.recentMaterials(studyId),
+    queryFn: async () => {
+      const res = await MaterialsService.recent(studyId);
+      const arr = Array.isArray(res?.json)
+        ? res.json
+        : Array.isArray(res)
+          ? res
+          : [];
+      return arr as Array<{
+        material_id: number;
+        material_title: string;
+        author_name: string;
+        file_count: number;
+        total_file_size: number;
+      }>;
+    },
     staleTime: 60 * 1000,
   });
 };

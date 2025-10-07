@@ -12,5 +12,11 @@ export {
   SkeletonTable,
   SkeletonListItem,
 } from './Skeleton';
+export {
+  SimpleSkeleton,
+  TableSkeleton,
+  CardSkeleton,
+  ListItemSkeleton,
+} from './SimpleSkeleton';
 export { default as ErrorBoundary } from './ErrorBoundary';
 export { default as ProfileSkeleton } from './ProfileSkeleton';

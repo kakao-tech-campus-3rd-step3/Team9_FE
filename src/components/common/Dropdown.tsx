@@ -45,7 +45,7 @@ const Dropdown: React.FC<DropdownProps> = ({
     }
   }, [isOpen, onOpenChange, onClose]);
 
-  const defaultOffsetClass = position === 'top' ? 'mb-1' : 'mt-2';
+  const defaultOffsetClass = position === 'top' ? 'mb-0' : 'mt-2';
   const positionClass =
     position === 'top'
       ? `bottom-full ${offsetClass ?? defaultOffsetClass}`
@@ -54,11 +54,17 @@ const Dropdown: React.FC<DropdownProps> = ({
 
   return (
     <div className='relative w-full' ref={dropdownRef}>
-      <div onClick={() => onOpenChange(!isOpen)}>{trigger}</div>
+      <button
+        type='button'
+        onClick={() => onOpenChange(!isOpen)}
+        className='w-full'
+      >
+        {trigger}
+      </button>
 
       {isOpen && (
         <div
-          className={`absolute ${positionClass} ${alignClass} min-w-[12rem] max-w-full w-full bg-background border-2 border-border rounded-md backdrop-blur-sm z-[9999]`}
+          className={`absolute ${positionClass} ${alignClass} min-w-[12rem] w-full bg-background border-2 border-border rounded-md backdrop-blur-sm shadow-lg z-[9999]`}
         >
           {children}
         </div>

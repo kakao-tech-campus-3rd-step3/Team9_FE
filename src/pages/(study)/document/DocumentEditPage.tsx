@@ -95,13 +95,7 @@ const DocumentEditPage = () => {
     }
   };
 
-  if (detailQuery.isLoading) {
-    return (
-      <div className='h-full flex items-center justify-center'>
-        <div className='w-6 h-6 animate-spin rounded-full border-2 border-primary border-t-transparent' />
-      </div>
-    );
-  }
+  // 로딩 상태는 MaterialForm 내부에서 처리
 
   if (!material) {
     return (
@@ -155,6 +149,7 @@ const DocumentEditPage = () => {
         onSubmit={handleSubmit}
         submitButtonText='저장'
         onCancel={handleBack}
+        isLoading={detailQuery.isLoading}
       />
     </div>
   );

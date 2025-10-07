@@ -1,7 +1,7 @@
 import { FileText, User, HardDrive } from 'lucide-react';
 import { getIconByExtension } from '../utils';
 import { SectionCard } from './common';
-import { SkeletonListItem } from '@/components/common';
+import { ListItemSkeleton } from '@/components/common';
 import type { Document } from '../types';
 
 interface RecentMaterialItem {
@@ -74,9 +74,9 @@ const DocumentSection = ({
         {isLoading ? (
           // 로딩 중일 때 스켈레톤 표시
           <>
-            <SkeletonListItem />
-            <SkeletonListItem />
-            <SkeletonListItem />
+            <ListItemSkeleton />
+            <ListItemSkeleton />
+            <ListItemSkeleton />
           </>
         ) : normalized.length === 0 ? (
           <div className='p-4 text-xs text-muted-foreground bg-muted/30 rounded-lg border border-dashed border-border'>

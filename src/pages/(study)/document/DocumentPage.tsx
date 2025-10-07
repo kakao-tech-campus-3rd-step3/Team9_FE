@@ -15,7 +15,6 @@ import {
 } from './hooks/useMaterials';
 import { TOAST_MESSAGES } from './constants';
 import type { Material } from './types';
-import { SkeletonTable } from '@/components/common';
 import { EmptyState } from './components/common';
 
 /**
@@ -61,8 +60,10 @@ const DocumentPage = () => {
   });
 
   // 서버 필터만 사용 (추가 클라이언트 필터 없음)
-  const materialsFromQuery: Material[] =
-    (materialsQuery.data?.materials as Material[]) ?? [];
+  // 로딩 중이어도 빈 배열을 전달하여 테이블 구조 유지
+  const materialsFromQuery: Material[] = materialsQuery.isLoading
+    ? []
+    : ((materialsQuery.data?.materials as Material[]) ?? []);
 
   // 네비게이션 핸들러
   const handleMaterialClick = (id: string) => navigate(id);
@@ -236,11 +237,7 @@ const DocumentPage = () => {
 
         {/* 테이블 / 로딩 / 에러 */}
         <div className='flex-1 overflow-y-auto bg-background p-4 relative'>
-          {materialsQuery.isLoading ? (
-            <div className='h-full p-4'>
-              <SkeletonTable rows={5} columns={4} />
-            </div>
-          ) : materialsQuery.isError ? (
+          {materialsQuery.isError ? (
             <div className='h-full flex items-center justify-center'>
               <EmptyState
                 title='오류가 발생했습니다'
@@ -258,6 +255,7 @@ const DocumentPage = () => {
               onSelectMaterial={handleSelectMaterial}
               onSelectAll={handleSelectAll}
               onMaterialClick={handleMaterialClick}
+              isLoading={materialsQuery.isLoading}
             />
           )}
         </div>

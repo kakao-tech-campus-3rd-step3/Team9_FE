@@ -1,4 +1,5 @@
 import { FileText, Paperclip, Check } from 'lucide-react';
+import { SimpleSkeleton } from '@/components/common';
 import { cn } from '@/pages/(study)/dashboard/utils';
 import { formatDate, getWeekNameById, getCategoryKrName } from '../utils';
 import type { Material } from '../types';
@@ -10,6 +11,7 @@ interface MaterialTableProps {
   onSelectMaterial: (id: string) => void;
   onSelectAll: (selected: boolean) => void;
   onMaterialClick: (id: string) => void;
+  isLoading?: boolean;
 }
 
 /**
@@ -21,24 +23,60 @@ const MaterialTable = ({
   onSelectMaterial,
   onSelectAll,
   onMaterialClick,
+  isLoading = false,
 }: MaterialTableProps) => {
   const isAllSelected =
     materials.length > 0 && selectedMaterials.length === materials.length;
   const isPartiallySelected =
     selectedMaterials.length > 0 && selectedMaterials.length < materials.length;
 
-  if (materials.length === 0) {
+  // 빈 상태 처리 (로딩 중이 아닐 때만)
+  if (!isLoading && materials.length === 0) {
     return (
-      <div className='flex flex-col items-center justify-center py-16 text-center'>
-        <div className='w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4'>
-          <FileText className='w-8 h-8 text-muted-foreground' />
+      <div className='bg-background border border-border rounded-lg overflow-hidden'>
+        <div className='overflow-x-auto'>
+          <table className='w-full text-sm'>
+            <thead className='bg-muted border-b border-border'>
+              <tr>
+                <th className='px-4 py-3 text-left'>
+                  <input type='checkbox' className='w-4 h-4' disabled />
+                </th>
+                <th className='px-4 py-3 text-left font-medium text-muted-foreground'>
+                  제목
+                </th>
+                <th className='px-4 py-3 text-left font-medium text-muted-foreground'>
+                  주차
+                </th>
+                <th className='px-4 py-3 text-left font-medium text-muted-foreground'>
+                  카테고리
+                </th>
+                <th className='px-4 py-3 text-left font-medium text-muted-foreground'>
+                  첨부파일
+                </th>
+                <th className='px-4 py-3 text-left font-medium text-muted-foreground'>
+                  작성일
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colSpan={6} className='px-4 py-16 text-center'>
+                  <div className='flex flex-col items-center justify-center'>
+                    <div className='w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4'>
+                      <FileText className='w-8 h-8 text-muted-foreground' />
+                    </div>
+                    <h3 className='text-lg font-semibold text-foreground mb-2'>
+                      자료가 없습니다
+                    </h3>
+                    <p className='text-muted-foreground'>
+                      새로운 자료를 추가하거나 다른 필터를 선택해보세요.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <h3 className='text-lg font-semibold text-foreground mb-2'>
-          자료가 없습니다
-        </h3>
-        <p className='text-muted-foreground'>
-          새로운 자료를 추가하거나 다른 필터를 선택해보세요.
-        </p>
       </div>
     );
   }
@@ -172,6 +210,46 @@ const MaterialTable = ({
                 </tr>
               );
             })}
+
+            {/* 로딩 중일 때 추가 스켈레톤 행들 */}
+            {isLoading &&
+              Array.from({ length: 8 }).map((_, index) => (
+                <tr key={`skeleton-${index}`} className='hover:bg-accent/30'>
+                  <td className='px-4 py-3'>
+                    <div className='flex items-center justify-center'>
+                      <div className='w-5'>
+                        <SimpleSkeleton
+                          height='h-5'
+                          width='w-5'
+                          className='rounded'
+                        />
+                      </div>
+                    </div>
+                  </td>
+                  <td className='px-4 py-3'>
+                    <div className='flex items-center gap-3'>
+                      <SimpleSkeleton
+                        height='h-6'
+                        width='w-6'
+                        className='rounded'
+                      />
+                      <SimpleSkeleton height='h-4' width='w-3/4' />
+                    </div>
+                  </td>
+                  <td className='px-4 py-3'>
+                    <SimpleSkeleton height='h-4' width='w-20' />
+                  </td>
+                  <td className='px-4 py-3'>
+                    <SimpleSkeleton height='h-4' width='w-24' />
+                  </td>
+                  <td className='px-4 py-3'>
+                    <SimpleSkeleton height='h-4' width='w-12' />
+                  </td>
+                  <td className='px-4 py-3'>
+                    <SimpleSkeleton height='h-4' width='w-24' />
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>

@@ -4,8 +4,9 @@ import { downloadImageService } from '@/services/images/downloadImage';
 import type { Material } from '../types';
 import { MATERIAL_CATEGORIES } from '../constants';
 
-interface MaterialDetailProps {
+export interface MaterialDetailProps {
   material: Material;
+  isLoading?: boolean;
 }
 
 /**
@@ -13,7 +14,7 @@ interface MaterialDetailProps {
  * - 자료의 상세 정보를 표시
  * - 첨부파일 다운로드 기능 제공
  */
-function MaterialDetail({ material }: MaterialDetailProps) {
+function MaterialDetail({ material, isLoading = false }: MaterialDetailProps) {
   const category = MATERIAL_CATEGORIES.find(
     (cat) => cat.id === material.category,
   );
@@ -70,38 +71,58 @@ function MaterialDetail({ material }: MaterialDetailProps) {
     }
   };
 
+  // 로딩 상태는 개별 섹션에서 처리
+
   return (
     <div className='max-w-6xl mx-auto p-6'>
       {/* 헤더 */}
       <div className='mb-10'>
         <div className='flex items-start justify-between mb-6'>
           <div className='flex-1'>
-            <h1 className='text-2xl font-bold text-foreground mb-4 leading-tight'>
-              {material.title}
-            </h1>
-            {category && (
-              <div className='flex items-center gap-2 mb-4'>
-                <Tag className='w-4 h-4 text-muted-foreground' />
-                <span className='px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-sm font-medium border border-primary/20'>
-                  {category.name}
-                </span>
-              </div>
+            {isLoading ? (
+              <>
+                <div className='h-8 bg-muted animate-pulse rounded w-3/4 mb-4' />
+                <div className='h-6 bg-muted animate-pulse rounded w-1/4 mb-4' />
+              </>
+            ) : (
+              <>
+                <h1 className='text-2xl font-bold text-foreground mb-4 leading-tight'>
+                  {material.title}
+                </h1>
+                {category && (
+                  <div className='flex items-center gap-2 mb-4'>
+                    <Tag className='w-4 h-4 text-muted-foreground' />
+                    <span className='px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-sm font-medium border border-primary/20'>
+                      {category.name}
+                    </span>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
 
         {/* 메타 정보 */}
         <div className='flex flex-wrap items-center gap-6 text-sm text-muted-foreground'>
-          <div className='flex items-center gap-2'>
-            <Calendar className='w-4 h-4' />
-            <span className='font-medium'>생성일:</span>
-            <span>{formatDate(material.createdAt)}</span>
-          </div>
-          <div className='flex items-center gap-2'>
-            <Clock className='w-4 h-4' />
-            <span className='font-medium'>수정일:</span>
-            <span>{formatDate(material.updatedAt)}</span>
-          </div>
+          {isLoading ? (
+            <>
+              <div className='h-4 bg-muted animate-pulse rounded w-1/6' />
+              <div className='h-4 bg-muted animate-pulse rounded w-1/6' />
+            </>
+          ) : (
+            <>
+              <div className='flex items-center gap-2'>
+                <Calendar className='w-4 h-4' />
+                <span className='font-medium'>생성일:</span>
+                <span>{formatDate(material.createdAt)}</span>
+              </div>
+              <div className='flex items-center gap-2'>
+                <Clock className='w-4 h-4' />
+                <span className='font-medium'>수정일:</span>
+                <span>{formatDate(material.updatedAt)}</span>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -112,26 +133,42 @@ function MaterialDetail({ material }: MaterialDetailProps) {
           <h2 className='text-xl font-bold text-foreground'>내용</h2>
         </div>
         <div className='bg-background border border-border rounded-lg p-6'>
-          <div className='prose max-w-none text-foreground'>
-            <div className='whitespace-pre-wrap leading-relaxed text-base'>
-              {material.content}
+          {isLoading ? (
+            <div className='space-y-4'>
+              <div className='h-4 bg-muted animate-pulse rounded w-full' />
+              <div className='h-4 bg-muted animate-pulse rounded w-5/6' />
+              <div className='h-4 bg-muted animate-pulse rounded w-4/6' />
+              <div className='h-4 bg-muted animate-pulse rounded w-3/6' />
             </div>
-          </div>
+          ) : (
+            <div className='prose max-w-none text-foreground'>
+              <div className='whitespace-pre-wrap leading-relaxed text-base'>
+                {material.content}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* 첨부파일 */}
-      {material.attachments.length > 0 && (
-        <div className='mb-8'>
-          <div className='flex items-center gap-3 mb-4'>
-            <div className='w-1 h-6 bg-secondary rounded-full'></div>
-            <h2 className='text-xl font-bold text-foreground'>첨부파일</h2>
+      <div className='mb-8'>
+        <div className='flex items-center gap-3 mb-4'>
+          <div className='w-1 h-6 bg-secondary rounded-full'></div>
+          <h2 className='text-xl font-bold text-foreground'>첨부파일</h2>
+          {!isLoading && material.attachments.length > 0 && (
             <span className='px-2 py-1 bg-secondary/10 text-secondary rounded text-sm font-medium'>
               {material.attachments.length}개
             </span>
-          </div>
-          <div className='space-y-3'>
-            {material.attachments.map((attachment) => (
+          )}
+        </div>
+        <div className='space-y-3'>
+          {isLoading ? (
+            <>
+              <div className='h-12 bg-muted animate-pulse rounded' />
+              <div className='h-12 bg-muted animate-pulse rounded' />
+            </>
+          ) : material.attachments.length > 0 ? (
+            material.attachments.map((attachment) => (
               <div
                 key={attachment.id}
                 className='flex items-center gap-4 p-4 bg-background border border-border rounded-lg hover:bg-accent/5 transition-colors'
@@ -158,10 +195,14 @@ function MaterialDetail({ material }: MaterialDetailProps) {
                   다운로드
                 </button>
               </div>
-            ))}
-          </div>
+            ))
+          ) : (
+            <div className='text-center py-8 text-muted-foreground'>
+              첨부파일이 없습니다.
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

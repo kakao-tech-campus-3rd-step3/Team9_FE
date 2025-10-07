@@ -3,7 +3,7 @@ import { useCurrentStudy } from '@/hooks/study/useCurrentStudy';
 import { useParams } from 'react-router-dom';
 import { Users } from 'lucide-react';
 import { UserProfileSection } from '@/components/user';
-import { ProfileSkeleton } from '@/components/common';
+import { SimpleSkeleton, ListItemSkeleton } from '@/components/common';
 import SidebarHeader from './SidebarHeader';
 import SidebarNav from './SidebarNav';
 
@@ -11,43 +11,33 @@ import SidebarNav from './SidebarNav';
  * 스터디 정보 영역 컴포넌트 (Suspense와 함께 사용)
  */
 const StudyInfoSection = ({ studyId }: { studyId: number }) => {
-  const { data: currentStudy } = useCurrentStudy(studyId);
+  const { data: currentStudy, loading } = useCurrentStudy(studyId);
+
+  const containerClass =
+    'w-full p-4 flex items-center gap-3 min-w-0 border-y border-border bg-secondary/80';
+  const iconClass =
+    'w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-shrink-0';
 
   return (
-    <div className='w-full p-4 flex items-center gap-3 min-w-0 border-t border-border bg-secondary/80'>
-      <div className='w-8 h-8 rounded-full border-2 border-primary/30 bg-primary/10 flex items-center justify-center text-primary flex-shrink-0'>
+    <div className={containerClass}>
+      <div className={iconClass}>
         <Users className='w-4 h-4' />
       </div>
       <div className='min-w-0 flex-1'>
         <div className='text-xs font-medium text-muted-foreground'>
           현재 스터디
         </div>
-        <div className='text-md font-bold text-primary truncate'>
-          {currentStudy?.title}
-        </div>
+        {loading ? (
+          <SimpleSkeleton height='h-4' width='w-3/4' />
+        ) : (
+          <div className='text-md font-bold text-primary truncate'>
+            {currentStudy?.title}
+          </div>
+        )}
       </div>
     </div>
   );
 };
-
-/**
- * 스터디 정보 스켈레톤 (크기 고정, 타이틀만 펄스)
- */
-const StudyInfoSkeletonEnhanced = () => (
-  <div className='w-full p-4 flex items-center gap-3 min-w-0 border-t border-border bg-secondary/80'>
-    <div className='w-8 h-8 rounded-full border-2 border-primary/30 bg-primary/10 flex items-center justify-center text-primary flex-shrink-0'>
-      <Users className='w-4 h-4' />
-    </div>
-    <div className='min-w-0 flex-1'>
-      <div className='text-xs font-medium text-muted-foreground'>
-        현재 스터디
-      </div>
-      <div className='h-4 bg-gradient-to-r from-blue-200 via-purple-200 to-pink-200 rounded-md animate-pulse w-3/4'>
-        <div className='h-full bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse' />
-      </div>
-    </div>
-  </div>
-);
 
 /**
  * 스터디 페이지 사이드바 컴포넌트
@@ -62,24 +52,24 @@ function Sidebar() {
     <aside className='w-full bg-background border-r-2 border-border-primary relative z-20 flex flex-col h-full shadow-xl/40 overflow-x-hidden'>
       <div className='flex-1 overflow-y-auto'>
         <SidebarHeader />
-        {isValidStudyId && (
-          <Suspense fallback={<StudyInfoSkeletonEnhanced />}>
-            <StudyInfoSection studyId={studyId} />
-          </Suspense>
-        )}
+        {isValidStudyId && <StudyInfoSection studyId={studyId} />}
         <SidebarNav />
       </div>
-      <div className='mt-auto'>
-        <Suspense
-          fallback={
-            <ProfileSkeleton
-              variant='study-sidebar'
-              showRole={isValidStudyId}
-            />
-          }
-        >
-          <UserProfileSection variant='study-sidebar' />
-        </Suspense>
+      {/* 프로필 섹션: 사이드바에서만 프레임(배경/경계) 노출, 고정 높이로 점프 방지 */}
+      <div className='mt-auto border-t border-border bg-secondary/80 hover:bg-secondary/40 h-17'>
+        <div className='h-full flex items-center'>
+          <Suspense
+            fallback={
+              <div className='w-full'>
+                <ListItemSkeleton />
+              </div>
+            }
+          >
+            <div className='w-full'>
+              <UserProfileSection variant='study-sidebar' />
+            </div>
+          </Suspense>
+        </div>
       </div>
     </aside>
   );

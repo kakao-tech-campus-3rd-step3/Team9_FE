@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/auth';
 import { ROUTES } from '@/constants';
 import { getStudyRoleLabel, getRoleColorClass } from '@/utils';
 import Dropdown from '../common/Dropdown';
+import { SimpleSkeleton } from '@/components/common';
 import UserAvatar from './UserAvatar';
 
 interface UserProfileSectionProps {
@@ -56,7 +57,22 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
 
   // 로딩 상태 (Suspense가 처리하므로 기본적인 로딩만 처리)
   if (isAuthLoading) {
-    return null;
+    return (
+      <div className={`${variant === 'study-sidebar' ? 'px-4 py-3' : ''}`}>
+        <div className='flex items-center gap-3'>
+          <div className='relative flex-shrink-0'>
+            <SimpleSkeleton
+              height='h-10'
+              width='w-10'
+              className='rounded-full'
+            />
+          </div>
+          <div className='flex-1 min-w-0'>
+            <SimpleSkeleton height='h-4' width='w-1/3' />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // 비로그인 상태
@@ -73,11 +89,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
       </Link>
     );
 
-    return variant === 'study-sidebar' ? (
-      <div className='p-4'>{loginButton}</div>
-    ) : (
-      loginButton
-    );
+    return variant === 'study-sidebar' ? loginButton : loginButton;
   }
 
   // 드롭다운 메뉴 아이템 (마이페이지 / 설정 / 로그아웃)
@@ -104,15 +116,24 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
   const ProfileTrigger = () => {
     const isHeader = variant === 'header';
     const avatarSize = isHeader ? 'w-8 h-8 text-sm' : 'w-10 h-10 text-sm';
+    const baseTrigger =
+      'flex items-center gap-3 text-sm rounded-lg transition-all duration-200 group w-full';
+    const triggerPadding = 'px-4 py-3';
+    const triggerBg = isHeader
+      ? 'hover:bg-secondary/90 min-w-0'
+      : 'rounded-none';
+    const triggerOpenBg = isHeader
+      ? isDropdownOpen
+        ? 'bg-accent/30 border-border/50'
+        : ''
+      : isDropdownOpen
+        ? 'bg-secondary/90'
+        : '';
 
     return (
       <button
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-        className={`flex items-center gap-3 px-4 py-3 text-sm rounded-lg transition-all duration-200 group w-full ${
-          isHeader
-            ? 'hover:bg-secondary/90 min-w-0'
-            : 'border-t border-border rounded-none bg-secondary/80 hover:bg-secondary/90'
-        } ${isDropdownOpen ? (isHeader ? 'bg-accent/30 border-border/50' : 'bg-secondary/90') : ''}`}
+        className={`${baseTrigger} ${triggerPadding} ${triggerBg} ${triggerOpenBg}`}
       >
         <div className='relative flex-shrink-0'>
           <UserAvatar
@@ -122,7 +143,6 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
           />
         </div>
 
-        {/* 사용자 정보 - 데스크톱과 모바일 통합 */}
         <div className='flex items-center justify-between min-w-0 flex-1 text-left'>
           <span className='font-medium text-foreground group-hover:text-accent-foreground transition-colors leading-tight text-sm'>
             {user.nickname}
@@ -141,7 +161,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
 
   // 메뉴 아이템 렌더링 (개선된 디자인)
   const MenuItems = () => (
-    <div className='py-2'>
+    <div className=''>
       {menuItems.map((item, index) => (
         <button
           key={index}
@@ -166,16 +186,16 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
   );
 
   // 드롭다운 설정
-  const dropdownConfig =
-    variant === 'study-sidebar'
-      ? { position: 'top' as const, align: 'left' as const }
-      : { position: 'bottom' as const, align: 'right' as const };
+  const isHeader = variant === 'header';
+  const dropdownPosition = isHeader ? 'bottom' : ('top' as const);
+  const dropdownAlign = isHeader ? 'right' : ('left' as const);
+  const dropdownOffset = isHeader ? 'mt-4' : 'mb-1';
 
   return (
     <Dropdown
-      position={dropdownConfig.position}
-      align={dropdownConfig.align}
-      offsetClass={variant === 'header' ? 'mt-4' : undefined}
+      position={dropdownPosition}
+      align={dropdownAlign}
+      offsetClass={dropdownOffset}
       isOpen={isDropdownOpen}
       onOpenChange={setIsDropdownOpen}
       onClose={onMobileMenuClose}
