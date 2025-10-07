@@ -87,7 +87,7 @@ const DashboardPage = () => {
         {/* 회고, 퀴즈 - 한줄에 */}
         <DashboardRow cols={2}>
           <RetrospectSection
-            onClick={() => navigateToStudy(ROUTES.STUDY.RETRO)}
+            onClick={() => navigateToStudy(ROUTES.STUDY.REFLECTION)}
           />
           <QuizSection onClick={() => navigateToStudy(ROUTES.STUDY.QUIZ)} />
         </DashboardRow>
