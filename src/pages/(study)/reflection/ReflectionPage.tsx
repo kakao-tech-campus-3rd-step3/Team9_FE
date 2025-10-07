@@ -14,11 +14,11 @@ const ReflectionPage = () => {
   const [reflections] = useState<ReflectionListItem[]>(mockReflections);
 
   const handleWriteReflection = () => {
-    navigate('write');
+    navigate('/study/reflection/write');
   };
 
   const handleReflectionClick = (reflectionId: number) => {
-    navigate(`${reflectionId}`);
+    navigate(`/study/reflection/${reflectionId}`);
   };
 
   const filteredReflections = showMyReflectionsOnly

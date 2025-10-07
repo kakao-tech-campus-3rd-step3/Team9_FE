@@ -145,6 +145,18 @@ const router = createBrowserRouter([
             element: <routes.StudyReflection />,
           },
           {
+            path: `${ROUTES.STUDY.REFLECTION}/write`,
+            element: <routes.StudyReflectionDetail />,
+          },
+          {
+            path: `${ROUTES.STUDY.REFLECTION}/:id`,
+            element: <routes.StudyReflectionView />,
+          },
+          {
+            path: `${ROUTES.STUDY.REFLECTION}/:id/edit`,
+            element: <routes.StudyReflectionDetail />,
+          },
+          {
             path: ROUTES.STUDY.ADMIN.ROOT,
             element: <routes.StudyAdmin />,
             children: [
