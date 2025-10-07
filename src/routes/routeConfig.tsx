@@ -22,6 +22,7 @@ import {
   ApplicantManagement,
   StudyInfoManagement,
 } from '@/pages/(study)';
+import { ReflectionPage } from '@/pages/(study)/reflection';
 
 // TODO: 팀원과 논의 후 HOC 적용 결정 후 주석 제거
 // import { auth, guest, role } from './routeHelpers';
@@ -54,6 +55,7 @@ export const routes = {
   StudyAdminStudyInfo: StudyInfoManagement,
   StudyCreate: StudyCreatePage,
   StudyExplore: StudyExplorePage,
+  StudyReflection: ReflectionPage,
   NotFound: NotFoundPage,
 
   //  TODO: 팀원과 논의 후 페이지 별 HOC 적용 결정

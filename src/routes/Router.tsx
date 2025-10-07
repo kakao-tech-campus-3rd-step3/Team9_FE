@@ -111,7 +111,10 @@ const router = createBrowserRouter([
             ],
           },
           { path: ROUTES.STUDY.QUIZ, element: <routes.Example /> },
-          { path: ROUTES.STUDY.RETRO, element: <routes.Example /> },
+          {
+            path: ROUTES.STUDY.REFLECTION,
+            element: <routes.StudyReflection />,
+          },
           {
             path: ROUTES.STUDY.ADMIN.ROOT,
             element: <routes.StudyAdmin />,
