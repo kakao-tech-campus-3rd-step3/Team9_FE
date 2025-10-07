@@ -22,31 +22,81 @@ interface ApiStudyResponse {
 const mapApiResponseToStudy = async (
   apiStudy: ApiStudyResponse,
 ): Promise<Study> => {
-  // file_key가 있으면 실제 이미지 URL 가져오기
+  // 이미지 URL 처리 - presigned URL 사용
   let imageUrl: string | undefined = undefined;
+
+  console.log(`스터디 ${apiStudy.id} 이미지 디버깅:`, {
+    file_key: apiStudy.file_key,
+    has_file_key: !!apiStudy.file_key,
+    file_key_type: typeof apiStudy.file_key,
+    file_key_length: apiStudy.file_key?.length,
+  });
+
+  // file_key가 있으면 presigned URL 요청
   if (apiStudy.file_key) {
     try {
-      imageUrl = await downloadImageService.getImagePresignedUrl(
+      const presignedUrl = await downloadImageService.getImagePresignedUrl(
         apiStudy.file_key,
       );
+
+      if (presignedUrl && presignedUrl !== '') {
+        imageUrl = presignedUrl;
+        console.log(`이미지 URL 생성 성공 (study ${apiStudy.id}):`, imageUrl);
+      } else {
+        console.log(
+          `presigned URL이 비어있음 (study ${apiStudy.id}) - 아이콘 사용`,
+        );
+      }
     } catch (error) {
       console.warn(`이미지 URL 생성 실패 (study ${apiStudy.id}):`, error);
+      // 실패 시 아이콘 사용 (이미 imageUrl이 undefined로 설정됨)
     }
+  } else {
+    console.log(`file_key 없음 (study ${apiStudy.id}) - 아이콘 사용`);
   }
 
-  return {
+  // 백엔드 데이터에서 description과 detail_description 중 어느 것이 짧은 설명인지 자동 판단
+  const desc = apiStudy.description || '';
+  const detailDesc = apiStudy.detail_description || '';
+
+  // 길이를 기준으로 짧은 설명과 긴 설명 결정
+  let shortDesc = desc;
+  let longDesc = detailDesc;
+
+  if (desc.length > detailDesc.length && detailDesc.length > 0) {
+    // description이 더 길면 바꿈
+    shortDesc = detailDesc;
+    longDesc = desc;
+  }
+
+  const mappedStudy = {
     id: apiStudy.id,
     title: apiStudy.title,
-    description: apiStudy.description,
-    category: apiStudy.interests?.[0] || '프로그래밍', // 첫 번째 interest를 카테고리로 사용
+    description: shortDesc, // 짧은 설명 → 카드에 표시
+    shortDescription: longDesc, // 긴 설명 → 상세 모달에 표시
+    category: apiStudy.interests?.[0] || '프로그래밍', // 첫 번째 interest를 카테고리로 사용 (호환성)
+    interests: apiStudy.interests || [], // interests 배열 그대로 전달
     currentMembers: apiStudy.current_members || 1,
     maxMembers: apiStudy.max_members || 10,
     region: apiStudy.region || '전체',
     imageUrl,
-    detailedDescription: apiStudy.detail_description || apiStudy.description,
+    detailedDescription: longDesc, // 긴 설명
     schedule: apiStudy.study_time,
     requirements: apiStudy.conditions,
   };
+
+  // 디버깅용 로그
+  console.log('스터디 매핑 결과:', {
+    title: mappedStudy.title,
+    description: mappedStudy.description,
+    shortDescription: mappedStudy.shortDescription,
+    originalApi: {
+      description: apiStudy.description,
+      detail_description: apiStudy.detail_description,
+    },
+  });
+
+  return mappedStudy;
 };
 
 /**
@@ -61,7 +111,7 @@ export const studyExploreService = {
     const { data } = await apiClient.get(STUDY_ENDPOINTS.STUDIES, {
       params: {
         page: params.page || 0,
-        size: params.size || 10,
+        size: params.size || 50, // 더 많은 스터디 요청
         keyword: params.keyword,
         interests: params.interests?.join(','),
         locations: params.locations?.join(','),

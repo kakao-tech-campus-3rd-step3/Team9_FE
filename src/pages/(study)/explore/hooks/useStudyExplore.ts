@@ -2,10 +2,9 @@
  * 스터디 탐색 페이지 로직을 관리하는 훅
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
-import { useSearchParams } from 'react-router-dom';
 import type { Study } from '../types';
 import { studyExploreService } from '../services';
 import { MOCK_STUDIES, CATEGORIES } from '../constants';
@@ -13,21 +12,19 @@ import { MOCK_STUDIES, CATEGORIES } from '../constants';
 type ModalType = 'apply' | 'detail' | 'region' | null;
 
 export const useStudyExplore = (searchTerm: string) => {
-  const [searchParams] = useSearchParams();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([
     '전체',
   ]);
   const [selectedRegions, setSelectedRegions] = useState<string[]>(['전체']);
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [selectedStudy, setSelectedStudy] = useState<Study | null>(null);
-  const [newlyCreatedStudies, setNewlyCreatedStudies] = useState<Study[]>([]);
-  const [hasProcessedNewStudy, setHasProcessedNewStudy] = useState(false);
 
   // React Query로 스터디 목록 조회
   const {
     data: studies = [],
     isLoading,
     error,
+    refetch,
   } = useQuery({
     queryKey: ['studies', searchTerm, selectedCategories, selectedRegions],
     queryFn: () => {
@@ -48,25 +45,78 @@ export const useStudyExplore = (searchTerm: string) => {
     enabled: true,
   });
 
+  // 스터디 생성 이벤트 리스너
+  React.useEffect(() => {
+    const handleStudyCreated = () => {
+      console.log('스터디 생성 이벤트 감지 - 데이터 새로고침');
+      refetch(); // 백엔드 데이터 새로고침
+    };
+
+    window.addEventListener('studyCreated', handleStudyCreated);
+    return () => window.removeEventListener('studyCreated', handleStudyCreated);
+  }, [refetch]);
+
   // 필터링된 스터디 목록 (클라이언트 사이드 필터링은 유지)
   // 새로 생성한 스터디를 맨 앞에 추가
   // localStorage에서 영구 저장된 스터디들 불러오기
   const persistentStudies = useMemo(() => {
     try {
-      return JSON.parse(localStorage.getItem('persistentStudies') || '[]');
+      const stored = JSON.parse(
+        localStorage.getItem('persistentStudies') || '[]',
+      );
+      // 목데이터 "독서 모임" 제거
+      return stored.filter((study: Study) => study.title !== '독서 모임');
     } catch (error) {
       console.error('영구 저장된 스터디 로드 실패:', error);
       return [];
     }
   }, []);
 
-  const allStudies = [
-    ...newlyCreatedStudies,
-    ...persistentStudies,
-    ...(studies.length > 0 ? studies : MOCK_STUDIES),
-  ];
+  // API 연결 상태 확인 (에러가 없으면 연결됨, 데이터 유무와 상관없이)
+  const isApiConnected = !error;
 
-  const filteredStudies = allStudies.filter((study: Study) => {
+  // 디버깅용 로그
+  console.log('API 상태:', {
+    error,
+    studiesLength: studies.length,
+    isApiConnected,
+    selectedCategories,
+    selectedRegions,
+    persistentStudies,
+    backendStudies: studies,
+  });
+
+  // 중복 제거를 위한 헬퍼 함수 (ID 기반)
+  const removeDuplicates = (studies: Study[]) => {
+    const seen = new Set();
+    return studies.filter((study) => {
+      // ID가 있으면 ID로, 없으면 제목+설명+카테고리로 중복 판단
+      const key = study.id
+        ? `id-${study.id}`
+        : `${study.title}-${study.description}-${study.category}`;
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
+  };
+
+  const allStudies = removeDuplicates([
+    // API 연결됐으면 백엔드 데이터만 사용
+    ...(isApiConnected
+      ? studies
+      : [
+          // API 연결 안됐을 때만 로컬 데이터 사용
+          ...persistentStudies, // localStorage 데이터 (백엔드 실패 시 저장됨)
+          ...MOCK_STUDIES, // 목데이터
+        ]),
+  ]);
+
+  // 최신순으로 정렬 (ID 기준 내림차순)
+  const sortedStudies = allStudies.sort((a, b) => b.id - a.id);
+
+  const filteredStudies = sortedStudies.filter((study: Study) => {
     // 카테고리 필터
     if (!selectedCategories.includes('전체')) {
       // interests 배열이 있으면 interests로 필터링, 없으면 category로 필터링
@@ -75,9 +125,26 @@ export const useStudyExplore = (searchTerm: string) => {
           ? study.interests
           : [study.category];
 
+      // 카테고리 매핑 (백엔드 DB의 category를 프론트엔드 카테고리로 변환)
+      const categoryMapping: { [key: string]: string } = {
+        개발: '프로그래밍',
+        어학: '어학',
+        취업: '취업',
+        '고시/공무원': '고시/공무원',
+        '취미/교양': '취미/교양',
+        '자율/기타': '자율/기타',
+      };
+
+      // interests가 있으면 이미 프론트엔드 카테고리이므로 매핑 불필요
+      // interests가 없으면 백엔드 category를 프론트엔드 카테고리로 변환
+      const mappedCategories =
+        study.interests && study.interests.length > 0
+          ? studyCategories // 이미 프론트엔드 카테고리
+          : studyCategories.map((cat) => categoryMapping[cat] || cat);
+
       // 선택된 카테고리 중 하나라도 스터디의 카테고리/관심사와 일치하는지 확인
       const hasMatchingCategory = selectedCategories.some((selectedCategory) =>
-        studyCategories.includes(selectedCategory),
+        mappedCategories.includes(selectedCategory),
       );
 
       if (!hasMatchingCategory) {
@@ -185,72 +252,8 @@ export const useStudyExplore = (searchTerm: string) => {
   };
 
   // 로컬 스토리지에서 새로 생성한 스터디 정보 읽기
-  useEffect(() => {
-    const newStudy = searchParams.get('newStudy');
-
-    if (newStudy === 'true' && !hasProcessedNewStudy) {
-      // 중복 추가 방지
-      setHasProcessedNewStudy(true);
-
-      // 로컬 스토리지에서 스터디 데이터 읽기
-      const storedStudyData = localStorage.getItem('newlyCreatedStudy');
-
-      if (storedStudyData) {
-        try {
-          const studyData = JSON.parse(storedStudyData);
-
-          console.log('로컬 스토리지에서 읽은 데이터:', studyData);
-          console.log('이미지 URL:', studyData.imageUrl);
-
-          const newStudyData: Study = {
-            id: Date.now(), // 간단한 ID
-            title: studyData.title,
-            category: studyData.category,
-            interests: studyData.interests || [studyData.category], // interests 배열이 있으면 사용, 없으면 category를 배열로 변환
-            region: studyData.region || '온라인',
-            description: studyData.description || '새로 생성된 스터디입니다.',
-            shortDescription: studyData.shortDescription || undefined,
-            detailedDescription: studyData.description || undefined,
-            schedule: studyData.schedule || undefined,
-            requirements: studyData.conditions || [],
-            maxMembers: studyData.maxMembers || 4,
-            currentMembers: 1,
-            imageUrl: studyData.imageUrl || '/api/placeholder/300/200',
-          };
-
-          console.log('생성된 스터디 데이터:', newStudyData);
-          setNewlyCreatedStudies((prev) => [newStudyData, ...prev]);
-
-          // localStorage에 영구 저장 (새로고침해도 유지)
-          const existingStudies = JSON.parse(
-            localStorage.getItem('persistentStudies') || '[]',
-          );
-          const updatedStudies = [newStudyData, ...existingStudies];
-          localStorage.setItem(
-            'persistentStudies',
-            JSON.stringify(updatedStudies),
-          );
-
-          // 로컬 스토리지에서 데이터 제거 (중복 방지)
-          localStorage.removeItem('newlyCreatedStudy');
-        } catch (error) {
-          console.error('스터디 데이터 파싱 실패:', error);
-        }
-      }
-
-      // URL 파라미터 제거 (새로고침 시 중복 추가 방지)
-      const newSearchParams = new URLSearchParams(searchParams);
-      newSearchParams.delete('newStudy');
-
-      const newUrl = `${window.location.pathname}${newSearchParams.toString() ? `?${newSearchParams.toString()}` : ''}`;
-      window.history.replaceState({}, '', newUrl);
-    }
-  }, [searchParams, hasProcessedNewStudy]);
 
   // 새로 생성한 스터디 추가 함수
-  const addNewlyCreatedStudy = (study: Study) => {
-    setNewlyCreatedStudies((prev) => [study, ...prev]);
-  };
 
   return {
     // 상태
@@ -280,8 +283,5 @@ export const useStudyExplore = (searchTerm: string) => {
     applyStudy: (studyId: number, message: string) => {
       applyStudyMutation.mutate({ studyId, message });
     },
-
-    // 새로 생성한 스터디 추가
-    addNewlyCreatedStudy,
   };
 };

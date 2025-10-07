@@ -63,15 +63,17 @@ const StudyExplorePage: React.FC = () => {
 
   return (
     <div className='min-h-screen bg-background'>
-      <div className='px-6 py-4 border-b border-border bg-background'>
-        <SearchBar
-          searchTerm={inputValue}
-          onSearchChange={handleSearchChange}
-          onSearch={handleSearch}
-          placeholder='스터디를 검색해보세요'
-        />
+      <div className='px-6 py-4 border-b border-border bg-background flex justify-end'>
+        <div className='w-80'>
+          <SearchBar
+            searchTerm={inputValue}
+            onSearchChange={handleSearchChange}
+            onSearch={handleSearch}
+            placeholder='스터디를 검색해보세요'
+          />
+        </div>
       </div>
-      <div className='flex h-[calc(100vh-8rem)]'>
+      <div className='flex relative'>
         {/* 사이드바 */}
         <StudyExploreSidebar
           categories={categories}

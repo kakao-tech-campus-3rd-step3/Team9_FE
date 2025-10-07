@@ -89,16 +89,9 @@ export const useStudyCreate = () => {
         file_key: fileKey, // 업로드된 이미지의 file_key 사용
       };
 
-      // TODO: 실제 서버 연동 시 아래 주석 해제
-      // return studyCreateService.createStudy(requestData);
-
-      // 임시: 서버 연동 전까지는 성공으로 처리
+      // 실제 백엔드 서버로 스터디 생성 요청
       console.log('스터디 생성 요청 데이터:', requestData);
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({ id: Date.now(), ...requestData });
-        }, 1000);
-      });
+      return studyCreateService.createStudy(requestData);
     },
     onSuccess: (data, variables) => {
       // 현재 스터디 제목 저장
@@ -107,14 +100,71 @@ export const useStudyCreate = () => {
       setCreatedStudyData(variables);
 
       console.log('스터디 생성 성공:', data);
-      toast.success('스터디가 성공적으로 생성되었습니다!');
+      console.log('백엔드 응답 데이터:', {
+        id: data.id,
+        title: data.title,
+        created: data.created_at,
+        backendResponse: data,
+      });
+
+      // 완료 모달 열기 (토스트는 모달에서 처리)
+      setIsCompleteModalOpen(true);
+
+      // 백엔드 데이터 새로고침을 위한 이벤트 발생
+      window.dispatchEvent(new CustomEvent('studyCreated'));
+    },
+    onError: (error, variables) => {
+      console.error('스터디 생성 실패:', error);
+      
+      // axios 에러인 경우 상세 정보 출력
+      const axiosError = error as { response?: { data?: unknown; status?: number; statusText?: string } };
+      console.error('에러 상세:', {
+        message: error.message,
+        response: axiosError.response?.data,
+        status: axiosError.response?.status,
+        statusText: axiosError.response?.statusText,
+      });
+
+      // 백엔드 실패 시 로컬에 저장
+      console.log('백엔드 실패로 로컬에 저장합니다.');
+
+      const newStudy = {
+        id: Date.now(),
+        title: variables.title,
+        description: variables.description,
+        shortDescription: variables.shortDescription || '',
+        category: variables.category || '프로그래밍',
+        interests: [variables.category || '프로그래밍'],
+        currentMembers: 1,
+        maxMembers: variables.maxMembers || 4,
+        region: variables.region,
+        imageUrl: undefined,
+        detailedDescription: variables.description,
+        schedule: variables.schedule,
+        requirements: variables.conditions || [],
+      };
+
+      // 기존 로컬 스터디 불러오기
+      const existingStudies = JSON.parse(
+        localStorage.getItem('persistentStudies') || '[]',
+      );
+      existingStudies.push(newStudy);
+      localStorage.setItem(
+        'persistentStudies',
+        JSON.stringify(existingStudies),
+      );
+
+      // 새로 생성한 스터디를 즉시 반영하기 위해 상태에 추가
+      setCreatedStudyData(variables);
 
       // 완료 모달 열기
+      setCurrentStudyTitle(variables.title);
       setIsCompleteModalOpen(true);
-    },
-    onError: (error) => {
-      console.error('스터디 생성 실패:', error);
-      toast.error(error.message || '스터디 생성에 실패했습니다.');
+
+      // 백엔드 데이터 새로고침을 위한 이벤트 발생
+      window.dispatchEvent(new CustomEvent('studyCreated'));
+
+      toast.error('백엔드 실패로 로컬에 저장되었습니다.');
     },
   });
 
