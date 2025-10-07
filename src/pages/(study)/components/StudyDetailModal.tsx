@@ -6,7 +6,9 @@ interface Study {
   id: number;
   title: string;
   description: string;
+  shortDescription?: string;
   category: string;
+  interests?: string[]; // 여러 카테고리/관심사
   currentMembers: number;
   maxMembers: number;
   region: string;
@@ -46,12 +48,20 @@ const StudyDetailModal: React.FC<StudyDetailModalProps> = ({
       <div className='p-6'>
         {/* 스터디 이미지 및 기본 정보 */}
         <div className='mb-6'>
-          <div className='w-full h-48 bg-primary-light rounded-lg mb-4 flex items-center justify-center'>
-            <div className='w-16 h-16 bg-primary rounded-lg flex items-center justify-center'>
-              <span className='text-primary-foreground text-2xl font-bold'>
-                {study.title.charAt(0)}
-              </span>
-            </div>
+          <div className='w-full h-48 bg-primary-light rounded-lg mb-4 flex items-center justify-center overflow-hidden'>
+            {study.imageUrl ? (
+              <img
+                src={study.imageUrl}
+                alt={study.title}
+                className='w-full h-full object-cover rounded-lg'
+              />
+            ) : (
+              <div className='w-16 h-16 bg-primary rounded-lg flex items-center justify-center'>
+                <span className='text-primary-foreground text-2xl font-bold'>
+                  {study.title.charAt(0)}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className='flex items-start justify-between mb-4'>
@@ -59,7 +69,9 @@ const StudyDetailModal: React.FC<StudyDetailModalProps> = ({
               <h3 className='text-2xl font-bold text-foreground mb-2'>
                 {study.title}
               </h3>
-              <p className='text-muted-foreground mb-3'>{study.description}</p>
+              <p className='text-muted-foreground mb-3'>
+                {study.shortDescription || study.description}
+              </p>
             </div>
             <div className='flex items-center text-sm text-muted-foreground bg-secondary px-3 py-1 rounded-full'>
               <Users className='h-4 w-4 mr-1' />
@@ -74,10 +86,21 @@ const StudyDetailModal: React.FC<StudyDetailModalProps> = ({
               <MapPin className='h-4 w-4 mr-1' />
               <span>{study.region}</span>
             </div>
-            <div className='flex items-center'>
-              <span className='bg-accent px-2 py-1 rounded text-xs'>
-                {study.category}
-              </span>
+            <div className='flex items-center space-x-2'>
+              {study.interests && study.interests.length > 0 ? (
+                study.interests.map((interest, index) => (
+                  <span
+                    key={index}
+                    className='bg-accent px-2 py-1 rounded text-xs'
+                  >
+                    {interest}
+                  </span>
+                ))
+              ) : (
+                <span className='bg-accent px-2 py-1 rounded text-xs'>
+                  {study.category}
+                </span>
+              )}
             </div>
             <div className='flex items-center'>
               <Clock className='h-4 w-4 mr-1' />

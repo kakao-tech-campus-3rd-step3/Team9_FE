@@ -8,6 +8,7 @@ export interface Study {
   description: string;
   shortDescription?: string;
   category: string;
+  interests?: string[]; // 여러 카테고리/관심사
   currentMembers: number;
   maxMembers: number;
   region: string;

@@ -23,7 +23,7 @@ export interface CreateStudyRequest {
   title: string;
   description: string;
   short_description: string;
-  category: string;
+  interests: string[]; // 여러 카테고리/관심사
   max_members: number;
   schedule: string;
   region: string;
