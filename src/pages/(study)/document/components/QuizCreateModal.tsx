@@ -2,7 +2,6 @@ import { useMemo, useState, useCallback } from 'react';
 import BaseModal from '@/components/common/BaseModal';
 import { cn } from '@/pages/(study)/dashboard/utils';
 import type { Material, Attachment } from '../types';
-import { aggregateAttachments } from '../utils/attachments';
 
 interface QuizCreateModalProps {
   isOpen: boolean;
@@ -27,11 +26,15 @@ const QuizCreateModal = ({
     [],
   );
 
-  // 선택된 자료들의 첨부파일을 집계하고 중복 제거
-  const allAttachments = useMemo<Attachment[]>(
-    () => aggregateAttachments(materials),
-    [materials],
-  );
+  // 선택된 자료들의 첨부파일을 집계 (고유한 ID 부여)
+  const allAttachments = useMemo<Attachment[]>(() => {
+    return materials.flatMap((m) =>
+      (m.attachments || []).map((a) => ({
+        ...a,
+        id: `${m.id}:${a.id}`, // 자료ID:첨부ID 조합으로 고유성 보장
+      })),
+    );
+  }, [materials]);
 
   const toggleAttachment = useCallback((id: string) => {
     setSelectedAttachmentIds((prev) =>
@@ -129,7 +132,6 @@ const QuizCreateModal = ({
                         'flex items-center justify-between px-4 py-2',
                         isSelected && 'bg-primary/5',
                       )}
-                      onClick={() => toggleAttachment(String(a.id))}
                     >
                       <div className='min-w-0'>
                         <div className='text-sm font-medium text-foreground truncate'>
