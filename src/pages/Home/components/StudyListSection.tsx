@@ -1,3 +1,4 @@
+import { LoadingSpinner } from '@/components';
 import { useStudyMeQuery } from '../hooks/useStudyMeQuery';
 import StudyList from './StudyList';
 import StudyNothing from './StudyNothing';
@@ -9,7 +10,12 @@ const StudyListSection = () => {
   const pageSize = 3;
 
   if (isPending || !studies) {
-    return <div>Loading...</div>;
+    return (
+      <section className='flex flex-col w-full max-w-7xl gap-2'>
+        <h3 className='text-left font-bold mb-1'>나의 스터디</h3>
+        <LoadingSpinner />
+      </section>
+    );
   }
 
   const totalPages = Math.ceil(studies.length / pageSize);
