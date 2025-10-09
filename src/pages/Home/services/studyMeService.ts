@@ -11,7 +11,7 @@ type StudyMeResponse = {
  */
 export const studyMeService = async (): Promise<StudyMeResponse> => {
   const { data } = await apiClient.get<StudyMeResponse>(
-    USERS_ENDPOINTS.STYDY_ME,
+    USERS_ENDPOINTS.STUDY_ME,
   );
 
   if (!data) {
