@@ -1,11 +1,9 @@
-import React, { useMemo, useState } from 'react';
-import { mainDashboard } from './mock/studyData';
+import React, { useState } from 'react';
 import {
   CalendarSection,
   ScheduleSection,
   StudyListSection,
 } from './components';
-import { studyColor } from '@/utils';
 import dayjs from 'dayjs';
 
 /**
@@ -15,19 +13,6 @@ import dayjs from 'dayjs';
 const HomePage: React.FC = () => {
   const [year, setYear] = useState(dayjs().year());
   const [month, setMonth] = useState(dayjs().month() + 1);
-
-  const schedules = useMemo(
-    () =>
-      mainDashboard.flatMap((dashboard) =>
-        dashboard.studies.flatMap((study) =>
-          study.schedule.map((s) => ({
-            ...s,
-            color: studyColor(study.study_id),
-          })),
-        ),
-      ),
-    [],
-  );
 
   return (
     <div className='h-full bg-background p-8 text-center flex flex-col justify-center items-center'>
@@ -41,7 +26,7 @@ const HomePage: React.FC = () => {
           month={month}
           setMonth={setMonth}
         />
-        <ScheduleSection schedules={schedules} />
+        <ScheduleSection />
       </div>
     </div>
   );
