@@ -1,5 +1,5 @@
 import apiClient from '@/api';
-import { STUDY_ENDPOINTS } from '@/api/constants';
+import { USERS_ENDPOINTS } from '@/api/constants';
 
 type StudyMeResponse = {
   study_id: number;
@@ -11,7 +11,7 @@ type StudyMeResponse = {
  */
 export const studyMeService = async (): Promise<StudyMeResponse> => {
   const { data } = await apiClient.get<StudyMeResponse>(
-    STUDY_ENDPOINTS.STYDY_ME,
+    USERS_ENDPOINTS.STYDY_ME,
   );
 
   if (!data) {
