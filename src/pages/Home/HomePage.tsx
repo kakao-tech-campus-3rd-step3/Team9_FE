@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { mainDashboard } from './mock/studyData';
 import {
   CalendarSection,
@@ -6,12 +6,16 @@ import {
   StudyListSection,
 } from './components';
 import { studyColor } from '@/utils';
+import dayjs from 'dayjs';
 
 /**
  * 홈페이지 컴포넌트
  * - 메인 페이지 컨텐츠를 표시
  */
 const HomePage: React.FC = () => {
+  const [year, setYear] = useState(dayjs().year());
+  const [month, setMonth] = useState(dayjs().month() + 1);
+
   const schedules = useMemo(
     () =>
       mainDashboard.flatMap((dashboard) =>
@@ -31,7 +35,12 @@ const HomePage: React.FC = () => {
         <StudyListSection />
       </div>
       <div className='flex gap-4 w-full h-full px-8 justify-center'>
-        <CalendarSection schedules={schedules} />
+        <CalendarSection
+          year={year}
+          setYear={setYear}
+          month={month}
+          setMonth={setMonth}
+        />
         <ScheduleSection schedules={schedules} />
       </div>
     </div>
