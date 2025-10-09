@@ -29,7 +29,7 @@ const StudyList = ({
       {studies.map((study) => (
         <Link
           key={study.study_id}
-          to={`${ROUTES.STUDY.DASHBOARD}?id=${study.study_id}`}
+          to={`${ROUTES.STUDY.DASHBOARD}?study_id=${study.study_id}`}
         >
           <div
             key={study.study_id}
