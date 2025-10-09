@@ -31,10 +31,7 @@ const StudyList = ({
           key={study.study_id}
           to={`${ROUTES.STUDY.DASHBOARD}?study_id=${study.study_id}`}
         >
-          <div
-            key={study.study_id}
-            className='flex text-center text-lg gap-4 px-4 py-2 items-center bg-blue-200 rounded-xl'
-          >
+          <div className='flex text-center text-lg gap-4 px-4 py-2 items-center bg-blue-200 rounded-xl'>
             <div
               className='min-w-5 min-h-5 rounded-full inline-block'
               style={{ backgroundColor: studyColor(study.study_id) }}
