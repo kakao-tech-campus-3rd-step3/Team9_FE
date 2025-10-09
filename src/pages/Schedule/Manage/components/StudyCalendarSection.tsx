@@ -127,7 +127,13 @@ const StudyCalendarSection = ({
       />
 
       <CalendarPopover
-        schedules={events}
+        schedules={events.map((event) => ({
+          schedule_id: event.id,
+          title: event.title,
+          start_time: event.start_time,
+          end_time: event.end_time,
+          study_id: schedules.study_id,
+        }))}
         popover={popover}
         setPopover={setPopover}
       />
