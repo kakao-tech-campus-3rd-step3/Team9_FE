@@ -9,5 +9,5 @@ export const USERS_ENDPOINTS = {
   // 현재 로그인한 사용자의 스터디 신청 목록
   STUDY_APPLICATIONS: '/api/users/me/studies/applications',
   // 내 스터디 정보
-  STYDY_ME: '/api/users/me/studies',
+  STUDY_ME: '/api/users/me/studies',
 } as const;
