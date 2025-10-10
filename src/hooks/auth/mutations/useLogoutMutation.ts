@@ -13,22 +13,26 @@ import { ROUTES } from '@/constants';
  */
 export const useLogoutMutation = () => {
   const navigate = useNavigate();
-  const { reset } = useAuthStore();
+  const { reset, setIsInitialized } = useAuthStore();
 
   return useMutation({
+    // 즉시 UX 응답: 낙관적 내비게이션 + 스토어 리셋
+    onMutate: () => {
+      reset();
+      // 초기화 완료 상태를 유지하여 게스트 UI가 즉시 렌더링되도록 보장
+      setIsInitialized(true);
+      navigate(ROUTES.LOGIN, { replace: true });
+    },
+    // 서버 요청은 백그라운드로 처리 (실패해도 UX 영향 최소화)
     mutationFn: async () => {
       try {
         await apiClient.post(AUTH_ENDPOINTS.LOGOUT, null, {
           showToast: false,
           withCredentials: true,
         });
-      } finally {
-        reset();
+      } catch {
+        // ignore
       }
-    },
-    onSettled: () => {
-      // 성공/실패 관계없이 로그인 페이지로 이동
-      navigate(ROUTES.LOGIN);
     },
     onError: () => {
       toast.error(

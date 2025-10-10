@@ -16,7 +16,7 @@ export const STUDY_NAV_ITEMS = [
     icon: LayoutDashboard,
   },
   {
-    to: ROUTES.STUDY.DOCUMENT,
+    to: ROUTES.STUDY.DOCUMENT.ROOT,
     label: '문서',
     icon: FileText,
   },

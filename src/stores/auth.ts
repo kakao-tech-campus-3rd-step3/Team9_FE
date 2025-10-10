@@ -62,6 +62,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({
       user: { nickname: '', imageKey: '', imageUrl: undefined },
       accessToken: null,
+      isInitialized: false,
       isInitializing: false,
     }),
 }));

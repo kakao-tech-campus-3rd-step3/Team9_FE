@@ -7,6 +7,7 @@ import { ToastContainer } from 'react-toastify';
 import '@/styles/index.css';
 import 'react-toastify/dist/ReactToastify.css';
 import App from './App';
+import { AuthInitializer as AuthUtils } from '@/utils/auth';
 
 // React Query 클라이언트 생성 - 필수 최적화 설정
 const queryClient = new QueryClient({
@@ -23,6 +24,9 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+// 전역 인증 초기화: 렌더를 막지 않고 비동기로 시작
+void AuthUtils.init();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
