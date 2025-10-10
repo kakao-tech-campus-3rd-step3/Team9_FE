@@ -17,7 +17,7 @@ export const ROUTES = {
     PROGRESS: 'progress',
     SCHEDULE: 'schedule',
     QUIZ: 'quiz',
-    RETRO: 'retro',
+    REFLECTION: 'reflection',
     ADMIN: {
       ROOT: 'admin',
       MEMBERS: 'admin/members',

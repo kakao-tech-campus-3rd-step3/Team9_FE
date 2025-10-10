@@ -36,7 +36,7 @@ export const STUDY_NAV_ITEMS = [
     icon: HelpCircle,
   },
   {
-    to: ROUTES.STUDY.RETRO,
+    to: ROUTES.STUDY.REFLECTION,
     label: '회고',
     icon: ClipboardList,
   },
