@@ -28,12 +28,6 @@ import {
   ReflectionViewPage,
 } from '@/pages/(study)/reflection';
 
-import {
-  ReflectionPage,
-  ReflectionDetailPage,
-  ReflectionViewPage,
-} from '@/pages/(study)/reflection';
-
 import { auth, guest, role } from './routeHelpers';
 
 /**
