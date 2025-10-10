@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ROUTES, ROUTE_BUILDERS, ROUTE_PARAMS } from '@/constants';
 import { ArrowLeft, Edit, Calendar, User } from 'lucide-react';
 import { mockReflectionDetails, mockSchedules } from './mock';
 import type { Reflection, Schedule } from './types';
@@ -9,7 +10,7 @@ import type { Reflection, Schedule } from './types';
  */
 const ReflectionViewPage = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { [ROUTE_PARAMS.reflectionId]: reflection_id, study_id } = useParams();
   const [reflection, setReflection] = useState<Reflection | null>(null);
   const [schedules] = useState<Schedule[]>(mockSchedules);
 
@@ -17,14 +18,14 @@ const ReflectionViewPage = () => {
   const currentUserId = 5; // 김경대 (첫 번째 회고 작성자)
 
   useEffect(() => {
-    if (id) {
+    if (reflection_id) {
       // 실제로는 API 호출로 데이터를 가져와야 함
       const reflectionData = mockReflectionDetails.find(
-        (r) => r.id === parseInt(id),
+        (r) => r.id === parseInt(reflection_id),
       );
       setReflection(reflectionData || null);
     }
-  }, [id]);
+  }, [reflection_id]);
 
   if (!reflection) {
     return <div>로딩 중...</div>;
@@ -46,11 +47,17 @@ const ReflectionViewPage = () => {
   };
 
   const handleEdit = () => {
-    navigate(`/study/reflection/${id}/edit`);
+    if (!study_id) return;
+    navigate(
+      `${ROUTE_BUILDERS.study.root(study_id)}/${ROUTES.STUDY.REFLECTION}/${reflection_id}/edit`,
+    );
   };
 
   const handleBack = () => {
-    navigate('/study/reflection');
+    if (!study_id) return;
+    navigate(
+      `${ROUTE_BUILDERS.study.root(study_id)}/${ROUTES.STUDY.REFLECTION}`,
+    );
   };
 
   return (

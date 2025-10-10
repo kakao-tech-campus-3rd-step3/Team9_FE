@@ -149,11 +149,11 @@ const router = createBrowserRouter([
             element: <routes.StudyReflectionDetail />,
           },
           {
-            path: `${ROUTES.STUDY.REFLECTION}/:id`,
+            path: `${ROUTES.STUDY.REFLECTION}/:${ROUTE_PARAMS.reflectionId}`,
             element: <routes.StudyReflectionView />,
           },
           {
-            path: `${ROUTES.STUDY.REFLECTION}/:id/edit`,
+            path: `${ROUTES.STUDY.REFLECTION}/:${ROUTE_PARAMS.reflectionId}/edit`,
             element: <routes.StudyReflectionDetail />,
           },
           {

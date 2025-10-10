@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ROUTES, ROUTE_BUILDERS } from '@/constants';
 import { Plus, Filter } from 'lucide-react';
 import { REFLECTION_TEXTS } from './constants';
 import { mockReflections } from './mock';
@@ -11,14 +12,21 @@ import type { ReflectionListItem } from './types';
 const ReflectionPage = () => {
   const navigate = useNavigate();
   const [showMyReflectionsOnly, setShowMyReflectionsOnly] = useState(false);
+  const { study_id } = useParams<{ study_id: string }>();
   const [reflections] = useState<ReflectionListItem[]>(mockReflections);
 
   const handleWriteReflection = () => {
-    navigate('/study/reflection/write');
+    if (!study_id) return;
+    navigate(
+      `${ROUTE_BUILDERS.study.root(study_id)}/${ROUTES.STUDY.REFLECTION}/write`,
+    );
   };
 
   const handleReflectionClick = (reflectionId: number) => {
-    navigate(`/study/reflection/${reflectionId}`);
+    if (!study_id) return;
+    navigate(
+      `${ROUTE_BUILDERS.study.root(study_id)}/${ROUTES.STUDY.REFLECTION}/${reflectionId}`,
+    );
   };
 
   const filteredReflections = showMyReflectionsOnly

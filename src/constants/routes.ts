@@ -2,6 +2,7 @@
 export const ROUTE_PARAMS = {
   studyId: 'study_id',
   materialId: 'document_id',
+  reflectionId: 'reflection_id',
 } as const;
 
 // 애플리케이션 라우트 경로 상수

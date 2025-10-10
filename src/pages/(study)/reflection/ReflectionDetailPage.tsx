@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ROUTES, ROUTE_BUILDERS, ROUTE_PARAMS } from '@/constants';
 import { REFLECTION_TEXTS, SCORE_LABELS, SCORE_RANGE } from './constants';
 import { mockSchedules, mockReflectionDetails } from './mock';
 import { ScoreSlider, ScheduleDropdown } from './components';
@@ -10,8 +11,9 @@ import type { ReflectionFormData, Schedule } from './types';
  */
 const ReflectionDetailPage = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
-  const isEdit = Boolean(id) && !window.location.pathname.endsWith('/write');
+  const { [ROUTE_PARAMS.reflectionId]: reflection_id, study_id } = useParams();
+  const isEdit =
+    Boolean(reflection_id) && !window.location.pathname.endsWith('/write');
 
   // 폼 상태
   const [formData, setFormData] = useState<ReflectionFormData>({
@@ -29,10 +31,10 @@ const ReflectionDetailPage = () => {
 
   // 수정 모드일 때 기존 데이터 로드
   useEffect(() => {
-    if (isEdit && id) {
+    if (isEdit && reflection_id) {
       // 실제로는 API 호출로 데이터를 가져와야 함
       const existingData = mockReflectionDetails.find(
-        (r) => r.id === parseInt(id),
+        (r) => r.id === parseInt(reflection_id),
       );
       if (existingData) {
         setFormData({
@@ -46,7 +48,7 @@ const ReflectionDetailPage = () => {
         });
       }
     }
-  }, [isEdit, id]);
+  }, [isEdit, reflection_id]);
 
   // 입력 핸들러
   const handleInputChange = (
@@ -64,12 +66,18 @@ const ReflectionDetailPage = () => {
     // 실제로는 API 호출
     console.log('저장할 데이터:', formData);
     // 성공 시 목록으로 이동
-    navigate('/study/reflection');
+    if (!study_id) return;
+    navigate(
+      `${ROUTE_BUILDERS.study.root(study_id)}/${ROUTES.STUDY.REFLECTION}`,
+    );
   };
 
   // 취소 핸들러
   const handleCancel = () => {
-    navigate('/study/reflection');
+    if (!study_id) return;
+    navigate(
+      `${ROUTE_BUILDERS.study.root(study_id)}/${ROUTES.STUDY.REFLECTION}`,
+    );
   };
 
   return (
