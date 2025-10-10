@@ -2,7 +2,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { StudyMe } from '../types/study';
 import { studyColor } from '@/utils';
 import { Link } from 'react-router-dom';
-import { ROUTES } from '@/constants';
+import { ROUTES, ROUTE_BUILDERS } from '@/constants';
 
 type StudyListProps = {
   studies: StudyMe[];
@@ -29,7 +29,7 @@ const StudyList = ({
       {studies.map((study) => (
         <Link
           key={study.study_id}
-          to={`${ROUTES.STUDY.DASHBOARD}?study_id=${study.study_id}`}
+          to={`${ROUTE_BUILDERS.study.root(study.study_id)}/${ROUTES.STUDY.DASHBOARD}`}
         >
           <div className='flex text-center text-lg gap-4 px-4 py-2 items-center bg-blue-200 rounded-xl'>
             <div
