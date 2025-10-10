@@ -2,7 +2,6 @@ import { useMemo, useState, useCallback } from 'react';
 import BaseModal from '@/components/common/BaseModal';
 import { cn } from '@/pages/(study)/dashboard/utils';
 import type { Material, Attachment } from '../types';
-import { aggregateAttachments } from '../utils/attachments';
 
 interface QuizCreateModalProps {
   isOpen: boolean;
