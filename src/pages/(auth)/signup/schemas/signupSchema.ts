@@ -27,19 +27,11 @@ export const signupSchema = z
       .min(1, { message: '이메일을 입력해주세요.' })
       .transform((email) => email.toLowerCase()),
 
-    // 인증번호 (임시로 선택사항으로 변경)
+    // 인증번호 (필수, 6자리 숫자)
     verifyCode: z
       .string()
-      .optional()
-      .or(z.literal(''))
-      .refine(
-        (val) => {
-          // 빈 값이거나 6자리 숫자인 경우만 허용
-          if (!val || val === '') return true;
-          return /^\d{6}$/.test(val);
-        },
-        { message: '숫자 6자리여야 합니다.' },
-      ),
+      .min(1, { message: '인증번호를 입력해주세요.' })
+      .regex(/^\d{6}$/, { message: '숫자 6자리여야 합니다.' }),
 
     // 비밀번호
     password: z

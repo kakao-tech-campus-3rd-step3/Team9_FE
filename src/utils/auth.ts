@@ -5,10 +5,8 @@
 import dayjs from 'dayjs';
 import { REMEMBER_ME } from '@/constants';
 import { refreshTokenService } from '@/pages/(auth)/login/services/refreshService';
-import { getUserProfile } from '@/services/users/getUserProfile';
-import { downloadImageService } from '@/services/images/downloadImage';
+import { loadAndCacheAuthUser } from '@/utils/authUserLoader';
 import { useAuthStore } from '@/stores/auth';
-import { mapUserProfileToAuthUser } from '@/utils/mappers';
 
 /**
  * 쿠키 관리
@@ -75,17 +73,20 @@ export const TokenManager = {
 /**
  * 인증 초기화 관리
  */
-let isInitializing = false;
-
 export const AuthInitializer = {
   init: async (): Promise<void> => {
-    if (isInitializing) return;
-    isInitializing = true;
+    const {
+      setIsInitialized,
+      isInitialized,
+      isInitializing,
+      setIsInitializing,
+    } = useAuthStore.getState();
 
-    const { setIsInitialized, isInitialized } = useAuthStore.getState();
+    if (isInitializing) return;
+    setIsInitializing(true);
 
     if (isInitialized) {
-      isInitializing = false;
+      setIsInitializing(false);
       return;
     }
 
@@ -94,36 +95,19 @@ export const AuthInitializer = {
       if (refreshSuccess) {
         // 토큰 재발급 성공 시 프로필도 로드
         try {
-          const { setUser, setUserImageUrl, setIsLogin } =
-            useAuthStore.getState();
-          const profile = await getUserProfile();
-          const authUser = mapUserProfileToAuthUser(profile);
-          setUser(authUser);
-          setIsLogin(true);
-
-          // 이미지 키가 있으면 이미지 URL도 로드
-          if (authUser.imageKey) {
-            try {
-              const imageUrl = await downloadImageService.getImagePresignedUrl(
-                authUser.imageKey,
-              );
-              setUserImageUrl(imageUrl);
-            } catch (error) {
-              console.warn('이미지 URL 로드 실패:', error);
-            }
-          }
+          await loadAndCacheAuthUser();
         } catch (profileError) {
           console.warn('프로필 로드 실패:', profileError);
-          // 프로필 로드 실패해도 토큰은 유효하므로 로그인 상태 유지
-          const { setIsLogin } = useAuthStore.getState();
-          setIsLogin(true);
         }
       }
     } catch (error) {
-      console.log('인증 초기화 실패:', error);
+      // CORS나 네트워크 에러는 개발 환경에서 흔한 문제이므로 조용히 처리
+      if (import.meta.env.DEV) {
+        console.warn('인증 초기화 실패 (개발 환경):', error);
+      }
     } finally {
       setIsInitialized(true);
-      isInitializing = false;
+      setIsInitializing(false);
     }
   },
 } as const;

@@ -1,12 +1,16 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ROUTE_BUILDERS } from '@/constants';
 import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { MaterialForm } from './components';
+import { buildMaterialRequestBody } from './utils';
+import { useCreateMaterialMutation } from './hooks/useMaterials';
 import {
   TOAST_MESSAGES,
   NAVIGATION_DELAY,
-  DEFAULT_CATEGORY,
+  DEFAULT_WEEK,
+  DEFAULT_MATERIAL_CATEGORY,
 } from './constants';
 import type { MaterialFormData } from './types';
 
@@ -15,22 +19,38 @@ import type { MaterialFormData } from './types';
  */
 const DocumentAddPage = () => {
   const navigate = useNavigate();
+  const { study_id } = useParams<{ study_id: string }>();
+  const createMutation = useCreateMaterialMutation(Number(study_id));
 
   // 폼 데이터 상태 관리
   const [formData, setFormData] = useState<MaterialFormData>({
     title: '',
     content: '',
-    category: DEFAULT_CATEGORY,
+    week: DEFAULT_WEEK,
+    category: DEFAULT_MATERIAL_CATEGORY,
+    files: [],
   });
 
   // 네비게이션 핸들러
-  const handleBack = () => navigate('/study/document');
+  const handleBack = () =>
+    navigate(ROUTE_BUILDERS.study.document.list(String(study_id)));
 
   // 폼 제출 핸들러
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success(TOAST_MESSAGES.ADD_SUCCESS);
-    setTimeout(() => navigate('/study/document'), NAVIGATION_DELAY);
+    try {
+      const body = buildMaterialRequestBody(formData);
+      const studyIdNum = Number(study_id);
+      if (!studyIdNum) throw new Error('invalid study id');
+      await createMutation.mutateAsync(body);
+      toast.success(TOAST_MESSAGES.ADD_SUCCESS);
+      setTimeout(
+        () => navigate(ROUTE_BUILDERS.study.document.list(String(study_id))),
+        NAVIGATION_DELAY,
+      );
+    } catch {
+      toast.error('자료 추가 중 오류가 발생했습니다.');
+    }
   };
 
   return (

@@ -4,27 +4,34 @@ import {
   Navigate,
   RouterProvider,
 } from 'react-router-dom';
-import { ROUTES } from '@/constants';
+import { ROUTES, ROUTE_PARAMS } from '@/constants';
 import { Layout } from '@/components';
 import { StudyLayout } from '@/pages/(study)';
 import routes from './routeConfig';
+import { useAuthStatus } from '@/hooks';
 
 /**
  * 애플리케이션 라우터 설정
  * - 각 페이지별로 다른 레이아웃 타입 적용
  * - 404 페이지는 레이아웃 없이 표시
  */
+
+// 인증 여부에 따른 루트 경로
+const RootIndexRoute: React.FC = () => {
+  const { isAuthenticated } = useAuthStatus();
+  return isAuthenticated ? (
+    <routes.Home />
+  ) : (
+    <Navigate to={`/${ROUTES.STUDY.ROOT}/${ROUTES.STUDY.EXPLORE}`} replace />
+  );
+};
+
 const router = createBrowserRouter([
   // 홈 페이지 (헤더만) - 인증 필요
   {
     path: ROUTES.HOME,
     element: <Layout layoutType='header-only' />,
-    children: [
-      {
-        index: true,
-        element: <routes.Home />,
-      },
-    ],
+    children: [{ index: true, element: <RootIndexRoute /> }],
   },
 
   // 예시 페이지 (사이드바만)
@@ -63,9 +70,29 @@ const router = createBrowserRouter([
     ],
   },
 
-  // 스터디 - 전역 그룹 (study/...) - 인증 필요
+  // 스터디 탐색 - 헤더만 사용하는 영역 (전역)
   {
     path: ROUTES.STUDY.ROOT,
+    element: <Layout layoutType='header-only' />,
+    children: [
+      {
+        index: true,
+        element: <Navigate to={ROUTES.STUDY.EXPLORE} replace />,
+      },
+      {
+        path: ROUTES.STUDY.EXPLORE,
+        element: <routes.StudyExplore />,
+      },
+      {
+        path: ROUTES.STUDY.CREATE,
+        element: <routes.StudyCreate />,
+      },
+    ],
+  },
+
+  // 스터디 - 전역 그룹 (study/:study_id/...) - 인증 필요
+  {
+    path: `${ROUTES.STUDY.ROOT}/:${ROUTE_PARAMS.studyId}`,
     children: [
       // 스터디 연관 사이드바 사용하는 영역
       {
@@ -76,20 +103,22 @@ const router = createBrowserRouter([
             element: <routes.StudyDashboard />,
           },
           {
-            path: ROUTES.STUDY.DOCUMENT,
-            element: <routes.StudyDocument />,
-          },
-          {
-            path: ROUTES.STUDY.DOCUMENT_ADD,
-            element: <routes.StudyDocumentAdd />,
-          },
-          {
-            path: ROUTES.STUDY.DOCUMENT_DETAIL,
-            element: <routes.StudyDocumentDetail />,
-          },
-          {
-            path: ROUTES.STUDY.DOCUMENT_EDIT,
-            element: <routes.StudyDocumentEdit />,
+            path: ROUTES.STUDY.DOCUMENT.ROOT,
+            children: [
+              { index: true, element: <routes.StudyDocument /> },
+              {
+                path: ROUTES.STUDY.DOCUMENT.ADD,
+                element: <routes.StudyDocumentAdd />,
+              },
+              {
+                path: ROUTES.STUDY.DOCUMENT.DETAIL,
+                element: <routes.StudyDocumentDetail />,
+              },
+              {
+                path: ROUTES.STUDY.DOCUMENT.EDIT,
+                element: <routes.StudyDocumentEdit />,
+              },
+            ],
           },
           { path: ROUTES.STUDY.PROGRESS, element: <routes.StudyProgress /> },
           {
@@ -111,50 +140,43 @@ const router = createBrowserRouter([
             ],
           },
           { path: ROUTES.STUDY.QUIZ, element: <routes.Example /> },
-          { path: ROUTES.STUDY.RETRO, element: <routes.Example /> },
+          {
+            path: ROUTES.STUDY.REFLECTION,
+            element: <routes.StudyReflection />,
+          },
+          {
+            path: `${ROUTES.STUDY.REFLECTION}/write`,
+            element: <routes.StudyReflectionDetail />,
+          },
+          {
+            path: `${ROUTES.STUDY.REFLECTION}/:${ROUTE_PARAMS.reflectionId}`,
+            element: <routes.StudyReflectionView />,
+          },
+          {
+            path: `${ROUTES.STUDY.REFLECTION}/:${ROUTE_PARAMS.reflectionId}/edit`,
+            element: <routes.StudyReflectionDetail />,
+          },
           {
             path: ROUTES.STUDY.ADMIN.ROOT,
             element: <routes.StudyAdmin />,
             children: [
               {
                 index: true,
-                element: <Navigate to='members' replace />,
+                element: <Navigate to={ROUTES.STUDY.ADMIN.MEMBERS} replace />,
               },
               {
-                path: 'members',
+                path: ROUTES.STUDY.ADMIN.MEMBERS,
                 element: <routes.StudyAdminMembers />,
               },
               {
-                path: 'applicants',
+                path: ROUTES.STUDY.ADMIN.APPLICANTS,
                 element: <routes.StudyAdminApplicants />,
               },
               {
-                path: 'study-info',
+                path: ROUTES.STUDY.ADMIN.STUDY_INFO,
                 element: <routes.StudyAdminStudyInfo />,
               },
             ],
-          },
-        ],
-      },
-
-      // 헤더만 사용하는 영역 - 스터디 생성 (인증 필요)
-      {
-        element: <Layout layoutType='header-only' />,
-        children: [
-          {
-            path: ROUTES.STUDY.CREATE,
-            element: <routes.StudyCreate />,
-          },
-        ],
-      },
-
-      // 헤더만 사용하는 영역 - 스터디 탐색
-      {
-        element: <Layout layoutType='header-only' />,
-        children: [
-          {
-            path: ROUTES.STUDY.EXPLORE,
-            element: <routes.StudyExplore />,
           },
         ],
       },

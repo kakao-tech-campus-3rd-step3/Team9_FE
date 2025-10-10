@@ -17,16 +17,13 @@ const WeekFilter = ({
   selectedWeeks,
   onWeekChange,
 }: WeekFilterProps) => {
-  const availableWeeks = Array.from(
-    new Set(materials.map((material) => material.category)),
-  ).sort((a, b) => {
-    const weekA = parseInt(a.replace('week', ''));
-    const weekB = parseInt(b.replace('week', ''));
-    return weekA - weekB;
-  });
+  const availableWeeks = Array.from(new Set(materials.map((m) => m.week)))
+    .sort((a, b) => a - b)
+    .map((w) => `week${w}`);
 
   const getWeekCount = (week: string) => {
-    return materials.filter((material) => material.category === week).length;
+    const weekNumber = parseInt(week.replace('week', ''));
+    return materials.filter((material) => material.week === weekNumber).length;
   };
 
   const handleWeekToggle = (week: string) => {

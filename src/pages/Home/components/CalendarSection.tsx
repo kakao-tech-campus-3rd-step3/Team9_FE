@@ -5,18 +5,24 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import dayjs from 'dayjs';
 import '@/styles/calendar.css';
 import { CalendarPopover } from '@/components';
+import { useScheduleMeQuery } from '../hooks/useScheduleMeQuery';
+import { studyColor } from '@/utils';
 
 type CalendarSectionProps = {
-  schedules: {
-    id: number;
-    title: string;
-    start_time: string;
-    end_time: string;
-    color: string;
-  }[];
+  year: number;
+  setYear: (year: number) => void;
+  month: number;
+  setMonth: (month: number) => void;
 };
 
-const CalendarSection = ({ schedules }: CalendarSectionProps) => {
+const CalendarSection = ({
+  year,
+  setYear,
+  month,
+  setMonth,
+}: CalendarSectionProps) => {
+  const { data: scheduleData } = useScheduleMeQuery({ year, month });
+
   const [popover, setPopover] = useState<{
     top: number;
     left: number;
@@ -24,7 +30,7 @@ const CalendarSection = ({ schedules }: CalendarSectionProps) => {
   } | null>(null);
 
   const handleDateClick = (info: { jsEvent: MouseEvent; dateStr: string }) => {
-    const hasSchedules = schedules.some(
+    const hasSchedules = scheduleData?.some(
       (schedule) =>
         dayjs(schedule.start_time).format('YYYY-MM-DD') === info.dateStr,
     );
@@ -57,6 +63,19 @@ const CalendarSection = ({ schedules }: CalendarSectionProps) => {
           const month = date.date.month + 1;
           return `${year}년 ${month}월`;
         }}
+        datesSet={(arg) => {
+          const viewStart = arg.start;
+          const viewEnd = arg.end;
+
+          const midTime = (viewStart.getTime() + viewEnd.getTime()) / 2;
+          const midDate = new Date(midTime);
+
+          const newYear = midDate.getFullYear();
+          const newMonth = midDate.getMonth() + 1;
+
+          if (newYear !== year) setYear(newYear);
+          if (newMonth !== month) setMonth(newMonth);
+        }}
         initialView='dayGridMonth'
         headerToolbar={{
           left: 'prev',
@@ -66,7 +85,7 @@ const CalendarSection = ({ schedules }: CalendarSectionProps) => {
         dayMaxEventRows={2}
         dateClick={handleDateClick}
         dayCellClassNames={(arg) => {
-          const hasSchedules = schedules.some(
+          const hasSchedules = scheduleData?.some(
             (schedule) =>
               dayjs(schedule.start_time).format('YYYY-MM-DD') ===
               dayjs(arg.date).format('YYYY-MM-DD'),
@@ -93,16 +112,16 @@ const CalendarSection = ({ schedules }: CalendarSectionProps) => {
           prev: '◀',
           next: '▶',
         }}
-        events={schedules.map((schedule) => ({
+        events={scheduleData?.map((schedule) => ({
           title: schedule.title,
           date: dayjs(schedule.start_time).format('YYYY-MM-DD'),
-          backgroundColor: schedule.color,
-          borderColor: schedule.color,
+          backgroundColor: studyColor(schedule.study_id),
+          borderColor: studyColor(schedule.study_id),
         }))}
       />
 
       <CalendarPopover
-        schedules={schedules}
+        schedules={scheduleData || []}
         popover={popover}
         setPopover={setPopover}
       />

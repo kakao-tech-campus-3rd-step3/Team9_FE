@@ -2,6 +2,7 @@ import React from 'react';
 import { getNameInitials, getNameBasedColor, getTextColor } from '@/utils';
 import { useImageUrl } from '@/hooks';
 import { useAuthStore } from '@/stores/auth';
+import { SkeletonAvatar } from '@/components/common';
 
 interface UserAvatarProps {
   /** 사용자 이미지 키 */
@@ -49,12 +50,19 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
   };
 
   // 로딩 중이거나 이미지가 없는 경우 이니셜 아바타를 기본으로 표시
-  const initials = getNameInitials(name);
-  const bgColor = getNameBasedColor(name);
+  const safeName = name || '';
+  const initials = getNameInitials(safeName);
+  const bgColor = getNameBasedColor(safeName);
+  const hasName = safeName.trim().length > 0;
   const textColor = getTextColor();
 
   // 기본 스타일과 외부 className을 조합
   const containerClasses = `rounded-full overflow-hidden flex items-center justify-center font-semibold ${className}`;
+
+  // 로딩 중일 때 스켈레톤 표시
+  if (isLoading) {
+    return <SkeletonAvatar className={className} />;
+  }
 
   return (
     <div
@@ -74,7 +82,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
         <div
           className={`w-full h-full ${bgColor} ${textColor} flex items-center justify-center`}
         >
-          {initials}
+          {hasName ? initials : ''}
         </div>
       )}
     </div>

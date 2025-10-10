@@ -35,7 +35,7 @@ export const StudyInfoManagement: React.FC = () => {
         maxMembers: MOCK_STUDY_INFO.maxMembers,
         schedule: MOCK_STUDY_INFO.schedule,
         region: MOCK_STUDY_INFO.region,
-        conditions: MOCK_STUDY_INFO.conditions,
+        conditions: [...MOCK_STUDY_INFO.conditions], // 배열 복사본으로 명시적 설정
       },
     });
 
@@ -43,9 +43,9 @@ export const StudyInfoManagement: React.FC = () => {
   const watchedRegion = watch('region');
 
   const handleConditionAdd = () => {
-    const trimmedInput = conditionInput.trim();
-    if (trimmedInput && !watchedConditions.includes(trimmedInput)) {
-      setValue('conditions', [...watchedConditions, trimmedInput]);
+    const value = conditionInput.trim();
+    if (value && !watchedConditions.includes(value)) {
+      setValue('conditions', [...watchedConditions, value]);
       setConditionInput('');
     }
   };
@@ -55,7 +55,7 @@ export const StudyInfoManagement: React.FC = () => {
     setValue('conditions', updatedConditions);
   };
 
-  const handleConditionKeyDown = (e: React.KeyboardEvent) => {
+  const handleConditionKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       handleConditionAdd();
@@ -217,7 +217,7 @@ export const StudyInfoManagement: React.FC = () => {
               <input
                 value={conditionInput}
                 onChange={(e) => setConditionInput(e.target.value)}
-                onKeyDown={handleConditionKeyDown}
+                onKeyPress={handleConditionKeyPress}
                 className='flex-1 px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary'
                 placeholder='참여조건을 입력하세요'
               />
