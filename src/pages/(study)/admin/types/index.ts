@@ -1,35 +1,138 @@
 /**
- * 관리자 페이지 타입 정의
+ * 스터디 관리자 페이지 API 타입 정의
  */
 
+// 스터디원 정보
 export interface StudyMember {
-  id: string;
-  name: string;
-  role: 'leader' | 'member';
-  joinDate: string;
+  member_id: number;
+  user_id: number;
+  nickname: string;
   email: string;
-}
-
-export interface StudyApplicant {
-  id: string;
-  name: string;
-  email: string;
-  applyDate: string;
+  role: 'Leader' | 'Member';
+  join_date: string;
   message?: string;
+  user_detail: {
+    file_key?: string;
+    location: string;
+  };
 }
 
+// 스터디원 목록 조회 응답
+export interface StudyMembersResponse {
+  members: StudyMember[];
+  total_count: number;
+}
+
+// 스터디원 역할 변경 요청
+export interface ChangeRoleRequest {
+  member_id: number;
+  role: 'Leader' | 'Member';
+}
+
+// 스터디원 역할 변경 응답
+export interface ChangeRoleResponse {
+  success: boolean;
+  message: string;
+}
+
+// 스터디원 탈퇴 요청
+export interface RemoveMemberRequest {
+  member_id: number;
+}
+
+// 스터디원 탈퇴 응답
+export interface RemoveMemberResponse {
+  success: boolean;
+  message: string;
+}
+
+// 신청자 정보
+export interface StudyApplication {
+  application_id: number;
+  user_id: number;
+  study_id: number;
+  application_date: string;
+  status: 'Pending' | 'Approved' | 'Rejected';
+  message: string;
+  user_detail: {
+    nickname: string;
+    email: string;
+    file_key?: string;
+    location: string;
+  };
+}
+
+// 신청자 목록 조회 응답
+export interface StudyApplicationsResponse {
+  applications: StudyApplication[];
+  total_count: number;
+}
+
+// 신청 상태 변경 요청
+export interface ChangeApplicationStatusRequest {
+  application_id: number;
+  status: 'Approved' | 'Rejected';
+}
+
+// 신청 상태 변경 응답
+export interface ChangeApplicationStatusResponse {
+  success: boolean;
+  message: string;
+}
+
+// 스터디 정보
 export interface StudyInfo {
-  id: string;
-  title: string;
+  study_id: number;
+  study_name: string;
   description: string;
-  shortDescription: string;
+  detailed_description: string;
   category: string;
-  maxMembers: number;
-  currentMembers: number;
-  image?: string;
-  schedule: string;
-  region: string;
-  conditions: string[];
+  max_members: number;
+  current_members: number;
+  leader_id: number;
+  created_at: string;
+  updated_at: string;
+  // 추가 필드들
+  schedule?: string;
+  region?: string;
+  conditions?: string[];
 }
 
-export type AdminTabType = 'members' | 'applicants' | 'study-info';
+// 스터디 정보 조회 응답
+export interface StudyInfoResponse {
+  study: StudyInfo;
+}
+
+// 스터디 정보 수정 요청
+export interface UpdateStudyInfoRequest {
+  study_name?: string;
+  description?: string;
+  detailed_description?: string;
+  category?: string;
+  max_members?: number;
+}
+
+// 스터디 정보 수정 응답
+export interface UpdateStudyInfoResponse {
+  success: boolean;
+  message: string;
+  study: StudyInfo;
+}
+
+// 리더 위임 요청
+export interface DelegateLeadershipRequest {
+  new_leader_id: number;
+}
+
+// 리더 위임 응답
+export interface DelegateLeadershipResponse {
+  success: boolean;
+  message: string;
+}
+
+// API 에러 응답
+export interface ApiErrorResponse {
+  success: false;
+  message: string;
+  errors?: Record<string, string[]>;
+}

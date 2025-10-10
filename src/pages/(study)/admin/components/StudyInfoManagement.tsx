@@ -2,11 +2,14 @@
  * 스터디 정보 관리 컴포넌트
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { MapPin, Plus, X, Camera } from 'lucide-react';
+import { MapPin, Plus, X, Camera, Loader2, Save } from 'lucide-react';
 import RegionSelectModal from '../../components/RegionSelectModal';
-import { MOCK_STUDY_INFO, CATEGORIES } from '../constants';
+import { getStudyInfo, updateStudyInfo } from '../services';
+import { mockStudyInfoResponse, MOCK_STUDY_ID } from '../mock';
+import { CATEGORIES, MAX_MEMBER_OPTIONS } from '../constants';
+import type { StudyInfo, UpdateStudyInfoRequest } from '../types';
 
 interface StudyInfoFormData {
   title: string;
@@ -21,46 +24,71 @@ interface StudyInfoFormData {
 }
 
 export const StudyInfoManagement: React.FC = () => {
+  const [studyInfo, setStudyInfo] = useState<StudyInfo | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [isRegionModalOpen, setIsRegionModalOpen] = useState(false);
   const [conditionInput, setConditionInput] = useState('');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  const { control, register, handleSubmit, setValue, watch } =
+  const { control, register, handleSubmit, setValue, watch, reset } =
     useForm<StudyInfoFormData>({
       defaultValues: {
-        title: MOCK_STUDY_INFO.title,
-        shortDescription: MOCK_STUDY_INFO.shortDescription,
-        description: MOCK_STUDY_INFO.description,
-        category: MOCK_STUDY_INFO.category,
-        maxMembers: MOCK_STUDY_INFO.maxMembers,
-        schedule: MOCK_STUDY_INFO.schedule,
-        region: MOCK_STUDY_INFO.region,
-        conditions: [...MOCK_STUDY_INFO.conditions], // 배열 복사본으로 명시적 설정
+        title: '',
+        shortDescription: '',
+        description: '',
+        category: '',
+        maxMembers: 2,
+        schedule: '',
+        region: '',
+        conditions: [],
       },
     });
 
-  const watchedConditions = watch('conditions');
   const watchedRegion = watch('region');
 
-  const handleConditionAdd = () => {
-    const value = conditionInput.trim();
-    if (value && !watchedConditions.includes(value)) {
-      setValue('conditions', [...watchedConditions, value]);
-      setConditionInput('');
+  // 스터디 정보가 변경될 때 폼 업데이트
+  useEffect(() => {
+    if (studyInfo) {
+      reset({
+        title: studyInfo.study_name,
+        shortDescription: studyInfo.description,
+        description: studyInfo.detailed_description,
+        category: studyInfo.category,
+        maxMembers: studyInfo.max_members,
+        schedule: studyInfo.schedule || '',
+        region: studyInfo.region || '',
+        conditions: studyInfo.conditions || [],
+      });
+    }
+  }, [studyInfo, reset]);
+
+  // 스터디 정보 조회
+  const fetchStudyInfo = async () => {
+    try {
+      setLoading(true);
+      // 개발 환경에서는 Mock 데이터 사용
+      if (import.meta.env.DEV) {
+        await new Promise((resolve) => setTimeout(resolve, 500)); // 로딩 시뮬레이션
+        const mockData = mockStudyInfoResponse.study;
+        setStudyInfo(mockData);
+      } else {
+        const response = await getStudyInfo(MOCK_STUDY_ID);
+        setStudyInfo(response.study);
+      }
+    } catch (error) {
+      console.error('스터디 정보 조회 실패:', error);
+      // 에러 시 Mock 데이터 사용
+      const mockData = mockStudyInfoResponse.study;
+      setStudyInfo(mockData);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleConditionRemove = (index: number) => {
-    const updatedConditions = watchedConditions.filter((_, i) => i !== index);
-    setValue('conditions', updatedConditions);
-  };
-
-  const handleConditionKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleConditionAdd();
-    }
-  };
+  useEffect(() => {
+    fetchStudyInfo();
+  }, []);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -80,10 +108,49 @@ export const StudyInfoManagement: React.FC = () => {
     setValue('image', '');
   };
 
-  const onSubmit = (data: StudyInfoFormData) => {
-    console.log('스터디 정보 수정:', data);
-    // TODO: 실제 수정 로직 구현
+  // 스터디 정보 수정
+  const onSubmit = async (data: StudyInfoFormData) => {
+    try {
+      setSaving(true);
+
+      const updateData: UpdateStudyInfoRequest = {
+        study_name: data.title,
+        description: data.shortDescription,
+        detailed_description: data.description,
+        category: data.category,
+        max_members: data.maxMembers,
+      };
+
+      if (import.meta.env.DEV) {
+        // Mock 응답 시뮬레이션
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        console.log('스터디 정보 수정 (Mock):', updateData);
+        alert('스터디 정보가 수정되었습니다.');
+      } else {
+        const response = await updateStudyInfo(MOCK_STUDY_ID, updateData);
+
+        if (response.success) {
+          setStudyInfo(response.study);
+          alert('스터디 정보가 수정되었습니다.');
+        }
+      }
+    } catch (error) {
+      console.error('스터디 정보 수정 실패:', error);
+      alert('스터디 정보 수정에 실패했습니다.');
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className='bg-card rounded-lg border border-border p-6'>
+        <div className='flex justify-center items-center h-32'>
+          <Loader2 className='h-6 w-6 animate-spin text-primary' />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='bg-card rounded-lg border border-border p-6'>
@@ -167,16 +234,35 @@ export const StudyInfoManagement: React.FC = () => {
             <label className='block text-sm font-medium text-foreground mb-2'>
               스터디 인원
             </label>
-            <select
-              {...register('maxMembers', { required: true })}
-              className='w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary'
-            >
-              {[2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                <option key={num} value={num}>
-                  {num}명
-                </option>
-              ))}
-            </select>
+            <Controller
+              name='maxMembers'
+              control={control}
+              rules={{
+                required: '스터디 인원을 선택해주세요.',
+                min: {
+                  value: studyInfo?.current_members || 2,
+                  message: `현재 ${studyInfo?.current_members}명이므로 최소 ${studyInfo?.current_members}명 이상이어야 합니다.`,
+                },
+              }}
+              render={({ field }) => (
+                <select
+                  {...field}
+                  className='w-full px-4 py-2 border border-input rounded-lg focus:border-primary focus:ring-0 bg-background text-foreground'
+                >
+                  {MAX_MEMBER_OPTIONS.filter(
+                    (num) => num >= (studyInfo?.current_members || 2),
+                  ).map((num) => (
+                    <option key={num} value={num}>
+                      {num}인
+                    </option>
+                  ))}
+                </select>
+              )}
+            />
+            <p className='mt-1 text-xs text-muted-foreground'>
+              현재 {studyInfo?.current_members}명이 참여 중입니다. 최대 인원을
+              현재 인원보다 적게 설정할 수 없습니다.
+            </p>
           </div>
 
           {/* 스터디 시간 */}
@@ -185,10 +271,19 @@ export const StudyInfoManagement: React.FC = () => {
               스터디 시간
             </label>
             <input
-              {...register('schedule', { required: true })}
-              className='w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary'
+              {...register('schedule', {
+                required: '스터디 시간을 입력해주세요.',
+                minLength: {
+                  value: 5,
+                  message: '스터디 시간을 구체적으로 입력해주세요.',
+                },
+              })}
+              className='w-full px-4 py-2 border border-input rounded-lg focus:border-primary focus:ring-0 bg-background text-foreground'
               placeholder='예: 매주 토요일 오후 2시'
             />
+            <p className='mt-1 text-xs text-muted-foreground'>
+              스터디가 진행되는 시간을 자유롭게 입력해주세요.
+            </p>
           </div>
 
           {/* 스터디 지역 */}
@@ -196,16 +291,32 @@ export const StudyInfoManagement: React.FC = () => {
             <label className='block text-sm font-medium text-foreground mb-2'>
               스터디 지역
             </label>
-            <button
-              type='button'
-              onClick={() => setIsRegionModalOpen(true)}
-              className='w-full flex items-center justify-between px-3 py-2 border border-border rounded-lg hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors'
-            >
-              <span className='flex items-center'>
-                <MapPin className='h-4 w-4 mr-2 text-muted-foreground' />
-                {watchedRegion || '지역을 선택하세요'}
-              </span>
-            </button>
+            <Controller
+              name='region'
+              control={control}
+              rules={{
+                required: '스터디 지역을 선택해주세요.',
+              }}
+              render={({ field }) => (
+                <div>
+                  <button
+                    type='button'
+                    onClick={() => setIsRegionModalOpen(true)}
+                    className={`w-full px-4 py-2 border rounded-lg text-left flex items-center justify-between ${
+                      field.value
+                        ? 'border-primary bg-primary/5 text-foreground'
+                        : 'border-input bg-background text-muted-foreground'
+                    }`}
+                  >
+                    <div className='flex items-center space-x-2'>
+                      <MapPin className='h-4 w-4' />
+                      <span>{field.value || '지역을 선택해주세요'}</span>
+                    </div>
+                    <span className='text-muted-foreground'>▼</span>
+                  </button>
+                </div>
+              )}
+            />
           </div>
 
           {/* 참여조건 */}
@@ -213,39 +324,78 @@ export const StudyInfoManagement: React.FC = () => {
             <label className='block text-sm font-medium text-foreground mb-2'>
               참여조건
             </label>
-            <div className='flex gap-2 mb-3'>
-              <input
-                value={conditionInput}
-                onChange={(e) => setConditionInput(e.target.value)}
-                onKeyPress={handleConditionKeyPress}
-                className='flex-1 px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary'
-                placeholder='참여조건을 입력하세요'
-              />
-              <button
-                type='button'
-                onClick={handleConditionAdd}
-                className='flex items-center px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors'
-              >
-                <Plus className='h-4 w-4' />
-              </button>
-            </div>
-            <div className='flex flex-wrap gap-2'>
-              {watchedConditions.map((condition, index) => (
-                <span
-                  key={index}
-                  className='flex items-center px-3 py-1 bg-secondary text-secondary-foreground rounded-full text-sm'
-                >
-                  {condition}
-                  <button
-                    type='button'
-                    onClick={() => handleConditionRemove(index)}
-                    className='ml-2 text-muted-foreground hover:text-destructive'
-                  >
-                    <X className='h-3 w-3' />
-                  </button>
-                </span>
-              ))}
-            </div>
+            <Controller
+              name='conditions'
+              control={control}
+              render={({ field }) => (
+                <div>
+                  {/* 입력 필드 */}
+                  <div className='flex gap-2 mb-3'>
+                    <input
+                      type='text'
+                      placeholder='참여조건을 입력하세요 (예: React 경험 1년 이상)'
+                      value={conditionInput}
+                      onChange={(e) => setConditionInput(e.target.value)}
+                      className='flex-1 px-4 py-2 border border-input rounded-lg focus:border-primary focus:ring-0 bg-background text-foreground'
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          const value = conditionInput.trim();
+                          if (value && !field.value.includes(value)) {
+                            field.onChange([...field.value, value]);
+                            setConditionInput('');
+                          }
+                        }
+                      }}
+                    />
+                    <button
+                      type='button'
+                      onClick={() => {
+                        const value = conditionInput.trim();
+                        if (value && !field.value.includes(value)) {
+                          field.onChange([...field.value, value]);
+                          setConditionInput('');
+                        }
+                      }}
+                      className='px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors flex items-center gap-2'
+                    >
+                      <Plus className='h-4 w-4' />
+                      추가
+                    </button>
+                  </div>
+
+                  {/* 선택된 참여조건 태그들 */}
+                  {field.value.length > 0 && (
+                    <div className='flex flex-wrap gap-2 mb-2'>
+                      {field.value.map((condition, index) => (
+                        <div
+                          key={index}
+                          className='flex items-center gap-2 px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm'
+                        >
+                          <span>{condition}</span>
+                          <button
+                            type='button'
+                            onClick={() => {
+                              const newConditions = field.value.filter(
+                                (_, i) => i !== index,
+                              );
+                              field.onChange(newConditions);
+                            }}
+                            className='text-primary-foreground hover:text-primary-foreground/80'
+                          >
+                            <X className='h-3 w-3' />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <p className='text-xs text-muted-foreground'>
+                    스터디 참여를 위한 조건을 입력해주세요. (선택사항)
+                  </p>
+                </div>
+              )}
+            />
           </div>
 
           {/* 스터디 대표 이미지 */}
@@ -298,9 +448,20 @@ export const StudyInfoManagement: React.FC = () => {
           <div className='flex justify-end'>
             <button
               type='submit'
-              className='px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors'
+              disabled={saving}
+              className='px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center space-x-2'
             >
-              수정하기
+              {saving ? (
+                <>
+                  <Loader2 className='h-4 w-4 animate-spin' />
+                  <span>저장 중...</span>
+                </>
+              ) : (
+                <>
+                  <Save className='h-4 w-4' />
+                  <span>수정하기</span>
+                </>
+              )}
             </button>
           </div>
         </form>
@@ -314,6 +475,7 @@ export const StudyInfoManagement: React.FC = () => {
             setValue('region', region);
             setIsRegionModalOpen(false);
           }}
+          multiSelect={false}
         />
       </div>
     </div>

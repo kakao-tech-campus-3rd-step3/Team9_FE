@@ -2,7 +2,7 @@
  * 관리자 페이지 상수
  */
 
-import type { StudyMember, StudyApplicant, StudyInfo } from '../types';
+// import type { StudyMember, StudyApplication, StudyInfo } from '../types';
 
 export const ADMIN_TABS = [
   { id: 'members', label: '스터디원 관리' },
@@ -10,67 +10,20 @@ export const ADMIN_TABS = [
   { id: 'study-info', label: '스터디 관리' },
 ] as const;
 
+// 스터디 생성 페이지와 동일한 카테고리
 export const CATEGORIES = [
   '어학',
-  '프로그래밍',
   '취업',
   '고시/공무원',
   '취미/교양',
+  '프로그래밍',
   '자율/기타',
 ] as const;
 
-// 목업 데이터
-export const MOCK_STUDY_MEMBERS: StudyMember[] = [
-  {
-    id: '1',
-    name: '김철수',
-    role: 'leader',
-    joinDate: '2024-01-15',
-    email: 'kimcs@example.com',
-  },
-  {
-    id: '2',
-    name: '김민수',
-    role: 'member',
-    joinDate: '2024-01-20',
-    email: 'kimminsu@example.com',
-  },
-  {
-    id: '3',
-    name: '이재민',
-    role: 'member',
-    joinDate: '2024-02-01',
-    email: 'leejm@example.com',
-  },
-  {
-    id: '4',
-    name: '김준서',
-    role: 'member',
-    joinDate: '2024-02-10',
-    email: 'kimjs@example.com',
-  },
-];
+// 최대 참여자 수 옵션 (스터디 생성 페이지와 동일)
+export const MAX_MEMBER_OPTIONS = [2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 
-export const MOCK_APPLICANTS: StudyApplicant[] = [
-  {
-    id: '1',
-    name: '홍길동',
-    email: 'honggd@example.com',
-    applyDate: '2024-03-01',
-    message: '토익 점수 향상을 위해 열심히 참여하겠습니다!',
-  },
-];
-
-export const MOCK_STUDY_INFO: StudyInfo = {
-  id: '1',
-  title: '토익 스터디',
-  description:
-    '토익 점수 향상을 위한 스터디입니다. 매주 토요일 오후 2시에 진행됩니다.',
-  shortDescription: '토익 점수 향상을 위한 스터디',
-  category: '어학',
-  maxMembers: 8,
-  currentMembers: 4,
-  schedule: '매주 토요일 오후 2시',
-  region: '서울',
-  conditions: ['토익 600점 이상', '매주 참석 가능'],
-};
+// 목업 데이터 (사용하지 않음 - mock/index.ts에서 관리)
+// export const MOCK_STUDY_MEMBERS: StudyMember[] = [...];
+// export const MOCK_APPLICANTS: StudyApplication[] = [...];
+// export const MOCK_STUDY_INFO: StudyInfo = {...};
