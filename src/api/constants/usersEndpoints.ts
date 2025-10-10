@@ -6,4 +6,6 @@ export const USERS_ENDPOINTS = {
   PROFILE_DETAIL: '/api/users/detail',
   // 사용자 스터디 관련 정보 (path: study_id, int64)
   STUDY_BY_ID: (study_id: number) => `/api/users/${study_id}`,
+  // 내 스터디 정보
+  STUDY_ME: '/api/users/me/studies',
 } as const;
