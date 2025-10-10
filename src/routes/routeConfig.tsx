@@ -22,6 +22,11 @@ import {
   ApplicantManagement,
   StudyInfoManagement,
 } from '@/pages/(study)';
+import {
+  ReflectionPage,
+  ReflectionDetailPage,
+  ReflectionViewPage,
+} from '@/pages/(study)/reflection';
 
 import {
   ReflectionPage,
