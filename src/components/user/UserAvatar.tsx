@@ -29,13 +29,13 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
   const [hasImageError, setHasImageError] = React.useState(false);
   const { user } = useAuthStore();
 
-  // authUserLoader에서 이미 로드된 이미지 URL 우선 사용
-  const cachedImageUrl = user.imageUrl;
+  // 현재 사용자의 이미지인지 확인하여 캐시된 URL 사용 여부 결정
+  const isCurrentUser = user.imageKey && user.imageKey === imageKey;
+  const cachedImageUrl = isCurrentUser ? user.imageUrl : undefined;
 
-  // 캐시된 URL이 없거나 현재 사용자 이미지가 아닌 경우에만 useImageUrl 사용
-  const shouldFetchImage = !cachedImageUrl && imageKey;
+  // 캐시된 URL이 없으면 useImageUrl을 통해 이미지 URL 가져오기
   const { imageUrl: fetchedImageUrl, isLoading: imageLoading } = useImageUrl(
-    shouldFetchImage ? imageKey : undefined,
+    !cachedImageUrl ? imageKey : undefined,
   );
 
   const finalImageUrl = cachedImageUrl || fetchedImageUrl;
