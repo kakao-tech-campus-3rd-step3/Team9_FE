@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, MapPin, Clock } from 'lucide-react';
 import BaseModal from '@/components/common/BaseModal';
+import { downloadImageService } from '@/services/images/downloadImage';
 
 interface Study {
   id: number;
@@ -13,6 +14,7 @@ interface Study {
   maxMembers: number;
   region: string;
   imageUrl?: string;
+  imageKey?: string; // 이미지 키 (API에서 사용)
   detailedDescription?: string;
   schedule?: string;
   duration?: string;
@@ -32,6 +34,41 @@ const StudyDetailModal: React.FC<StudyDetailModalProps> = ({
   study,
   onApply,
 }) => {
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageLoading, setImageLoading] = useState(false);
+
+  // 이미지 로드 로직
+  useEffect(() => {
+    const loadImage = async () => {
+      if (!study) return;
+
+      // 1. imageUrl이 있으면 바로 사용 (개발용)
+      if (study.imageUrl) {
+        setImageUrl(study.imageUrl);
+        return;
+      }
+
+      // 2. imageKey가 있으면 API에서 presigned URL 가져오기 (실제 서비스용)
+      if (study.imageKey) {
+        setImageLoading(true);
+        try {
+          const presignedUrl = await downloadImageService.getImagePresignedUrl(
+            study.imageKey,
+          );
+          if (presignedUrl) {
+            setImageUrl(presignedUrl);
+          }
+        } catch (error) {
+          console.error('이미지 로드 실패:', error);
+        } finally {
+          setImageLoading(false);
+        }
+      }
+    };
+
+    loadImage();
+  }, [study?.imageKey, study?.imageUrl]);
+
   if (!study) return null;
 
   const handleApplyClick = () => {
@@ -49,11 +86,19 @@ const StudyDetailModal: React.FC<StudyDetailModalProps> = ({
         {/* 스터디 이미지 및 기본 정보 */}
         <div className='mb-6'>
           <div className='w-full h-48 bg-primary-light rounded-lg mb-4 flex items-center justify-center overflow-hidden'>
-            {study.imageUrl ? (
+            {imageLoading ? (
+              <div className='w-16 h-16 bg-primary rounded-lg flex items-center justify-center'>
+                <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-primary-foreground'></div>
+              </div>
+            ) : imageUrl ? (
               <img
-                src={study.imageUrl}
+                src={imageUrl}
                 alt={study.title}
                 className='w-full h-full object-cover rounded-lg'
+                onError={() => {
+                  // 이미지 로드 실패 시 URL 초기화하여 아이콘 표시
+                  setImageUrl(null);
+                }}
               />
             ) : (
               <div className='w-16 h-16 bg-primary rounded-lg flex items-center justify-center'>

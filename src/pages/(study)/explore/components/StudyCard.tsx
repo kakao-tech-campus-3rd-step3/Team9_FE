@@ -2,8 +2,9 @@
  * 스터디 카드 컴포넌트
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, Eye } from 'lucide-react';
+import { downloadImageService } from '@/services/images/downloadImage';
 import type { Study } from '../types';
 
 interface StudyCardProps {
@@ -17,27 +18,56 @@ const StudyCard: React.FC<StudyCardProps> = ({
   onCardClick,
   onApplyClick,
 }) => {
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageLoading, setImageLoading] = useState(false);
+
+  // 이미지 로드 로직
+  useEffect(() => {
+    const loadImage = async () => {
+      // 1. imageUrl이 있으면 바로 사용 (개발용)
+      if (study.imageUrl) {
+        setImageUrl(study.imageUrl);
+        return;
+      }
+
+      // 2. imageKey가 있으면 API에서 presigned URL 가져오기 (실제 서비스용)
+      if (study.imageKey) {
+        setImageLoading(true);
+        try {
+          const presignedUrl = await downloadImageService.getImagePresignedUrl(
+            study.imageKey,
+          );
+          if (presignedUrl) {
+            setImageUrl(presignedUrl);
+          }
+        } catch (error) {
+          console.error('이미지 로드 실패:', error);
+        } finally {
+          setImageLoading(false);
+        }
+      }
+    };
+
+    loadImage();
+  }, [study.imageKey, study.imageUrl]);
+
   return (
     <div className='bg-white rounded-lg shadow-sm border border-border hover:shadow-md transition-shadow flex flex-col'>
       <div className='p-6 flex-1'>
         <div className='mb-4'>
           <div className='w-full h-32 bg-primary-light rounded-lg mb-4 flex items-center justify-center overflow-hidden'>
-            {study.imageUrl ? (
+            {imageLoading ? (
+              <div className='w-12 h-12 bg-primary rounded-lg flex items-center justify-center'>
+                <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-primary-foreground'></div>
+              </div>
+            ) : imageUrl ? (
               <img
-                src={study.imageUrl}
+                src={imageUrl}
                 alt={study.title}
                 className='w-full h-full object-cover rounded-lg'
-                onError={(e) => {
-                  // 이미지 로드 실패 시 아이콘으로 대체
-                  e.currentTarget.style.display = 'none';
-                  const parent = e.currentTarget.parentElement;
-                  if (parent) {
-                    parent.innerHTML = `
-                    <div class="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
-                      <span class="text-primary-foreground text-lg font-bold">${study.title.charAt(0)}</span>
-                    </div>
-                  `;
-                  }
+                onError={() => {
+                  // 이미지 로드 실패 시 URL 초기화하여 아이콘 표시
+                  setImageUrl(null);
                 }}
               />
             ) : (

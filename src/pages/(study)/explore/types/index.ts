@@ -13,6 +13,7 @@ export interface Study {
   maxMembers: number;
   region: string;
   imageUrl?: string;
+  imageKey?: string; // 이미지 키 (API에서 사용)
   detailedDescription?: string;
   schedule?: string;
   duration?: string;
