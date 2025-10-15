@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import type { UserStudyInfo } from '@/types';
 import { getUserStudyInfo } from '@/services/users/getUserStudyInfo';
@@ -7,7 +7,6 @@ import { studyKeys } from '@/constants/queryKeys';
 
 // 특정 스터디 페이지에서 현재 스터디 정보 동기화 훅
 // - studyId가 없으면 아무 것도 하지 않음
-// - select로 데이터 변환, useMemo로 성능 최적화
 export const useCurrentStudy = (studyId?: number) => {
   const setCurrentStudy = useAuthStore((s) => s.setCurrentStudy);
 
@@ -21,21 +20,18 @@ export const useCurrentStudy = (studyId?: number) => {
     gcTime: 10 * 60 * 1000,
   });
 
-  // 변환된 데이터를 메모이제이션
-  const studyInfo = useMemo(() => query.data, [query.data]);
-
-  // 스토어 동기화: studyInfo 변경 시 스토어 업데이트
+  // 스토어 동기화: 데이터 변경 시 스토어 업데이트
   useEffect(() => {
-    if (studyInfo) {
-      setCurrentStudy(studyInfo);
+    if (query.data) {
+      setCurrentStudy(query.data);
     } else if (query.error) {
       setCurrentStudy(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [studyInfo, query.error, setCurrentStudy]);
+  }, [query.data, query.error, setCurrentStudy]);
 
   return {
-    data: studyInfo,
+    data: query.data,
     loading: query.isLoading,
     error: query.error,
   } as const;
@@ -53,22 +49,18 @@ export const useCurrentStudySuspense = (studyId: number) => {
     gcTime: 10 * 60 * 1000,
   });
 
-  // 변환된 데이터를 메모이제이션
-  const studyInfo = useMemo(() => query.data, [query.data]);
-
-  // 스토어 동기화: studyInfo 변경 시 스토어 업데이트
+  // 스토어 동기화: 데이터 변경 시 스토어 업데이트
   useEffect(() => {
-    if (studyInfo) {
-      setCurrentStudy(studyInfo);
+    if (query.data) {
+      setCurrentStudy(query.data);
     } else if (query.error) {
       setCurrentStudy(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [studyInfo, query.error, setCurrentStudy]);
+  }, [query.data, query.error, setCurrentStudy]);
 
   return {
-    data: studyInfo,
-    loading: query.isLoading,
+    data: query.data,
     error: query.error,
   } as const;
 };
