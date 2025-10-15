@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { User, Settings, LogOut } from 'lucide-react';
-import { useAuthStatus, useLogoutMutation } from '@/hooks';
-import { useAuthStore } from '@/stores/auth';
+import { useLogoutMutation } from '@/hooks';
+import { useAuthUserSuspense } from '@/hooks/useAuthUserSuspense';
 import { ROUTES } from '@/constants';
 import { getStudyRoleLabel, getRoleColorClass } from '@/utils';
 import Dropdown from '../common/Dropdown';
-import { SimpleSkeleton } from '@/components/common';
 import UserAvatar from './UserAvatar';
 
 interface UserProfileSectionProps {
@@ -23,8 +22,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
   variant = 'header',
   onMobileMenuClose,
 }) => {
-  const { isAuthenticated, isAuthLoading } = useAuthStatus();
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthUserSuspense();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const logoutMutation = useLogoutMutation();
   const location = useLocation();
@@ -55,43 +53,6 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
     onMobileMenuClose?.();
   };
 
-  // 로딩 상태 (Suspense가 처리하므로 기본적인 로딩만 처리)
-  if (isAuthLoading) {
-    return (
-      <div className={`${variant === 'study-sidebar' ? 'px-4 py-3' : ''}`}>
-        <div className='flex items-center gap-3'>
-          <div className='relative flex-shrink-0'>
-            <SimpleSkeleton
-              height='h-10'
-              width='w-10'
-              className='rounded-full'
-            />
-          </div>
-          <div className='flex-1 min-w-0'>
-            <SimpleSkeleton height='h-4' width='w-1/3' />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // 비로그인 상태
-  if (!isAuthenticated) {
-    const loginButton = (
-      <Link
-        to={ROUTES.LOGIN}
-        className={`flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-md hover:bg-primary-hover transition-colors font-medium ${
-          variant === 'study-sidebar' ? 'w-full px-4 py-2.5' : 'px-3 py-2'
-        }`}
-        onClick={onMobileMenuClose}
-      >
-        로그인
-      </Link>
-    );
-
-    return variant === 'study-sidebar' ? loginButton : loginButton;
-  }
-
   // 드롭다운 메뉴 아이템 (마이페이지 / 설정 / 로그아웃)
   const menuItems = [
     {
@@ -112,6 +73,21 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
     },
   ];
 
+  // 비로그인 상태
+  if (!isAuthenticated) {
+    return (
+      <Link
+        to={ROUTES.LOGIN}
+        className={`flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-md hover:bg-primary-hover transition-colors font-medium ${
+          variant === 'study-sidebar' ? 'w-full px-4 py-2.5' : 'px-3 py-2'
+        }`}
+        onClick={onMobileMenuClose}
+      >
+        로그인
+      </Link>
+    );
+  }
+
   // 통합된 프로필 버튼 컴포넌트
   const ProfileTrigger = () => {
     const isHeader = variant === 'header';
@@ -131,8 +107,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
         : '';
 
     return (
-      <button
-        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+      <div
         className={`${baseTrigger} ${triggerPadding} ${triggerBg} ${triggerOpenBg}`}
       >
         <div className='relative flex-shrink-0'>
@@ -155,7 +130,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
             </span>
           )}
         </div>
-      </button>
+      </div>
     );
   };
 
