@@ -107,8 +107,12 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
         : '';
 
     return (
-      <div
+      <button
         className={`${baseTrigger} ${triggerPadding} ${triggerBg} ${triggerOpenBg}`}
+        type='button'
+        aria-label='사용자 프로필 메뉴 열기'
+        aria-expanded={isDropdownOpen}
+        aria-haspopup='menu'
       >
         <div className='relative flex-shrink-0'>
           <UserAvatar
@@ -130,7 +134,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
             </span>
           )}
         </div>
-      </div>
+      </button>
     );
   };
 
