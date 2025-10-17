@@ -10,7 +10,7 @@ export const useScheduleStudyQuery = ({
   study_id,
 }: UseScheduleStudyQueryParams) => {
   return useQuery({
-    queryKey: [scheduleKeys.study(study_id)],
+    queryKey: scheduleKeys.study(study_id),
     queryFn: () => scheduleStudyService({ study_id }),
   });
 };
