@@ -12,7 +12,7 @@ export const useScheduleMeQuery = ({
   month,
 }: UseScheduleMeQueryParams) => {
   return useQuery({
-    queryKey: [scheduleKeys.me(year, month)],
+    queryKey: scheduleKeys.me(year, month),
     queryFn: () => scheduleMeService({ year, month }),
   });
 };

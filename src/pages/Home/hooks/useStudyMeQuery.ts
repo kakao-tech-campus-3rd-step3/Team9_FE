@@ -4,7 +4,7 @@ import { studyMeService } from '../services';
 
 export const useStudyMeQuery = () => {
   return useSuspenseQuery({
-    queryKey: [studyKeys.me],
+    queryKey: studyKeys.me,
     queryFn: studyMeService,
   });
 };
