@@ -2,6 +2,7 @@ import { Check, X } from 'lucide-react';
 import { useAttendanceStudyQuery } from '../hooks/useAttendanceStudyQuery';
 import { ErrorBoundary, LoadingSpinner } from '@/components';
 import { Suspense } from 'react';
+import { UserAvatar } from '@/components/user';
 
 type MemberInfoSectionProps = {
   study_id: number;
@@ -45,7 +46,11 @@ const MemberInfoSection = ({ study_id }: MemberInfoSectionProps) => {
                     {members.members.map((member, index) => (
                       <tr key={`${member.name}-${index}`}>
                         <td className='border-b border-primary text-center px-5 py-3 '>
-                          <div className='w-8 h-8 rounded-full overflow-hidden bg-red-400' />
+                          <UserAvatar
+                            name={member.name}
+                            imageKey={member.image_key}
+                            className='w-8 h-8 text-sm'
+                          />
                         </td>
                         <td className='border-b border-primary px-5 py-3 whitespace-nowrap'>
                           {member.name}
