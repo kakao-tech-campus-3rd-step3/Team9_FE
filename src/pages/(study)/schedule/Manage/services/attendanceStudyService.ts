@@ -6,14 +6,14 @@ type Attendance = {
   schedule_date: string;
 };
 
-type member = {
+type Member = {
   name: string;
   image_key: string;
   attendance: Attendance[];
 };
 
 type AttendanceStudyResponse = {
-  members: member[];
+  members: Member[];
 };
 
 type AttendanceStudyRequest = {

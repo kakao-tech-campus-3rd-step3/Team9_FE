@@ -1,7 +1,7 @@
 import apiClient from '@/api';
 import { SCHEDULE_ENDPOINTS } from '@/api/constants';
 
-type scheduleStudyResponse = {
+type ScheduleStudyResponse = {
   schedule_id: number;
   title: string;
   start_time: string;
@@ -17,8 +17,8 @@ type ScheduleStudyRequest = {
  */
 export const scheduleStudyService = async ({
   study_id,
-}: ScheduleStudyRequest): Promise<scheduleStudyResponse> => {
-  const { data } = await apiClient.get<scheduleStudyResponse>(
+}: ScheduleStudyRequest): Promise<ScheduleStudyResponse> => {
+  const { data } = await apiClient.get<ScheduleStudyResponse>(
     SCHEDULE_ENDPOINTS.STUDY(study_id),
   );
 
