@@ -29,7 +29,7 @@ const MemberInfoSection = ({ study_id }: MemberInfoSectionProps) => {
                     </th>
                     {scheduleDates.map((date, i) => (
                       <th
-                        key={i}
+                        key={`${date}-${i}`}
                         className='border-b-2 border-primary px-5 py-3 text-center'
                       >
                         {new Date(date).toLocaleDateString('ko-KR', {
