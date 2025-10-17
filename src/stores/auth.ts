@@ -12,6 +12,7 @@ export type AuthUser = {
   imageUrl?: string; // 캐시된 이미지 URL
   // 현재 선택된 스터디의 타이틀과 역할 (선택적, 하나만 유지)
   currentStudy?: {
+    study_id?: number;
     title: string;
     role: StudyRole;
   };
