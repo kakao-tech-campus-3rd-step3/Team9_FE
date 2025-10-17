@@ -10,7 +10,7 @@ export const useAttendanceStudyQuery = ({
   study_id,
 }: UseAttendanceStudyQueryParams) => {
   return useSuspenseQuery({
-    queryKey: [attendanceKeys.study(study_id)],
+    queryKey: attendanceKeys.study(study_id),
     queryFn: () => attendanceStudyService({ study_id }),
   });
 };
