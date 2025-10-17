@@ -46,7 +46,7 @@ const ManagePage = () => {
         />
         <ScheduleManageSection events={dateEvent} date={date} />
       </div>
-      <MemberInfoSection />
+      <MemberInfoSection study_id={studyId || 0} />
     </div>
   );
 };
