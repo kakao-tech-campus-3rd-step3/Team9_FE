@@ -6,3 +6,4 @@ export * from './quizEndpoints';
 export * from './scheduleEndpoints';
 export * from './materialEndpoints';
 export * from './quizEndpoints';
+export * from './attendanceEndpoints';

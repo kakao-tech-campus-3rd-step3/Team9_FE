@@ -14,7 +14,11 @@ export const useCurrentStudy = (studyId?: number) => {
     queryKey: studyKeys.detail(String(studyId)),
     queryFn: async (): Promise<UserStudyInfo> =>
       getUserStudyInfo(studyId as number),
-    select: (data: UserStudyInfo) => ({ title: data.title, role: data.role }), // 필요한 데이터만 추출
+    select: (data: UserStudyInfo) => ({
+      study_id: studyId,
+      title: data.title,
+      role: data.role,
+    }), // 필요한 데이터만 추출
     enabled: typeof studyId === 'number',
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,

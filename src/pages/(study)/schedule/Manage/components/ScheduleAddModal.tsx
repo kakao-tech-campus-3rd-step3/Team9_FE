@@ -5,6 +5,9 @@ import ScheduleAddManage from './ScheduleAddManage';
 import ScheduleAddTune from './ScheduleAddTune';
 import { FormProvider, useForm } from 'react-hook-form';
 import type { SubmitHandler } from 'react-hook-form';
+import { useAuthStore } from '@/stores';
+import { useScheduleAddMutation } from '../hooks/useScheduleAddMutation';
+import dayjs from 'dayjs';
 
 type ScheduleFormValues = {
   title: string;
@@ -28,7 +31,9 @@ type ScheduleAddModalProps = {
 };
 
 const ScheduleAddModal = ({ onClose }: ScheduleAddModalProps) => {
+  const currentStudy = useAuthStore((state) => state.user.currentStudy);
   const [isOn, setIsOn] = useState(false);
+  const addSchedule = useScheduleAddMutation();
 
   const methods = useForm<ScheduleFormValues>({
     shouldUnregister: true,
@@ -51,13 +56,20 @@ const ScheduleAddModal = ({ onClose }: ScheduleAddModalProps) => {
       console.log('(tune)', payload);
     } else {
       // 일정 추가
-      const payload = {
-        type: 'fixed',
+      const start_time = dayjs(
+        `${values.fixed?.startDate}T${values.fixed?.startTime}`,
+      ).toISOString();
+      const end_time = dayjs(
+        `${values.fixed?.endDate}T${values.fixed?.endTime}`,
+      ).toISOString();
+
+      addSchedule.mutateAsync({
+        study_id: currentStudy?.study_id || 0,
         title: values.title,
-        description: values.description,
-        fixed: values.fixed ?? {},
-      };
-      console.log('(fixed)', payload);
+        content: values.description ?? '',
+        start_time: dayjs(start_time).format('YYYY-MM-DDTHH:mm:ss'),
+        end_time: dayjs(end_time).format('YYYY-MM-DDTHH:mm:ss'),
+      });
     }
     onClose();
   };
