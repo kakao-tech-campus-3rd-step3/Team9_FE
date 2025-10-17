@@ -5,11 +5,12 @@ import {
   StudyCalendarSection,
 } from './components';
 import { studyColor } from '@/utils';
-import { useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useScheduleStudyQuery } from './hooks/useScheduleStudyQuery';
 import { useAuthStore } from '@/stores';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/constants';
+import { LoadingSpinner } from '@/components';
 
 const ManagePage = () => {
   const navigate = useNavigate();
@@ -17,9 +18,11 @@ const ManagePage = () => {
   const currentStudy = useAuthStore((state) => state.user.currentStudy);
   const studyId = currentStudy?.study_id;
 
-  if (!studyId) {
-    navigate(ROUTES.HOME);
-  }
+  useEffect(() => {
+    if (!studyId) {
+      navigate(ROUTES.HOME);
+    }
+  }, [studyId, navigate]);
 
   const { data: studySchedules } = useScheduleStudyQuery({
     study_id: studyId || 0,
@@ -50,7 +53,9 @@ const ManagePage = () => {
           role={currentStudy?.role || 'MEMBER'}
         />
       </div>
-      <MemberInfoSection study_id={studyId || 0} />
+      <Suspense fallback={<LoadingSpinner />}>
+        <MemberInfoSection study_id={studyId || 0} />
+      </Suspense>
     </div>
   );
 };
