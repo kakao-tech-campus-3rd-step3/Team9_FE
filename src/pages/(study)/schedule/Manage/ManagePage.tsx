@@ -44,7 +44,11 @@ const ManagePage = () => {
           date={date}
           setDate={setDate}
         />
-        <ScheduleManageSection events={dateEvent} date={date} />
+        <ScheduleManageSection
+          events={dateEvent}
+          date={date}
+          role={currentStudy?.role || 'MEMBER'}
+        />
       </div>
       <MemberInfoSection study_id={studyId || 0} />
     </div>
