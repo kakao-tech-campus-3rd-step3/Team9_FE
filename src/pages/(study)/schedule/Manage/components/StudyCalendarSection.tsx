@@ -84,7 +84,7 @@ const StudyCalendarSection = ({
         }}
         events={schedules.map((schedule) => ({
           title: schedule.title,
-          date: schedule.start_time,
+          date: dayjs(schedule.start_time).format('YYYY-MM-DD'),
           backgroundColor: studyColor(studyId),
           borderColor: studyColor(studyId),
         }))}
