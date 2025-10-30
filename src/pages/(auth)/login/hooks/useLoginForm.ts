@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema } from '../schemas';
 import { DEFAULT_LOGIN_FORM_VALUES } from '../constants';
 import type { LoginPayload } from '../schemas';
-import { useLoginMutation } from './useLoginMutation';
+import { useLoginMutation } from './mutations/useLoginMutation';
 import { RememberedEmail } from '@/utils/auth';
 
 /**

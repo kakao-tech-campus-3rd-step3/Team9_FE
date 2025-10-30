@@ -1,7 +1,11 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import type { StudyMe } from '../types/study';
+import { studyColor } from '@/utils';
+import { Link } from 'react-router-dom';
+import { ROUTES, ROUTE_BUILDERS } from '@/constants';
 
 type StudyListProps = {
-  studies: { id: number; title: string; color: string }[];
+  studies: StudyMe[];
   canLeft: boolean;
   onLeft: () => void;
   canRight: boolean;
@@ -23,16 +27,18 @@ const StudyList = ({
         </button>
       )}
       {studies.map((study) => (
-        <div
-          key={study.id}
-          className='flex text-center text-lg gap-4 px-4 py-2 items-center bg-blue-200 rounded-xl'
+        <Link
+          key={study.study_id}
+          to={`${ROUTE_BUILDERS.study.root(study.study_id)}/${ROUTES.STUDY.DASHBOARD}`}
         >
-          <div
-            className='min-w-5 min-h-5 rounded-full inline-block'
-            style={{ backgroundColor: study.color }}
-          />
-          <div className='font-medium line-clamp-1'>{study.title}</div>
-        </div>
+          <div className='flex text-center text-lg gap-4 px-4 py-2 items-center bg-blue-200 rounded-xl'>
+            <div
+              className='min-w-5 min-h-5 rounded-full inline-block'
+              style={{ backgroundColor: studyColor(study.study_id) }}
+            />
+            <div className='font-medium line-clamp-1'>{study.title}</div>
+          </div>
+        </Link>
       ))}
       {canRight && (
         <button onClick={onRight} className='text-lg font-medium'>

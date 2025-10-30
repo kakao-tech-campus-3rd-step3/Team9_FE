@@ -4,3 +4,4 @@ export * from './upload';
 export * from './auth';
 export * from './avatar';
 export * from './mappers';
+export * from './role';

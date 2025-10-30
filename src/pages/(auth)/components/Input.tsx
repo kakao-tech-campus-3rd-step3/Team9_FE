@@ -1,5 +1,5 @@
-import React, { forwardRef } from 'react';
-import { XCircle, CheckCircle } from 'lucide-react';
+import React, { forwardRef, useMemo, useState } from 'react';
+import { XCircle, CheckCircle, Eye, EyeOff } from 'lucide-react';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -14,7 +14,11 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
  * - 에러 상태 지원
  */
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, success, className = '', ...props }, ref) => {
+  ({ label, error, success, className = '', type, ...props }, ref) => {
+    const isPassword = useMemo(() => type === 'password', [type]);
+    const [showPassword, setShowPassword] = useState(false);
+    const inputType = isPassword && showPassword ? 'text' : type;
+
     return (
       <div className='relative w-full'>
         {label && (
@@ -38,8 +42,24 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             }
             ${className}
           `.trim()}
+          type={inputType}
           {...props}
         />
+        {isPassword && (
+          <button
+            type='button'
+            aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보기'}
+            onClick={() => setShowPassword((v) => !v)}
+            className='absolute inset-y-0 right-2 flex items-center text-muted-foreground hover:text-foreground transition-colors'
+            tabIndex={-1}
+          >
+            {showPassword ? (
+              <EyeOff className='w-4 h-4' />
+            ) : (
+              <Eye className='w-4 h-4' />
+            )}
+          </button>
+        )}
         {error && (
           <div className='absolute top-full left-0 mt-1 text-xs text-red-600 flex items-center gap-1'>
             <XCircle className='w-3 h-3' />

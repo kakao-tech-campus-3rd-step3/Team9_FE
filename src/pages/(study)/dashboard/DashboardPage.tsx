@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   NoticeSection,
   DocumentSection,
@@ -16,7 +16,8 @@ import {
   mockStudyInfo,
   mockMyRanking,
 } from './mock';
-import { ROUTES } from '../../../constants';
+import { ROUTES, ROUTE_BUILDERS } from '../../../constants';
+import { useRecentMaterialsQuery } from '@/pages/(study)/document/hooks/useMaterials';
 
 /**
  * 스터디 대시보드 컴포넌트
@@ -26,9 +27,17 @@ const DashboardPage = () => {
   const navigate = useNavigate();
 
   // 스터디 경로로 이동하는 헬퍼 함수
+  const { study_id } = useParams<{ study_id: string }>();
   const navigateToStudy = (path: string) => {
-    navigate(`/${ROUTES.STUDY.ROOT}/${path}`);
+    if (!study_id) return;
+    navigate(`${ROUTE_BUILDERS.study.root(study_id)}/${path}`);
   };
+
+  const recentQuery = useRecentMaterialsQuery(Number(study_id));
+  const goToDocumentDetail = (materialId: number) =>
+    navigate(
+      `${ROUTE_BUILDERS.study.document.detail(String(study_id), materialId)}`,
+    );
 
   return (
     <div className='flex-1 overflow-y-auto bg-background'>
@@ -50,8 +59,17 @@ const DashboardPage = () => {
         {/* 문서, 진척도 - 한줄에 */}
         <DashboardRow cols={2}>
           <DocumentSection
-            documents={mockDocuments}
-            onClick={() => navigateToStudy(ROUTES.STUDY.DOCUMENT)}
+            recent={
+              Array.isArray(recentQuery.data) ? recentQuery.data : undefined
+            }
+            documents={
+              Array.isArray(recentQuery.data) && recentQuery.data.length > 0
+                ? []
+                : mockDocuments
+            }
+            isLoading={recentQuery.isLoading}
+            onClick={() => navigateToStudy(ROUTES.STUDY.DOCUMENT.ROOT)}
+            onItemClick={goToDocumentDetail}
           />
           <ProgressSection
             onClick={() => navigateToStudy(ROUTES.STUDY.PROGRESS)}
@@ -69,7 +87,7 @@ const DashboardPage = () => {
         {/* 회고, 퀴즈 - 한줄에 */}
         <DashboardRow cols={2}>
           <RetrospectSection
-            onClick={() => navigateToStudy(ROUTES.STUDY.RETRO)}
+            onClick={() => navigateToStudy(ROUTES.STUDY.REFLECTION)}
           />
           <QuizSection onClick={() => navigateToStudy(ROUTES.STUDY.QUIZ)} />
         </DashboardRow>

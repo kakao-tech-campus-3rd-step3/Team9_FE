@@ -1,40 +1,41 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { getUserProfile } from '@/services/users/getUserProfile';
 import { useAuthStore } from '@/stores/auth';
 import { mapUserProfileToAuthUser } from '@/utils/mappers';
 import { downloadImageService } from '@/services/images/downloadImage';
+import { userKeys } from '@/constants/queryKeys';
 import type { UserProfile } from '@/types';
 
 /**
  * 사용자 프로필 조회 및 스토어 동기화 훅
- * - TanStack Query의 캐싱 활용
- * - 스토어와 자동 동기화
+ * - TanStack Query의 select 기능으로 데이터 변환
+ * - useEffect로 스토어 동기화
  */
 export const useLoadUserProfile = () => {
-  const { setUser, setUserImageUrl, setIsLogin } = useAuthStore();
+  const { setUser, setUserImageUrl } = useAuthStore();
 
-  // 사용자 프로필 조회 (쿼리 중심, onSuccess로 스토어 동기화)
+  // 사용자 프로필 조회 (select로 데이터 변환, TanStack Query 최대 활용)
   const profileQuery = useQuery({
-    queryKey: ['userProfile'],
+    queryKey: userKeys.profile(),
     queryFn: async (): Promise<UserProfile> => getUserProfile(),
+    select: (data: UserProfile) => mapUserProfileToAuthUser(data), // 데이터 변환을 쿼리 레벨에서
     staleTime: 5 * 60 * 1000, // 5분
     gcTime: 10 * 60 * 1000, // 10분
     enabled: false, // 필요 시 명시적으로 refetch
   });
 
-  // 쿼리 데이터 동기화: data 변경 시 스토어 업데이트
+  // 스토어 동기화: 데이터 변경 시 스토어 업데이트
   useEffect(() => {
     const run = async () => {
       if (!profileQuery.data) return;
-      const authUser = mapUserProfileToAuthUser(profileQuery.data);
-      setUser(authUser);
-      setIsLogin(true);
+      setUser(profileQuery.data);
 
-      if (authUser.imageKey) {
+      // 이미지 키가 있으면 이미지 URL도 로드
+      if (profileQuery.data.imageKey) {
         try {
           const imageUrl = await downloadImageService.getImagePresignedUrl(
-            authUser.imageKey,
+            profileQuery.data.imageKey,
           );
           setUserImageUrl(imageUrl);
         } catch (error) {
@@ -44,7 +45,33 @@ export const useLoadUserProfile = () => {
     };
     void run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profileQuery.data]);
+  }, [profileQuery.data, setUser, setUserImageUrl]);
+
+  return {
+    ...profileQuery,
+  };
+};
+
+// Suspense 버전
+export const useLoadUserProfileSuspense = () => {
+  const { setUser } = useAuthStore();
+
+  // 사용자 프로필 조회 (Suspense 버전)
+  const profileQuery = useSuspenseQuery({
+    queryKey: userKeys.profile(),
+    queryFn: async (): Promise<UserProfile> => getUserProfile(),
+    select: (data: UserProfile) => mapUserProfileToAuthUser(data),
+    staleTime: 5 * 60 * 1000, // 5분
+    gcTime: 10 * 60 * 1000, // 10분
+  });
+
+  // 스토어 동기화: 데이터 변경 시 스토어 업데이트 (이미지 URL 제외)
+  useEffect(() => {
+    if (profileQuery.data) {
+      setUser(profileQuery.data);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profileQuery.data, setUser]);
 
   return {
     ...profileQuery,

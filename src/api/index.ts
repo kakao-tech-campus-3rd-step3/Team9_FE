@@ -16,6 +16,7 @@ const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {
+    Accept: 'application/json',
     'Content-Type': 'application/json',
   },
 });
@@ -49,7 +50,6 @@ apiClient.interceptors.request.use(
     return config;
   },
   (error) => {
-    console.error('Request Interceptor Error:', error);
     return Promise.reject(error);
   },
 );
@@ -104,8 +104,7 @@ apiClient.interceptors.response.use(
       }
 
       // 토큰 재발급 실패 시 로그아웃 처리 (명시적 상태 초기화)
-      const { reset, setIsLogin } = useAuthStore.getState();
-      setIsLogin(false);
+      const { reset } = useAuthStore.getState();
       reset();
       const authMessage =
         data?.message || '인증이 만료되었습니다. 다시 로그인해주세요.';
@@ -113,6 +112,9 @@ apiClient.interceptors.response.use(
         toast.error(authMessage);
       }
       window.location.href = ROUTES.LOGIN;
+    } else if (status === 403) {
+      // 403 Forbidden 에러 - 토스트 표시하지 않음 (인증 초기화 중 발생 가능)
+      // 조용히 에러 처리
     } else {
       // 기타 에러 처리
       if (showToast) {
