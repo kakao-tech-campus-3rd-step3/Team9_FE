@@ -6,7 +6,7 @@ type TuneListRequest = {
 };
 
 type TuneListResponse = {
-  title: boolean;
+  title: string;
   start: string;
   end: string;
 };

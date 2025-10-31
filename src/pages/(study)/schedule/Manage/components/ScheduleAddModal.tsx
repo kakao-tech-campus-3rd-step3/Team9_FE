@@ -52,7 +52,7 @@ const ScheduleAddModal = ({ onClose }: ScheduleAddModalProps) => {
       addTune({
         title: values.title,
         content: values.description ?? '',
-        study_id: Number(studyId) || 0,
+        study_id: Number(studyId),
         start_date: values.tune?.startDate || '',
         end_date: values.tune?.endDate || '',
         available_start_time: values.tune?.startTime || '',
@@ -68,7 +68,7 @@ const ScheduleAddModal = ({ onClose }: ScheduleAddModalProps) => {
       ).toISOString();
 
       addSchedule.mutateAsync({
-        study_id: Number(studyId) || 0,
+        study_id: Number(studyId),
         title: values.title,
         content: values.description ?? '',
         start_time: dayjs(start_time).format('YYYY-MM-DDTHH:mm:ss'),
