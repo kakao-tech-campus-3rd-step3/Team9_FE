@@ -34,9 +34,13 @@ const ScheduleManageCard = ({ event }: ScheduleManageCardProps) => {
           <div className='flex-1'>{event.title}</div>
         </h4>
         {user.currentStudy?.role === 'LEADER' && (
-          <div>
-            <X onClick={() => deleteSchedule({ schedule_id: event.id })} />
-          </div>
+          <button
+            type='button'
+            className='ml-2'
+            onClick={() => deleteSchedule({ schedule_id: event.id })}
+          >
+            <X />
+          </button>
         )}
       </div>
       <div className='flex '>
