@@ -8,4 +8,6 @@ export const SCHEDULE_ENDPOINTS = {
   SCHEDULE_DELETE: (schedule_id: number) => `/api/schedules/${schedule_id}`,
 
   TUNE_ADD: (study_id: number) => `/api/studies/${study_id}/schedule-tunes`,
+
+  TUNE_LIST: (study_id: number) => `/api/studies/${study_id}/schedule-tunes`,
 } as const;
