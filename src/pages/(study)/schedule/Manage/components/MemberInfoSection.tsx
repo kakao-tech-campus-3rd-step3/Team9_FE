@@ -8,15 +8,17 @@ type MemberInfoSectionProps = {
 };
 
 const MemberInfoSection = ({ study_id }: MemberInfoSectionProps) => {
-  const { data: members } = useAttendanceStudyQuery({ study_id });
+  const { data } = useAttendanceStudyQuery({ study_id });
+  const members = data?.members ?? [];
+
   const scheduleDates =
-    members.members[0]?.attendance.map((a) => a.schedule_date) ?? [];
+    members[0]?.attendance.map((a) => a.schedule_date) ?? [];
 
   return (
     <ErrorBoundary>
       <section className='flex flex-col w-full p-4 gap-3 overflow-y-auto'>
         <div className='flex-1 flex flex-col items-center h-full px-6 py-4 border-2 border-primary rounded-xl'>
-          {members.members.length > 0 ? (
+          {members.length > 0 ? (
             <div className='w-full overflow-x-auto'>
               <table className='table-auto min-w-max border-collapse'>
                 <thead>
@@ -41,7 +43,7 @@ const MemberInfoSection = ({ study_id }: MemberInfoSectionProps) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {members.members.map((member, index) => (
+                  {members.map((member, index) => (
                     <tr key={`${member.name}-${index}`}>
                       <td className='border-b border-primary text-center px-5 py-3 '>
                         <UserAvatar

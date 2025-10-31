@@ -4,4 +4,10 @@ export const SCHEDULE_ENDPOINTS = {
   ME: '/api/schedules/me',
   // 스터디 id를 이용한 스터디 일정
   STUDY: (study_id: number) => `/api/studies/${study_id}/schedules`,
+
+  SCHEDULE_DELETE: (schedule_id: number) => `/api/schedules/${schedule_id}`,
+
+  TUNE_ADD: (study_id: number) => `/api/studies/${study_id}/schedule-tunes`,
+
+  TUNE_LIST: (study_id: number) => `/api/studies/${study_id}/schedule-tunes`,
 } as const;
