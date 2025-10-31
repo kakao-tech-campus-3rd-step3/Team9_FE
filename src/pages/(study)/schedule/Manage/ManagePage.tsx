@@ -8,15 +8,16 @@ import { studyColor } from '@/utils';
 import { Suspense, useEffect, useState } from 'react';
 import { useScheduleStudyQuery } from './hooks/useScheduleStudyQuery';
 import { useAuthStore } from '@/stores';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ROUTES } from '@/constants';
 import { LoadingSpinner } from '@/components';
 
 const ManagePage = () => {
   const navigate = useNavigate();
   const [date, setDate] = useState(dayjs().format('YYYY-MM-DD'));
+  const { study_id } = useParams<{ study_id: string }>();
+  const studyId = study_id ? Number(study_id) : undefined;
   const currentStudy = useAuthStore((state) => state.user.currentStudy);
-  const studyId = currentStudy?.study_id;
 
   useEffect(() => {
     if (!studyId) {
@@ -25,7 +26,7 @@ const ManagePage = () => {
   }, [studyId, navigate]);
 
   const { data: studySchedules } = useScheduleStudyQuery({
-    study_id: studyId || 0,
+    study_id: studyId!,
   });
   const dateEvent =
     studySchedules
@@ -35,14 +36,18 @@ const ManagePage = () => {
         title: schedule.title,
         start_time: dayjs(schedule.start_time),
         end_time: dayjs(schedule.end_time),
-        color: studyColor(studyId || 0),
+        color: studyColor(studyId!),
       })) || [];
+
+  if (!studyId) {
+    return null;
+  }
 
   return (
     <div className='flex flex-col p-4 items-center justify-center'>
       <div className='flex p-4 gap-8 w-full justify-center'>
         <StudyCalendarSection
-          studyId={studyId || 0}
+          studyId={studyId}
           schedules={studySchedules || []}
           date={date}
           setDate={setDate}
@@ -54,7 +59,7 @@ const ManagePage = () => {
         />
       </div>
       <Suspense fallback={<LoadingSpinner />}>
-        <MemberInfoSection study_id={studyId || 0} />
+        <MemberInfoSection study_id={studyId} />
       </Suspense>
     </div>
   );

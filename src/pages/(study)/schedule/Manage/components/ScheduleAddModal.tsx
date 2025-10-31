@@ -5,9 +5,9 @@ import ScheduleAddManage from './ScheduleAddManage';
 import ScheduleAddTune from './ScheduleAddTune';
 import { FormProvider, useForm } from 'react-hook-form';
 import type { SubmitHandler } from 'react-hook-form';
-import { useAuthStore } from '@/stores';
 import { useScheduleAddMutation } from '../hooks/useScheduleAddMutation';
 import dayjs from 'dayjs';
+import { useParams } from 'react-router-dom';
 
 type ScheduleFormValues = {
   title: string;
@@ -31,7 +31,7 @@ type ScheduleAddModalProps = {
 };
 
 const ScheduleAddModal = ({ onClose }: ScheduleAddModalProps) => {
-  const currentStudy = useAuthStore((state) => state.user.currentStudy);
+  const studyId = useParams<{ study_id: string }>().study_id;
   const [isOn, setIsOn] = useState(false);
   const addSchedule = useScheduleAddMutation();
 
@@ -64,7 +64,7 @@ const ScheduleAddModal = ({ onClose }: ScheduleAddModalProps) => {
       ).toISOString();
 
       addSchedule.mutateAsync({
-        study_id: currentStudy?.study_id || 0,
+        study_id: Number(studyId) || 0,
         title: values.title,
         content: values.description ?? '',
         start_time: dayjs(start_time).format('YYYY-MM-DDTHH:mm:ss'),
