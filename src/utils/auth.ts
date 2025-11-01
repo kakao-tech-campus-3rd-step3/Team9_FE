@@ -5,10 +5,8 @@
 import dayjs from 'dayjs';
 import { REMEMBER_ME } from '@/constants';
 import { refreshTokenService } from '@/pages/(auth)/login/services/refreshService';
-import { getUserProfile } from '@/services/users/getUserProfile';
-import { downloadImageService } from '@/services/images/downloadImage';
+import { loadAndCacheAuthUser } from '@/utils/authUserLoader';
 import { useAuthStore } from '@/stores/auth';
-import { mapUserProfileToAuthUser } from '@/utils/mappers';
 
 /**
  * 쿠키 관리
@@ -97,28 +95,16 @@ export const AuthInitializer = {
       if (refreshSuccess) {
         // 토큰 재발급 성공 시 프로필도 로드
         try {
-          const { setUser, setUserImageUrl } = useAuthStore.getState();
-          const profile = await getUserProfile();
-          const authUser = mapUserProfileToAuthUser(profile);
-          setUser(authUser);
-
-          // 이미지 키가 있으면 이미지 URL도 로드
-          if (authUser.imageKey) {
-            try {
-              const imageUrl = await downloadImageService.getImagePresignedUrl(
-                authUser.imageKey,
-              );
-              setUserImageUrl(imageUrl);
-            } catch (error) {
-              console.warn('이미지 URL 로드 실패:', error);
-            }
-          }
+          await loadAndCacheAuthUser();
         } catch (profileError) {
           console.warn('프로필 로드 실패:', profileError);
         }
       }
     } catch (error) {
-      console.log('인증 초기화 실패:', error);
+      // CORS나 네트워크 에러는 개발 환경에서 흔한 문제이므로 조용히 처리
+      if (import.meta.env.DEV) {
+        console.warn('인증 초기화 실패 (개발 환경):', error);
+      }
     } finally {
       setIsInitialized(true);
       setIsInitializing(false);

@@ -30,6 +30,7 @@ export interface Schedule {
 }
 
 export interface StudyInfo {
+  id: number;
   name: string;
 }
 

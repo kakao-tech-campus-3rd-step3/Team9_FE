@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { downloadImageService } from '@/services/images/downloadImage';
 import { imageKeys } from '@/constants/queryKeys';
 
@@ -12,6 +12,24 @@ export const useImageUrl = (imageKey?: string) => {
     queryKey: imageKeys.urlByKey(imageKey!),
     queryFn: () => downloadImageService.getImagePresignedUrl(imageKey!),
     enabled: !!imageKey,
+  });
+
+  return {
+    imageUrl: query.data || '',
+    isLoading: query.isLoading,
+    error: query.error,
+  };
+};
+
+/**
+ * 이미지 키를 presigned URL로 변환하는 Suspense 훅
+ * @param imageKey 이미지 키
+ * @returns { imageUrl: string, isLoading: boolean, error: Error | null }
+ */
+export const useImageUrlSuspense = (imageKey: string) => {
+  const query = useSuspenseQuery({
+    queryKey: imageKeys.urlByKey(imageKey),
+    queryFn: () => downloadImageService.getImagePresignedUrl(imageKey),
   });
 
   return {

@@ -16,6 +16,7 @@ const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {
+    Accept: 'application/json',
     'Content-Type': 'application/json',
   },
 });
@@ -49,7 +50,6 @@ apiClient.interceptors.request.use(
     return config;
   },
   (error) => {
-    console.error('Request Interceptor Error:', error);
     return Promise.reject(error);
   },
 );
@@ -112,6 +112,9 @@ apiClient.interceptors.response.use(
         toast.error(authMessage);
       }
       window.location.href = ROUTES.LOGIN;
+    } else if (status === 403) {
+      // 403 Forbidden 에러 - 토스트 표시하지 않음 (인증 초기화 중 발생 가능)
+      // 조용히 에러 처리
     } else {
       // 기타 에러 처리
       if (showToast) {

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { User, Settings, LogOut } from 'lucide-react';
-import { useAuthStatus, useLogoutMutation } from '@/hooks';
-import { useAuthStore } from '@/stores/auth';
+import { useLogoutMutation } from '@/hooks';
+import { useAuthUserSuspense } from '@/hooks/useAuthUserSuspense';
 import { ROUTES } from '@/constants';
+import { getStudyRoleLabel, getRoleColorClass } from '@/utils';
 import Dropdown from '../common/Dropdown';
 import UserAvatar from './UserAvatar';
 
@@ -21,10 +22,15 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
   variant = 'header',
   onMobileMenuClose,
 }) => {
-  const { isAuthenticated, isAuthLoading } = useAuthStatus();
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthUserSuspense();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const logoutMutation = useLogoutMutation();
+  const location = useLocation();
+
+  // 스터디 페이지인지 확인 (스터디 페이지에서만 역할 표시)
+  const isStudyPage =
+    location.pathname.startsWith(`/${ROUTES.STUDY.ROOT}/`) &&
+    !location.pathname.includes(`/${ROUTES.STUDY.EXPLORE}`);
 
   // 로그아웃 핸들러
   const handleLogout = () => {
@@ -47,48 +53,6 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
     onMobileMenuClose?.();
   };
 
-  // 로딩 상태
-  if (isAuthLoading) {
-    return (
-      <div
-        className={`flex items-center ${variant === 'study-sidebar' ? 'gap-3 p-4' : 'gap-2 px-3 py-2'}`}
-      >
-        <div
-          className={`${variant === 'study-sidebar' ? 'w-10 h-10' : 'w-8 h-8'} bg-muted rounded-full animate-pulse`}
-        />
-        <div className={variant === 'study-sidebar' ? 'flex-1' : ''}>
-          <div
-            className={`${variant === 'study-sidebar' ? 'h-4 mb-1' : 'h-4'} bg-muted rounded-md animate-pulse`}
-          />
-          {variant === 'study-sidebar' && (
-            <div className='h-3 bg-muted rounded-md animate-pulse w-2/3' />
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // 비로그인 상태
-  if (!isAuthenticated) {
-    const loginButton = (
-      <Link
-        to={ROUTES.LOGIN}
-        className={`flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-md hover:bg-primary-hover transition-colors font-medium ${
-          variant === 'study-sidebar' ? 'w-full px-4 py-2.5' : 'px-3 py-2'
-        }`}
-        onClick={onMobileMenuClose}
-      >
-        로그인
-      </Link>
-    );
-
-    return variant === 'study-sidebar' ? (
-      <div className='p-4'>{loginButton}</div>
-    ) : (
-      loginButton
-    );
-  }
-
   // 드롭다운 메뉴 아이템 (마이페이지 / 설정 / 로그아웃)
   const menuItems = [
     {
@@ -109,19 +73,46 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
     },
   ];
 
+  // 비로그인 상태
+  if (!isAuthenticated) {
+    return (
+      <Link
+        to={ROUTES.LOGIN}
+        className={`flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-md hover:bg-primary-hover transition-colors font-medium ${
+          variant === 'study-sidebar' ? 'w-full px-4 py-2.5' : 'px-3 py-2'
+        }`}
+        onClick={onMobileMenuClose}
+      >
+        로그인
+      </Link>
+    );
+  }
+
   // 통합된 프로필 버튼 컴포넌트
   const ProfileTrigger = () => {
     const isHeader = variant === 'header';
     const avatarSize = isHeader ? 'w-8 h-8 text-sm' : 'w-10 h-10 text-sm';
+    const baseTrigger =
+      'flex items-center gap-3 text-sm rounded-lg transition-all duration-200 group w-full';
+    const triggerPadding = 'px-4 py-3';
+    const triggerBg = isHeader
+      ? 'hover:bg-secondary/90 min-w-0'
+      : 'rounded-none';
+    const triggerOpenBg = isHeader
+      ? isDropdownOpen
+        ? 'bg-accent/30 border-border/50'
+        : ''
+      : isDropdownOpen
+        ? 'bg-secondary/90'
+        : '';
 
     return (
       <button
-        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-        className={`flex items-center gap-3 px-4 py-3 text-sm rounded-lg transition-all duration-200 group w-full ${
-          isHeader
-            ? 'hover:bg-secondary/90 min-w-0'
-            : 'border-t border-border rounded-none bg-secondary/80 hover:bg-secondary/90'
-        } ${isDropdownOpen ? (isHeader ? 'bg-accent/30 border-border/50' : 'bg-secondary/90') : ''}`}
+        className={`${baseTrigger} ${triggerPadding} ${triggerBg} ${triggerOpenBg}`}
+        type='button'
+        aria-label='사용자 프로필 메뉴 열기'
+        aria-expanded={isDropdownOpen}
+        aria-haspopup='menu'
       >
         <div className='relative flex-shrink-0'>
           <UserAvatar
@@ -131,14 +122,15 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
           />
         </div>
 
-        {/* 사용자 정보 - 데스크톱과 모바일 통합 */}
-        <div className='flex flex-col items-start min-w-0 flex-1 text-left'>
+        <div className='flex items-center justify-between min-w-0 flex-1 text-left'>
           <span className='font-medium text-foreground group-hover:text-accent-foreground transition-colors leading-tight text-sm'>
             {user.nickname}
           </span>
-          {user.currentStudy && (
-            <span className='text-xs text-muted-foreground mt-0.5 leading-relaxed'>
-              {user.currentStudy.title}
+          {isStudyPage && user.currentStudy && (
+            <span
+              className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium ${getRoleColorClass(user.currentStudy.role)} flex-shrink-0`}
+            >
+              {getStudyRoleLabel(user.currentStudy.role)}
             </span>
           )}
         </div>
@@ -148,7 +140,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
 
   // 메뉴 아이템 렌더링 (개선된 디자인)
   const MenuItems = () => (
-    <div className='py-2'>
+    <div className=''>
       {menuItems.map((item, index) => (
         <button
           key={index}
@@ -173,16 +165,16 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
   );
 
   // 드롭다운 설정
-  const dropdownConfig =
-    variant === 'study-sidebar'
-      ? { position: 'top' as const, align: 'left' as const }
-      : { position: 'bottom' as const, align: 'right' as const };
+  const isHeader = variant === 'header';
+  const dropdownPosition = isHeader ? 'bottom' : ('top' as const);
+  const dropdownAlign = isHeader ? 'right' : ('left' as const);
+  const dropdownOffset = isHeader ? 'mt-4' : 'mb-1';
 
   return (
     <Dropdown
-      position={dropdownConfig.position}
-      align={dropdownConfig.align}
-      offsetClass={variant === 'header' ? 'mt-4' : undefined}
+      position={dropdownPosition}
+      align={dropdownAlign}
+      offsetClass={dropdownOffset}
       isOpen={isDropdownOpen}
       onOpenChange={setIsDropdownOpen}
       onClose={onMobileMenuClose}

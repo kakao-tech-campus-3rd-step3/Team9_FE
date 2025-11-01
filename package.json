@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"pnpm dev:mock\" \"pnpm dev:app\"",
+    "dev": "pnpm dev:app",
     "dev:app": "vite",
     "dev:mock": "json-server --watch db.json --port 8080",
     "build": "tsc -b && vite build",
