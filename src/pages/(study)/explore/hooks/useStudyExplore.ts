@@ -4,6 +4,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import type { Study } from '../types';
 import { studyExploreService } from '../services';
@@ -12,6 +13,7 @@ import { MOCK_STUDIES, CATEGORIES } from '../constants';
 type ModalType = 'apply' | 'detail' | 'region' | null;
 
 export const useStudyExplore = (searchTerm: string) => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([
     '전체',
   ]);
@@ -43,9 +45,23 @@ export const useStudyExplore = (searchTerm: string) => {
     // enabled: true,
     // 실제 서버 연동 전까지는 목업 데이터 사용
     enabled: true,
+    // 스터디 생성 후 탐색 페이지로 이동할 때 자동으로 refetch
+    refetchOnMount: true,
   });
 
-  // 스터디 생성 이벤트 리스너
+  // URL 파라미터에서 newStudy 감지하여 refetch
+  React.useEffect(() => {
+    const newStudy = searchParams.get('newStudy');
+    if (newStudy === 'true') {
+      console.log('새 스터디 생성 감지 - 데이터 새로고침');
+      refetch();
+      // 파라미터 제거 (다음 방문 시 중복 refetch 방지)
+      searchParams.delete('newStudy');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams, refetch]);
+
+  // 스터디 생성 이벤트 리스너 (이미 탐색 페이지에 있는 경우 대응)
   React.useEffect(() => {
     const handleStudyCreated = () => {
       console.log('스터디 생성 이벤트 감지 - 데이터 새로고침');

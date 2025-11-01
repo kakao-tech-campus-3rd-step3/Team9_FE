@@ -99,8 +99,13 @@ const StudyCreateForm: React.FC<StudyCreateFormProps> = ({
                 value: 10,
                 message: '스터디 소개는 최소 10글자 이상이어야 합니다.',
               },
+              maxLength: {
+                value: 100,
+                message: '한 줄 소개는 100자를 초과할 수 없습니다.',
+              },
             })}
-            placeholder='스터디에 대한 간략한 설명'
+            placeholder='스터디에 대한 간략한 설명 (최대 100자)'
+            maxLength={100}
             className='w-full px-4 py-2 border border-input rounded-lg focus:border-primary focus:ring-0 bg-background text-foreground'
           />
           {errors.shortDescription && (

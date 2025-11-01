@@ -3,12 +3,13 @@
  */
 
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import type { StudyFormData, CreateStudyRequest } from '../types';
 import { studyCreateService } from '../services';
 
 export const useStudyCreate = () => {
+  const queryClient = useQueryClient();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
@@ -79,19 +80,47 @@ export const useStudyCreate = () => {
 
       // CreateStudyRequest 형태로 변환
       const requestData: CreateStudyRequest = {
-        title: data.title,
-        description: data.description,
-        short_description: data.shortDescription,
+        title: data.title.trim(),
+        description: data.description.trim(),
+        short_description: data.shortDescription.trim(),
         interests: selectedCategories, // 선택된 모든 카테고리
         max_members: data.maxMembers,
-        schedule: data.schedule,
+        schedule: data.schedule.trim(),
         region: data.region,
-        conditions: data.conditions,
-        file_key: fileKey, // 업로드된 이미지의 file_key 사용
+        conditions: data.conditions.filter((c) => c.trim().length > 0), // 빈 문자열 제거
+        file_key: fileKey && fileKey.trim() ? fileKey.trim() : undefined, // 빈 문자열이면 undefined로
       };
 
+      // 필수 필드 검증
+      if (!requestData.title || requestData.title.length === 0) {
+        throw new Error('스터디 이름을 입력해주세요.');
+      }
+      // 백엔드 description = 한 줄 소개 (100자 제한)
+      if (
+        !requestData.short_description ||
+        requestData.short_description.length === 0
+      ) {
+        throw new Error('스터디 한 줄 소개를 입력해주세요.');
+      }
+      if (requestData.short_description.length > 100) {
+        throw new Error('한 줄 소개는 100자를 초과할 수 없습니다.');
+      }
+      // 백엔드 detail_description = 상세 설명
+      if (!requestData.description || requestData.description.length === 0) {
+        throw new Error('스터디 설명을 입력해주세요.');
+      }
+      if (!requestData.region || requestData.region.length === 0) {
+        throw new Error('지역을 선택해주세요.');
+      }
+      if (requestData.interests.length === 0) {
+        throw new Error('최소 하나의 카테고리를 선택해주세요.');
+      }
+
       // 실제 백엔드 서버로 스터디 생성 요청
-      console.log('스터디 생성 요청 데이터:', requestData);
+      console.log(
+        '✅ 스터디 생성 요청 데이터:',
+        JSON.stringify(requestData, null, 2),
+      );
       return studyCreateService.createStudy(requestData);
     },
     onSuccess: (data, variables) => {
@@ -112,23 +141,46 @@ export const useStudyCreate = () => {
       // 완료 모달 열기 (토스트는 모달에서 처리)
       setIsCompleteModalOpen(true);
 
-      // 백엔드 데이터 새로고침을 위한 이벤트 발생
-      // 탐색 페이지에서 refetch하도록 함
+      // React Query 캐시 무효화하여 탐색 페이지에서 자동으로 새 데이터 가져오기
+      // 탐색 페이지로 이동하면 자동으로 refetch됨
+      queryClient.invalidateQueries({ queryKey: ['studies'] });
+
+      // 이벤트도 발생시켜 이미 탐색 페이지에 있는 경우에도 대응
       window.dispatchEvent(new CustomEvent('studyCreated'));
     },
     onError: (error, variables) => {
-      console.error('스터디 생성 실패:', error);
+      console.error('❌ 스터디 생성 실패:', error);
 
       // axios 에러인 경우 상세 정보 출력
       const axiosError = error as {
-        response?: { data?: unknown; status?: number; statusText?: string };
+        response?: {
+          data?: {
+            message?: string;
+            detail?: string;
+            errors?: unknown;
+            [key: string]: unknown;
+          };
+          status?: number;
+          statusText?: string;
+        };
       };
-      console.error('에러 상세:', {
+
+      const errorDetail = {
         message: error.message,
         response: axiosError.response?.data,
         status: axiosError.response?.status,
         statusText: axiosError.response?.statusText,
-      });
+      };
+
+      console.error('에러 상세:', JSON.stringify(errorDetail, null, 2));
+
+      // 백엔드 에러 메시지가 있으면 사용자에게 표시
+      const backendMessage =
+        axiosError.response?.data?.message ||
+        axiosError.response?.data?.detail ||
+        error.message;
+
+      toast.error(backendMessage || '스터디 생성에 실패했습니다.');
 
       // 백엔드 실패 시 로컬에 저장
       console.log('백엔드 실패로 로컬에 저장합니다.');

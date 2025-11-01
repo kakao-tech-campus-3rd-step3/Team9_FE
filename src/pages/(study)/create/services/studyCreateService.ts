@@ -12,17 +12,25 @@ import type { CreateStudyRequest, ImageUploadResponse } from '../types';
 export const studyCreateService = {
   // 스터디 생성 (스웨거 방식 - file_key 사용)
   createStudy: async (payload: CreateStudyRequest) => {
-    const requestData = {
+    const requestData: Record<string, unknown> = {
       title: payload.title,
-      description: payload.description,
-      detail_description: payload.short_description,
+      // 백엔드 description = 한 줄 소개 (100자 제한)
+      description: payload.short_description,
+      // 백엔드 detail_description = 상세 설명
+      detail_description: payload.description,
       interests: payload.interests, // 이미 배열로 전달됨
       region: payload.region,
       study_time: payload.schedule,
       max_members: payload.max_members,
       conditions: payload.conditions,
-      file_key: payload.file_key, // 이미지 파일 키
     };
+
+    // file_key가 있을 때만 요청에 포함
+    if (payload.file_key) {
+      requestData.file_key = payload.file_key;
+    }
+
+    console.log('스터디 생성 API 요청 데이터:', requestData);
 
     const { data } = await apiClient.post(
       STUDY_ENDPOINTS.STUDY_CREATE,
