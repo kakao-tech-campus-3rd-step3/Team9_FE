@@ -47,8 +47,8 @@ const mapApiResponseToStudy = async (
     shortDescription: longDesc, // 긴 설명 → 상세 모달에 표시
     category: apiStudy.interests?.[0] || '프로그래밍', // 첫 번째 interest를 카테고리로 사용 (호환성)
     interests: apiStudy.interests || [], // interests 배열 그대로 전달
-    currentMembers: apiStudy.current_members || 1,
-    maxMembers: apiStudy.max_members || 10,
+    currentMembers: apiStudy.current_members ?? 1, // null/undefined 체크
+    maxMembers: apiStudy.max_members ?? 10, // null/undefined 체크
     region: apiStudy.region || '전체',
     imageKey: apiStudy.file_key, // file_key를 imageKey로 매핑 - StudyCard에서 presigned URL 요청에 사용
     detailedDescription: longDesc, // 긴 설명
@@ -57,11 +57,13 @@ const mapApiResponseToStudy = async (
   };
 
   // 디버깅용 로그
-  console.log('스터디 매핑 결과:', {
+  console.log(`스터디 ${apiStudy.id} 매핑 결과:`, {
     title: mappedStudy.title,
-    description: mappedStudy.description,
-    shortDescription: mappedStudy.shortDescription,
+    currentMembers: mappedStudy.currentMembers,
+    maxMembers: mappedStudy.maxMembers,
     originalApi: {
+      current_members: apiStudy.current_members,
+      max_members: apiStudy.max_members,
       description: apiStudy.description,
       detail_description: apiStudy.detail_description,
     },
@@ -96,10 +98,36 @@ export const studyExploreService = {
           const detailResponse = await apiClient.get(
             STUDY_ENDPOINTS.STUDY_DETAIL(study.id),
           );
-          return { ...study, ...detailResponse.data } as ApiStudyResponse;
+          // 상세 정보와 기본 정보를 병합 (상세 정보가 우선)
+          const mergedStudy = {
+            ...study,
+            ...detailResponse.data,
+          } as ApiStudyResponse;
+
+          console.log(`스터디 ${study.id} 상세 정보 조회:`, {
+            basic: {
+              current_members: study.current_members,
+              max_members: study.max_members,
+            },
+            detail: {
+              current_members: detailResponse.data?.current_members,
+              max_members: detailResponse.data?.max_members,
+            },
+            merged: {
+              current_members: mergedStudy.current_members,
+              max_members: mergedStudy.max_members,
+            },
+          });
+
+          return mergedStudy;
         } catch (error) {
           console.warn(`Failed to fetch details for study ${study.id}:`, error);
-          return study; // 상세 정보 조회 실패 시 기본 정보만 반환
+          // 상세 정보 조회 실패 시 기본 정보만 반환
+          console.log(`스터디 ${study.id} 기본 정보 사용:`, {
+            current_members: study.current_members,
+            max_members: study.max_members,
+          });
+          return study;
         }
       }),
     );
