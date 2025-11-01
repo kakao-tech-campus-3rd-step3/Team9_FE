@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useParams } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import Sidebar from './sidebar/Sidebar';
+import { ChatWidget } from '@/components/chat';
+import { ROUTE_PARAMS } from '@/constants';
 
 /**
  * (study) 도메인 전용 레이아웃
@@ -10,6 +12,7 @@ import Sidebar from './sidebar/Sidebar';
  */
 function StudyLayout() {
   const [open, setOpen] = useState(false);
+  const { [ROUTE_PARAMS.studyId]: studyId } = useParams();
 
   return (
     <div className='flex h-screen bg-background overflow-hidden'>
@@ -65,6 +68,9 @@ function StudyLayout() {
       <main className='flex-1 min-w-0 flex flex-col min-h-0 overflow-auto'>
         <Outlet />
       </main>
+
+      {/* 스터디 채팅 위젯 */}
+      {studyId && <ChatWidget studyId={studyId} />}
     </div>
   );
 }
