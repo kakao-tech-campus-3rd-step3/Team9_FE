@@ -2,7 +2,7 @@
  * 스터디 관리자 페이지 API 서비스 함수들
  */
 
-import { publicClient } from '@/api';
+import apiClient from '@/api';
 import type {
   StudyMembersResponse,
   ChangeRoleRequest,
@@ -21,18 +21,19 @@ import type {
 
 // API 엔드포인트 상수
 const API_ENDPOINTS = {
-  STUDY_MEMBERS: (studyId: number) => `/studies/${studyId}/members`,
+  STUDY_MEMBERS: (studyId: number) => `/api/studies/${studyId}/members`,
   CHANGE_MEMBER_ROLE: (studyId: number, memberId: number) =>
-    `/studies/${studyId}/members/${memberId}/role`,
+    `/api/studies/${studyId}/members/${memberId}/role`,
   REMOVE_MEMBER: (studyId: number, memberId: number) =>
-    `/studies/${studyId}/members/${memberId}`,
-  STUDY_APPLICATIONS: (studyId: number) => `/studies/${studyId}/applications`,
+    `/api/studies/${studyId}/members/${memberId}`,
+  STUDY_APPLICATIONS: (studyId: number) =>
+    `/api/studies/${studyId}/applications`,
   CHANGE_APPLICATION_STATUS: (studyId: number, applicationId: number) =>
-    `/studies/${studyId}/applications/${applicationId}/status`,
-  STUDY_INFO: (studyId: number) => `/studies/${studyId}`,
-  UPDATE_STUDY_INFO: (studyId: number) => `/studies/${studyId}`,
+    `/api/studies/${studyId}/applications/${applicationId}/status`,
+  STUDY_INFO: (studyId: number) => `/api/studies/${studyId}`,
+  UPDATE_STUDY_INFO: (studyId: number) => `/api/studies/${studyId}`,
   DELEGATE_LEADERSHIP: (studyId: number) =>
-    `/studies/${studyId}/delegate-leadership`,
+    `/api/studies/${studyId}/delegate-leadership`,
 } as const;
 
 /**
@@ -42,9 +43,9 @@ export const getStudyMembers = async (
   studyId: number,
 ): Promise<StudyMembersResponse> => {
   try {
-    const response = await publicClient.get(
-      API_ENDPOINTS.STUDY_MEMBERS(studyId),
-    );
+    const response = await apiClient.get(API_ENDPOINTS.STUDY_MEMBERS(studyId), {
+      showToast: false,
+    });
     return response.data;
   } catch (error) {
     console.error('스터디원 목록 조회 실패:', error);
@@ -60,9 +61,10 @@ export const changeMemberRole = async (
   request: ChangeRoleRequest,
 ): Promise<ChangeRoleResponse> => {
   try {
-    const response = await publicClient.patch(
+    const response = await apiClient.patch(
       API_ENDPOINTS.CHANGE_MEMBER_ROLE(studyId, request.member_id),
       { role: request.role },
+      { showToast: false },
     );
     return response.data;
   } catch (error) {
@@ -79,8 +81,9 @@ export const removeMember = async (
   request: RemoveMemberRequest,
 ): Promise<RemoveMemberResponse> => {
   try {
-    const response = await publicClient.delete(
+    const response = await apiClient.delete(
       API_ENDPOINTS.REMOVE_MEMBER(studyId, request.member_id),
+      { showToast: false },
     );
     return response.data;
   } catch (error) {
@@ -96,8 +99,9 @@ export const getStudyApplications = async (
   studyId: number,
 ): Promise<StudyApplicationsResponse> => {
   try {
-    const response = await publicClient.get(
+    const response = await apiClient.get(
       API_ENDPOINTS.STUDY_APPLICATIONS(studyId),
+      { showToast: false },
     );
     return response.data;
   } catch (error) {
@@ -114,9 +118,10 @@ export const changeApplicationStatus = async (
   request: ChangeApplicationStatusRequest,
 ): Promise<ChangeApplicationStatusResponse> => {
   try {
-    const response = await publicClient.patch(
+    const response = await apiClient.patch(
       API_ENDPOINTS.CHANGE_APPLICATION_STATUS(studyId, request.application_id),
       { status: request.status },
+      { showToast: false },
     );
     return response.data;
   } catch (error) {
@@ -132,7 +137,9 @@ export const getStudyInfo = async (
   studyId: number,
 ): Promise<StudyInfoResponse> => {
   try {
-    const response = await publicClient.get(API_ENDPOINTS.STUDY_INFO(studyId));
+    const response = await apiClient.get(API_ENDPOINTS.STUDY_INFO(studyId), {
+      showToast: false,
+    });
     return response.data;
   } catch (error) {
     console.error('스터디 정보 조회 실패:', error);
@@ -148,9 +155,10 @@ export const updateStudyInfo = async (
   request: UpdateStudyInfoRequest,
 ): Promise<UpdateStudyInfoResponse> => {
   try {
-    const response = await publicClient.patch(
+    const response = await apiClient.patch(
       API_ENDPOINTS.UPDATE_STUDY_INFO(studyId),
       request,
+      { showToast: false },
     );
     return response.data;
   } catch (error) {
@@ -167,9 +175,10 @@ export const delegateLeadership = async (
   request: DelegateLeadershipRequest,
 ): Promise<DelegateLeadershipResponse> => {
   try {
-    const response = await publicClient.post(
+    const response = await apiClient.post(
       API_ENDPOINTS.DELEGATE_LEADERSHIP(studyId),
       request,
+      { showToast: false },
     );
     return response.data;
   } catch (error) {

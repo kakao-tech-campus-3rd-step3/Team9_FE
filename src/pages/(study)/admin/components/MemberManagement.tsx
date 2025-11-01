@@ -2,15 +2,26 @@
  * 스터디원 관리 컴포넌트
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
 import { User, Crown, UserMinus, Loader2 } from 'lucide-react';
-import { getStudyMembers, changeMemberRole, removeMember } from '../services';
-import { getMockMembers, MOCK_STUDY_ID } from '../mock';
+import {
+  getStudyMembers,
+  changeMemberRole,
+  removeMember,
+  delegateLeadership,
+} from '../services';
 import { useAdminPage } from '../AdminPage';
 import type { StudyMember } from '../types';
+import { ROUTE_PARAMS } from '@/constants';
 
 export const MemberManagement: React.FC = () => {
   const { setRefreshMembersFn } = useAdminPage();
+  const params = useParams<{ [ROUTE_PARAMS.studyId]: string }>();
+  const studyId = params[ROUTE_PARAMS.studyId]
+    ? Number(params[ROUTE_PARAMS.studyId])
+    : null;
+
   const [members, setMembers] = useState<StudyMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<Record<string, boolean>>(
@@ -18,47 +29,56 @@ export const MemberManagement: React.FC = () => {
   );
 
   // 스터디원 목록 조회
-  const fetchMembers = async () => {
+  const fetchMembers = useCallback(async () => {
+    if (!studyId) {
+      console.error('스터디 ID가 없습니다.');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
-      // 개발 환경에서는 Mock 데이터 사용
-      if (import.meta.env.DEV) {
-        await new Promise((resolve) => setTimeout(resolve, 500)); // 로딩 시뮬레이션
-        setMembers(getMockMembers().members);
-      } else {
-        const response = await getStudyMembers(MOCK_STUDY_ID);
-        setMembers(response.members);
-      }
+      const response = await getStudyMembers(studyId);
+      setMembers(response.members);
     } catch (error) {
       console.error('스터디원 목록 조회 실패:', error);
-      // 에러 시 Mock 데이터 사용
-      setMembers(getMockMembers().members);
+      setMembers([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [studyId]);
 
   useEffect(() => {
-    fetchMembers();
-  }, []);
+    if (studyId) {
+      fetchMembers();
+    }
+  }, [studyId, fetchMembers]);
 
   // AdminPage의 refreshMembers 함수에 현재 fetchMembers 함수 등록
   useEffect(() => {
     setRefreshMembersFn(fetchMembers);
-  }, [setRefreshMembersFn]);
+  }, [setRefreshMembersFn, fetchMembers]);
 
   // 스터디원 역할 변경
   const handleRoleChange = async (
     memberId: number,
     newRole: 'Leader' | 'Member',
   ) => {
+    if (!studyId) {
+      alert('스터디 ID가 없습니다.');
+      return;
+    }
+
     const actionKey = `role-${memberId}`;
     try {
       setActionLoading((prev) => ({ ...prev, [actionKey]: true }));
 
-      if (import.meta.env.DEV) {
-        // Mock 응답 시뮬레이션
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await changeMemberRole(studyId, {
+        member_id: memberId,
+        role: newRole,
+      });
+
+      if (response.success) {
         setMembers((prev) =>
           prev.map((member) =>
             member.member_id === memberId
@@ -67,22 +87,6 @@ export const MemberManagement: React.FC = () => {
           ),
         );
         alert('역할이 변경되었습니다.');
-      } else {
-        const response = await changeMemberRole(MOCK_STUDY_ID, {
-          member_id: memberId,
-          role: newRole,
-        });
-
-        if (response.success) {
-          setMembers((prev) =>
-            prev.map((member) =>
-              member.member_id === memberId
-                ? { ...member, role: newRole }
-                : member,
-            ),
-          );
-          alert('역할이 변경되었습니다.');
-        }
       }
     } catch (error) {
       console.error('역할 변경 실패:', error);
@@ -94,6 +98,11 @@ export const MemberManagement: React.FC = () => {
 
   // 스터디원 탈퇴 처리
   const handleRemoveMember = async (memberId: number, memberName: string) => {
+    if (!studyId) {
+      alert('스터디 ID가 없습니다.');
+      return;
+    }
+
     if (!window.confirm(`${memberName}님을 스터디에서 탈퇴시키시겠습니까?`)) {
       return;
     }
@@ -102,28 +111,59 @@ export const MemberManagement: React.FC = () => {
     try {
       setActionLoading((prev) => ({ ...prev, [actionKey]: true }));
 
-      if (import.meta.env.DEV) {
-        // Mock 응답 시뮬레이션
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await removeMember(studyId, {
+        member_id: memberId,
+      });
+
+      if (response.success) {
         setMembers((prev) =>
           prev.filter((member) => member.member_id !== memberId),
         );
         alert('스터디원이 탈퇴되었습니다.');
-      } else {
-        const response = await removeMember(MOCK_STUDY_ID, {
-          member_id: memberId,
-        });
-
-        if (response.success) {
-          setMembers((prev) =>
-            prev.filter((member) => member.member_id !== memberId),
-          );
-          alert('스터디원이 탈퇴되었습니다.');
-        }
       }
     } catch (error) {
       console.error('탈퇴 처리 실패:', error);
       alert('탈퇴 처리에 실패했습니다.');
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [actionKey]: false }));
+    }
+  };
+
+  // 리더 위임 처리
+  const handleDelegateLeadership = async (
+    memberId: number,
+    memberName: string,
+  ) => {
+    if (!studyId) {
+      alert('스터디 ID가 없습니다.');
+      return;
+    }
+
+    if (!window.confirm(`${memberName}님에게 리더 권한을 위임하시겠습니까?`)) {
+      return;
+    }
+
+    const actionKey = `delegate-${memberId}`;
+    try {
+      setActionLoading((prev) => ({ ...prev, [actionKey]: true }));
+
+      const response = await delegateLeadership(studyId, {
+        new_leader_id: memberId,
+      });
+
+      if (response.success) {
+        // 리더 역할 업데이트
+        setMembers((prev) =>
+          prev.map((member) => ({
+            ...member,
+            role: member.member_id === memberId ? 'Leader' : 'Member',
+          })),
+        );
+        alert('리더 권한이 위임되었습니다.');
+      }
+    } catch (error) {
+      console.error('리더 위임 실패:', error);
+      alert('리더 위임에 실패했습니다.');
     } finally {
       setActionLoading((prev) => ({ ...prev, [actionKey]: false }));
     }
@@ -207,6 +247,25 @@ export const MemberManagement: React.FC = () => {
                   >
                     {member.role === 'Leader' ? '리더' : '멤버'}
                   </span>
+
+                  {member.role === 'Leader' && (
+                    <button
+                      onClick={() =>
+                        handleDelegateLeadership(
+                          member.member_id,
+                          member.nickname,
+                        )
+                      }
+                      disabled={actionLoading[`delegate-${member.member_id}`]}
+                      className='px-3 py-1 text-sm text-primary hover:bg-primary/10 rounded-md transition-colors disabled:opacity-50'
+                    >
+                      {actionLoading[`delegate-${member.member_id}`] ? (
+                        <Loader2 className='h-3 w-3 animate-spin' />
+                      ) : (
+                        '리더 위임'
+                      )}
+                    </button>
+                  )}
 
                   {member.role === 'Member' && (
                     <button

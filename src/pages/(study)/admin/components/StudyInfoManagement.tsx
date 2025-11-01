@@ -2,14 +2,16 @@
  * 스터디 정보 관리 컴포넌트
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
+import { AxiosError } from 'axios';
 import { MapPin, Plus, X, Camera, Loader2, Save } from 'lucide-react';
 import RegionSelectModal from '../../components/RegionSelectModal';
 import { getStudyInfo, updateStudyInfo } from '../services';
-import { mockStudyInfoResponse, MOCK_STUDY_ID } from '../mock';
 import { CATEGORIES, MAX_MEMBER_OPTIONS } from '../constants';
 import type { StudyInfo, UpdateStudyInfoRequest } from '../types';
+import { ROUTE_PARAMS } from '@/constants';
 
 interface StudyInfoFormData {
   title: string;
@@ -24,6 +26,11 @@ interface StudyInfoFormData {
 }
 
 export const StudyInfoManagement: React.FC = () => {
+  const params = useParams<{ [ROUTE_PARAMS.studyId]: string }>();
+  const studyId = params[ROUTE_PARAMS.studyId]
+    ? Number(params[ROUTE_PARAMS.studyId])
+    : null;
+
   const [studyInfo, setStudyInfo] = useState<StudyInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -64,31 +71,50 @@ export const StudyInfoManagement: React.FC = () => {
   }, [studyInfo, reset]);
 
   // 스터디 정보 조회
-  const fetchStudyInfo = async () => {
+  const fetchStudyInfo = useCallback(async () => {
+    if (!studyId) {
+      console.error('스터디 ID가 없습니다.');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
-      // 개발 환경에서는 Mock 데이터 사용
-      if (import.meta.env.DEV) {
-        await new Promise((resolve) => setTimeout(resolve, 500)); // 로딩 시뮬레이션
-        const mockData = mockStudyInfoResponse.study;
-        setStudyInfo(mockData);
-      } else {
-        const response = await getStudyInfo(MOCK_STUDY_ID);
+      console.log(`[스터디 정보 조회] studyId: ${studyId}`);
+      const response = await getStudyInfo(studyId);
+      console.log('[스터디 정보 조회 성공]', response);
+
+      if (response && response.study) {
         setStudyInfo(response.study);
+        console.log('[스터디 정보 설정 완료]', response.study);
+      } else {
+        console.warn(
+          '[스터디 정보 조회] 응답에 study 데이터가 없습니다:',
+          response,
+        );
+        setStudyInfo(null);
       }
     } catch (error) {
-      console.error('스터디 정보 조회 실패:', error);
-      // 에러 시 Mock 데이터 사용
-      const mockData = mockStudyInfoResponse.study;
-      setStudyInfo(mockData);
+      console.error('[스터디 정보 조회 실패]', error);
+      if (error instanceof AxiosError) {
+        console.error('에러 메시지:', error.message);
+        console.error('응답 상태:', error.response?.status);
+        console.error('응답 데이터:', error.response?.data);
+      } else if (error instanceof Error) {
+        console.error('에러 메시지:', error.message);
+      }
+      setStudyInfo(null);
+      alert('스터디 정보를 불러올 수 없습니다. 콘솔을 확인해주세요.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [studyId]);
 
   useEffect(() => {
-    fetchStudyInfo();
-  }, []);
+    if (studyId) {
+      fetchStudyInfo();
+    }
+  }, [studyId, fetchStudyInfo]);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -110,6 +136,11 @@ export const StudyInfoManagement: React.FC = () => {
 
   // 스터디 정보 수정
   const onSubmit = async (data: StudyInfoFormData) => {
+    if (!studyId) {
+      alert('스터디 ID가 없습니다.');
+      return;
+    }
+
     try {
       setSaving(true);
 
@@ -121,18 +152,11 @@ export const StudyInfoManagement: React.FC = () => {
         max_members: data.maxMembers,
       };
 
-      if (import.meta.env.DEV) {
-        // Mock 응답 시뮬레이션
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        console.log('스터디 정보 수정 (Mock):', updateData);
-        alert('스터디 정보가 수정되었습니다.');
-      } else {
-        const response = await updateStudyInfo(MOCK_STUDY_ID, updateData);
+      const response = await updateStudyInfo(studyId, updateData);
 
-        if (response.success) {
-          setStudyInfo(response.study);
-          alert('스터디 정보가 수정되었습니다.');
-        }
+      if (response.success) {
+        setStudyInfo(response.study);
+        alert('스터디 정보가 수정되었습니다.');
       }
     } catch (error) {
       console.error('스터디 정보 수정 실패:', error);
@@ -147,6 +171,45 @@ export const StudyInfoManagement: React.FC = () => {
       <div className='bg-card rounded-lg border border-border p-6'>
         <div className='flex justify-center items-center h-32'>
           <Loader2 className='h-6 w-6 animate-spin text-primary' />
+          <span className='ml-3 text-sm text-muted-foreground'>
+            스터디 정보를 불러오는 중...
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!studyInfo) {
+    return (
+      <div className='bg-card rounded-lg border border-border p-6'>
+        <div className='space-y-6'>
+          <div>
+            <h2 className='text-lg font-semibold text-foreground'>
+              스터디 관리
+            </h2>
+            <p className='text-sm text-muted-foreground mt-1'>
+              스터디 정보를 불러올 수 없습니다.
+            </p>
+          </div>
+          <div className='bg-destructive/10 border border-destructive/20 rounded-lg p-4'>
+            <p className='text-sm text-destructive'>
+              스터디 정보를 불러오는 데 실패했습니다.
+            </p>
+            <p className='text-xs text-muted-foreground mt-2'>가능한 원인:</p>
+            <ul className='text-xs text-muted-foreground mt-1 ml-4 list-disc'>
+              <li>백엔드에 해당 스터디 데이터가 없을 수 있습니다.</li>
+              <li>
+                접근 권한이 없을 수 있습니다. (개발자 도구 콘솔 확인 필요)
+              </li>
+              <li>네트워크 오류가 발생했을 수 있습니다.</li>
+            </ul>
+            <button
+              onClick={fetchStudyInfo}
+              className='mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm'
+            >
+              다시 시도
+            </button>
+          </div>
         </div>
       </div>
     );

@@ -2,21 +2,25 @@
  * 신청자 관리 컴포넌트
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
 import { User, Loader2, Check, X } from 'lucide-react';
-import { getStudyApplications, changeApplicationStatus } from '../services';
 import {
-  getMockApplications,
-  approveApplication,
-  rejectApplication,
-  MOCK_STUDY_ID,
-  mockStudyInfoResponse,
-} from '../mock';
+  getStudyApplications,
+  changeApplicationStatus,
+  getStudyInfo,
+} from '../services';
 import { useAdminPage } from '../AdminPage';
 import type { StudyApplication } from '../types';
+import { ROUTE_PARAMS } from '@/constants';
 
 export const ApplicantManagement: React.FC = () => {
   const { refreshMembers } = useAdminPage();
+  const params = useParams<{ [ROUTE_PARAMS.studyId]: string }>();
+  const studyId = params[ROUTE_PARAMS.studyId]
+    ? Number(params[ROUTE_PARAMS.studyId])
+    : null;
+
   const [applications, setApplications] = useState<StudyApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<Record<string, boolean>>(
@@ -24,83 +28,64 @@ export const ApplicantManagement: React.FC = () => {
   );
 
   // 신청자 목록 조회
-  const fetchApplications = async () => {
+  const fetchApplications = useCallback(async () => {
+    if (!studyId) {
+      console.error('스터디 ID가 없습니다.');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
-      // 개발 환경에서는 Mock 데이터 사용
-      if (import.meta.env.DEV) {
-        await new Promise((resolve) => setTimeout(resolve, 500)); // 로딩 시뮬레이션
-        setApplications(getMockApplications().applications);
-      } else {
-        const response = await getStudyApplications(MOCK_STUDY_ID);
-        setApplications(response.applications);
-      }
+      const response = await getStudyApplications(studyId);
+      setApplications(response.applications);
     } catch (error) {
       console.error('신청자 목록 조회 실패:', error);
-      // 에러 시 Mock 데이터 사용
-      setApplications(getMockApplications().applications);
+      setApplications([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [studyId]);
 
   useEffect(() => {
-    fetchApplications();
-  }, []);
+    if (studyId) {
+      fetchApplications();
+    }
+  }, [studyId, fetchApplications]);
 
   // 신청 승인/거절 처리
   const handleStatusChange = async (
     applicationId: number,
     status: 'Approved' | 'Rejected',
   ) => {
+    if (!studyId) {
+      alert('스터디 ID가 없습니다.');
+      return;
+    }
+
     const actionKey = `${status.toLowerCase()}-${applicationId}`;
     const actionText = status === 'Approved' ? '승인' : '거절';
 
     try {
       setActionLoading((prev) => ({ ...prev, [actionKey]: true }));
 
-      if (import.meta.env.DEV) {
-        // Mock 응답 시뮬레이션
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await changeApplicationStatus(studyId, {
+        application_id: applicationId,
+        status: status,
+      });
 
-        let success = false;
+      if (response.success) {
+        // UI에서 해당 신청자 제거
+        setApplications((prev) =>
+          prev.filter((app) => app.application_id !== applicationId),
+        );
+
         if (status === 'Approved') {
-          success = approveApplication(applicationId);
           // 스터디원 목록 새로고침
           refreshMembers();
-        } else {
-          success = rejectApplication(applicationId);
         }
 
-        if (success) {
-          // UI에서 해당 신청자 제거
-          setApplications((prev) =>
-            prev.filter((app) => app.application_id !== applicationId),
-          );
-          alert(`신청이 ${actionText}되었습니다.`);
-        } else {
-          alert(`${actionText} 처리에 실패했습니다.`);
-        }
-      } else {
-        const response = await changeApplicationStatus(MOCK_STUDY_ID, {
-          application_id: applicationId,
-          status: status,
-        });
-
-        if (response.success) {
-          if (status === 'Approved') {
-            setApplications((prev) =>
-              prev.filter((app) => app.application_id !== applicationId),
-            );
-            // 스터디원 목록 새로고침
-            refreshMembers();
-          } else {
-            setApplications((prev) =>
-              prev.filter((app) => app.application_id !== applicationId),
-            );
-          }
-          alert(`신청이 ${actionText}되었습니다.`);
-        }
+        alert(`신청이 ${actionText}되었습니다.`);
       }
     } catch (error) {
       console.error('신청 상태 변경 실패:', error);
@@ -115,26 +100,40 @@ export const ApplicantManagement: React.FC = () => {
     applicationId: number,
     applicantName: string,
   ) => {
-    // 최대 멤버 수 체크
-    const studyInfo = mockStudyInfoResponse.study;
-    const currentMembers = studyInfo.current_members;
-    const maxMembers = studyInfo.max_members;
-
-    if (currentMembers >= maxMembers) {
-      const shouldIncreaseMaxMembers = window.confirm(
-        `현재 스터디원이 ${maxMembers}명으로 최대 인원에 도달했습니다.\n\n${applicantName}님을 승인하려면 최대 인원을 늘려야 합니다.\n최대 인원을 ${maxMembers + 1}명으로 늘리고 승인하시겠습니까?`,
-      );
-
-      if (shouldIncreaseMaxMembers) {
-        // 최대 인원 증가
-        studyInfo.max_members = maxMembers + 1;
-        await handleStatusChange(applicationId, 'Approved');
-      }
+    if (!studyId) {
+      alert('스터디 ID가 없습니다.');
       return;
     }
 
-    if (window.confirm(`${applicantName}님의 신청을 승인하시겠습니까?`)) {
-      await handleStatusChange(applicationId, 'Approved');
+    try {
+      // 최대 멤버 수 체크
+      const studyInfoResponse = await getStudyInfo(studyId);
+      const studyInfo = studyInfoResponse.study;
+      const currentMembers = studyInfo.current_members;
+      const maxMembers = studyInfo.max_members;
+
+      if (currentMembers >= maxMembers) {
+        const shouldIncreaseMaxMembers = window.confirm(
+          `현재 스터디원이 ${maxMembers}명으로 최대 인원에 도달했습니다.\n\n${applicantName}님을 승인하려면 최대 인원을 늘려야 합니다.\n최대 인원을 ${maxMembers + 1}명으로 늘리고 승인하시겠습니까?`,
+        );
+
+        if (shouldIncreaseMaxMembers) {
+          // 최대 인원 증가는 스터디 정보 관리 페이지에서 해야 하므로 안내
+          alert('스터디 정보 관리 페이지에서 최대 인원을 먼저 늘려주세요.');
+          return;
+        }
+        return;
+      }
+
+      if (window.confirm(`${applicantName}님의 신청을 승인하시겠습니까?`)) {
+        await handleStatusChange(applicationId, 'Approved');
+      }
+    } catch (error) {
+      console.error('스터디 정보 조회 실패:', error);
+      // 스터디 정보 조회 실패 시에도 승인 진행
+      if (window.confirm(`${applicantName}님의 신청을 승인하시겠습니까?`)) {
+        await handleStatusChange(applicationId, 'Approved');
+      }
     }
   };
 
