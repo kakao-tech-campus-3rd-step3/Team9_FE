@@ -1,4 +1,5 @@
 import publicClient from '@/api/publicClient';
+import apiClient from '@/api';
 import { DOWNLOAD_ENDPOINTS } from '@/api/constants';
 
 export interface DownloadPresignResponse {

@@ -1,6 +1,5 @@
 import apiClient from '@/api';
 import { STUDY_ENDPOINTS } from '@/api/constants';
-import { downloadImageService } from '@/services/images';
 import type { StudyListParams, StudyApplyRequest, Study } from '../types';
 
 // API 응답 타입 정의
@@ -22,49 +21,10 @@ interface ApiStudyResponse {
 const mapApiResponseToStudy = async (
   apiStudy: ApiStudyResponse,
 ): Promise<Study> => {
-  // 이미지 URL 처리 - presigned URL 사용
-  let imageUrl: string | undefined = undefined;
-
-  console.log(`스터디 ${apiStudy.id} 이미지 디버깅:`, {
-    file_key: apiStudy.file_key,
-    has_file_key: !!apiStudy.file_key,
-    file_key_type: typeof apiStudy.file_key,
-    file_key_length: apiStudy.file_key?.length,
-  });
-
-  // file_key가 있으면 presigned URL 요청
-  if (apiStudy.file_key) {
-    try {
-      const presignedUrl = await downloadImageService.getImagePresignedUrl(
-        apiStudy.file_key,
-      );
-
-      if (presignedUrl && presignedUrl !== '') {
-        imageUrl = presignedUrl;
-        console.log(`이미지 URL 생성 성공 (study ${apiStudy.id}):`, imageUrl);
-      } else {
-        console.log(
-          `presigned URL이 비어있음 (study ${apiStudy.id}) - 아이콘 사용`,
-        );
-      }
-    } catch (error) {
-      console.warn(`이미지 URL 생성 실패 (study ${apiStudy.id}):`, error);
-      // 실패 시 아이콘 사용 (이미 imageUrl이 undefined로 설정됨)
-    }
-  } else {
-    console.log(`file_key 없음 (study ${apiStudy.id}) - 아이콘 사용`);
-  }
-
-  // 🚨 임시 해결책: 백엔드 이미지 API가 작동하지 않으므로
-  // 새로 생성한 스터디의 경우 로컬 이미지 미리보기 사용
-  if (!imageUrl && apiStudy.id > 30) {
-    // 최근 생성된 스터디 (ID > 30)의 경우 로컬 이미지 확인
-    const localImageUrl = localStorage.getItem(`study_image_${apiStudy.id}`);
-    if (localImageUrl) {
-      imageUrl = localImageUrl;
-      console.log(`로컬 이미지 사용 (study ${apiStudy.id}):`, imageUrl);
-    }
-  }
+  // file_key를 imageKey로 매핑
+  // StudyCard에서 imageKey를 사용하여 직접 presigned URL을 요청하므로
+  // 여기서는 imageKey만 저장하고, 실제 URL 요청은 StudyCard에서 처리
+  // 이렇게 하면 컴포넌트 레벨에서 이미지 로딩 상태를 관리할 수 있음
 
   // 백엔드 데이터에서 description과 detail_description 중 어느 것이 짧은 설명인지 자동 판단
   const desc = apiStudy.description || '';
@@ -90,7 +50,7 @@ const mapApiResponseToStudy = async (
     currentMembers: apiStudy.current_members || 1,
     maxMembers: apiStudy.max_members || 10,
     region: apiStudy.region || '전체',
-    imageUrl,
+    imageKey: apiStudy.file_key, // file_key를 imageKey로 매핑 - StudyCard에서 presigned URL 요청에 사용
     detailedDescription: longDesc, // 긴 설명
     schedule: apiStudy.study_time,
     requirements: apiStudy.conditions,

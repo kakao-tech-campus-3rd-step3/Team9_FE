@@ -69,24 +69,10 @@ export const useStudyCreate = () => {
           const uploadResult =
             await studyCreateService.uploadImage(selectedFile);
           fileKey = uploadResult.file_key;
-          console.log('이미지 업로드 성공:', fileKey);
-
-          // 🚨 임시 해결책: 백엔드 API가 작동하지 않으므로
-          // 로컬 이미지 미리보기를 localStorage에 저장
-          if (imagePreview) {
-            localStorage.setItem(`study_image_temp`, imagePreview);
-            console.log('로컬 이미지 미리보기 저장됨');
-          }
+          console.log('✅ 스터디 이미지 업로드 성공:', fileKey);
         } catch (error) {
-          console.error('이미지 업로드 실패:', error);
-          console.log('백엔드 업로드 실패, 로컬 이미지로 대체');
-
-          // 백엔드 업로드 실패 시에도 로컬 이미지 저장
-          if (imagePreview) {
-            localStorage.setItem(`study_image_temp`, imagePreview);
-            console.log('로컬 이미지 미리보기 저장됨 (백엔드 실패)');
-          }
-
+          console.error('❌ 스터디 이미지 업로드 실패:', error);
+          // 이미지 업로드 실패 시에도 스터디는 생성 가능하도록 계속 진행
           // fileKey는 undefined로 두고 계속 진행
         }
       }
@@ -114,26 +100,20 @@ export const useStudyCreate = () => {
       // 생성된 스터디 데이터 저장 (탐색 페이지에서 사용)
       setCreatedStudyData(variables);
 
-      console.log('스터디 생성 성공:', data);
+      console.log('✅ 스터디 생성 성공:', data);
       console.log('백엔드 응답 데이터:', {
         id: data.id,
         title: data.title,
+        file_key: data.file_key, // 이미지 file_key 확인
         created: data.created_at,
         backendResponse: data,
       });
-
-      // 🚨 임시 해결책: 로컬 이미지를 실제 스터디 ID로 저장
-      const tempImageUrl = localStorage.getItem('study_image_temp');
-      if (tempImageUrl && data.id) {
-        localStorage.setItem(`study_image_${data.id}`, tempImageUrl);
-        localStorage.removeItem('study_image_temp'); // 임시 이미지 제거
-        console.log(`로컬 이미지를 스터디 ID ${data.id}로 저장`);
-      }
 
       // 완료 모달 열기 (토스트는 모달에서 처리)
       setIsCompleteModalOpen(true);
 
       // 백엔드 데이터 새로고침을 위한 이벤트 발생
+      // 탐색 페이지에서 refetch하도록 함
       window.dispatchEvent(new CustomEvent('studyCreated'));
     },
     onError: (error, variables) => {

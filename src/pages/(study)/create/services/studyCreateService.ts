@@ -1,5 +1,6 @@
 import apiClient from '@/api';
 import { STUDY_ENDPOINTS } from '@/api/constants';
+import { uploadPhotoWithPresignedUrl } from '@/utils/upload';
 import type { CreateStudyRequest, ImageUploadResponse } from '../types';
 
 /**
@@ -52,35 +53,18 @@ export const studyCreateService = {
     });
   },
 
-  // 전체 이미지 업로드 플로우 (임시 구현 - 서버 준비 전까지)
+  // 전체 이미지 업로드 플로우 (회원가입과 동일한 방식 사용)
   uploadImage: async (file: File): Promise<{ file_key: string }> => {
-    // TODO: 실제 서버 연동 시 아래 주석 해제하고 위의 실제 구현 사용
-    // try {
-    //   // 1. Pre-signed URL 요청 (스웨거 API 사용)
-    //   const presignedResponse = await studyCreateService.getPresignedUrl(
-    //     file.type,
-    //   );
+    try {
+      // uploadPhotoWithPresignedUrl를 사용하여 S3에 직접 업로드
+      // 이 함수는 presigned URL 요청과 S3 업로드를 모두 처리함
+      const fileKey = await uploadPhotoWithPresignedUrl(file);
 
-    //   // 2. S3에 직접 업로드
-    //   await studyCreateService.uploadToS3(
-    //     presignedResponse.presigned_url,
-    //     file,
-    //   );
-
-    //   console.log('이미지 업로드 성공:', presignedResponse.file_key);
-    //   return { file_key: presignedResponse.file_key };
-    // } catch (error) {
-    //   console.error('이미지 업로드 실패:', error);
-    //   throw new Error('이미지 업로드에 실패했습니다.');
-    // }
-
-    // 임시: 클라이언트에서 파일 키 생성 (서버 준비 전까지)
-    const timestamp = Date.now();
-    const randomId = Math.random().toString(36).substring(2, 8);
-    const fileExtension = file.name.split('.').pop();
-    const fileKey = `study/${randomId}${timestamp}/main.${fileExtension}`;
-
-    console.log('임시 파일 키 생성:', fileKey);
-    return { file_key: fileKey };
+      console.log('✅ 스터디 이미지 업로드 성공:', fileKey);
+      return { file_key: fileKey };
+    } catch (error) {
+      console.error('❌ 스터디 이미지 업로드 실패:', error);
+      throw new Error('이미지 업로드에 실패했습니다.');
+    }
   },
 } as const;
