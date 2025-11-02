@@ -20,15 +20,8 @@ export interface Schedule {
   schedule_title: string;
 }
 
-export interface ReflectionFormData {
-  schedule_id: number | null;
-  title: string;
-  satisfaction_score: number;
-  understanding_score: number;
-  participation_score: number;
-  learned_content: string;
-  improvement: string;
-}
+// ReflectionFormData는 이제 schemas/reflectionSchema.ts에서 정의됩니다.
+// import { ReflectionFormData } from '../schemas/reflectionSchema';
 
 export interface ReflectionListItem {
   id: number;

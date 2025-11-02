@@ -13,11 +13,13 @@ type ScheduleManageSectionProps = {
     color: string;
   }[];
   date: string;
+  role: 'LEADER' | 'MEMBER' | 'ADMIN';
 };
 
 const ScheduleManageSection = ({
   events,
   date,
+  role,
 }: ScheduleManageSectionProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -25,14 +27,16 @@ const ScheduleManageSection = ({
     <section className='flex-3 flex flex-col w-full h-[586px] border-2 border-primary rounded-xl p-6 gap-3 bg-white text-left overflow-y-auto'>
       <div className='flex items-center justify-between'>
         <h3>{dayjs(date).format('M월 D일')}</h3>
-        <button
-          onClick={() => {
-            setIsModalOpen(true);
-          }}
-          className='px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium'
-        >
-          일정 추가
-        </button>
+        {role !== 'MEMBER' && (
+          <button
+            onClick={() => {
+              setIsModalOpen(true);
+            }}
+            className='px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium'
+          >
+            일정 추가
+          </button>
+        )}
       </div>
       {events.length === 0 ? (
         <div className='flex flex-1 items-center justify-center h-full text-muted-foreground font-bold'>

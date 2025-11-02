@@ -8,6 +8,7 @@ export interface UserProfile {
 export type StudyRole = 'LEADER' | 'MEMBER';
 
 export interface UserStudyInfo extends UserProfile {
+  study_id: number;
   title: string;
   role: StudyRole;
 }
