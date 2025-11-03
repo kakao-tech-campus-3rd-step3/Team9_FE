@@ -19,6 +19,7 @@ export class ChatService {
     string,
     (message: ChatMessage) => void
   >();
+  private activeSubscriptions = new Map<string, { unsubscribe: () => void }>();
   private connectionStateListeners = new Set<
     (state: ChatConnectionState) => void
   >();
@@ -180,11 +181,17 @@ export class ChatService {
     const client = this.requireClient();
     const topic = buildTopicUrl(studyId);
 
-    client.subscribe(topic, (message: IMessage) => {
+    // 기존 구독이 있으면 먼저 해제
+    this.unsubscribeFromChat(studyId);
+
+    // 새 구독 생성
+    const subscription = client.subscribe(topic, (message: IMessage) => {
       const parsedMessage = this.parseIncomingMessage(message);
       if (parsedMessage) callback(parsedMessage);
     });
 
+    // 구독 객체와 콜백 저장
+    this.activeSubscriptions.set(studyId, subscription);
     this.messageSubscribers.set(
       studyId,
       callback as (message: ChatMessage) => void,
@@ -192,6 +199,14 @@ export class ChatService {
   }
 
   unsubscribeFromChat(studyId: string) {
+    // STOMP 구독 해제
+    const subscription = this.activeSubscriptions.get(studyId);
+    if (subscription) {
+      subscription.unsubscribe();
+      this.activeSubscriptions.delete(studyId);
+    }
+
+    // 콜백 제거
     this.messageSubscribers.delete(studyId);
   }
 
@@ -213,6 +228,12 @@ export class ChatService {
   }
 
   private reset() {
+    // 모든 활성 구독 해제
+    this.activeSubscriptions.forEach((subscription) => {
+      subscription.unsubscribe();
+    });
+    this.activeSubscriptions.clear();
+
     this.updateState(false, false);
     this.messageSubscribers.clear();
     this.connectionStateListeners.clear();

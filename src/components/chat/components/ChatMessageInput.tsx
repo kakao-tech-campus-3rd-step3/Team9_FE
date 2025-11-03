@@ -31,7 +31,7 @@ export function ChatMessageInput({
     }
   };
 
-  const isDisabled = disabled || !connectionState.isConnected;
+  const isDisabled = disabled;
 
   const getPlaceholder = () => {
     if (connectionState.isConnected) {
@@ -39,7 +39,7 @@ export function ChatMessageInput({
     } else if (connectionState.isConnecting) {
       return '실시간 채팅 연결 중...';
     } else if (connectionState.error) {
-      return '연결 실패 - 다시 시도해주세요';
+      return '연결 실패 - 메시지 입력은 가능하지만 전송 시 알림이 표시됩니다';
     } else {
       return '채팅을 준비 중입니다...';
     }
