@@ -46,32 +46,30 @@ export interface RemoveMemberResponse {
   message: string;
 }
 
-// 신청자 정보
+// 신청자 정보 (API 문서에 맞게 수정)
 export interface StudyApplication {
-  application_id: number;
-  user_id: number;
-  study_id: number;
-  application_date: string;
-  status: 'Pending' | 'Approved' | 'Rejected';
-  message: string;
-  user_detail: {
-    nickname: string;
-    email: string;
+  applicationId: number;
+  nickname: string;
+  applicationMessage: string;
+  appliedAt: string;
+  userDetail: {
     file_key?: string;
+    gender: string;
+    interests: string[];
     location: string;
+    email?: string;
   };
 }
 
 // 신청자 목록 조회 응답
 export interface StudyApplicationsResponse {
-  applications: StudyApplication[];
-  total_count: number;
+  applicants: StudyApplication[];
 }
 
 // 신청 상태 변경 요청
 export interface ChangeApplicationStatusRequest {
   application_id: number;
-  status: 'Approved' | 'Rejected';
+  status: 'Accepted' | 'Rejected' | 'Pending';
 }
 
 // 신청 상태 변경 응답

@@ -38,7 +38,7 @@ export const ApplicantManagement: React.FC = () => {
     try {
       setLoading(true);
       const response = await getStudyApplications(studyId);
-      setApplications(response.applications);
+      setApplications(response.applicants);
     } catch (error) {
       console.error('신청자 목록 조회 실패:', error);
       setApplications([]);
@@ -56,7 +56,7 @@ export const ApplicantManagement: React.FC = () => {
   // 신청 승인/거절 처리
   const handleStatusChange = async (
     applicationId: number,
-    status: 'Approved' | 'Rejected',
+    status: 'Accepted' | 'Rejected',
   ) => {
     if (!studyId) {
       alert('스터디 ID가 없습니다.');
@@ -64,7 +64,7 @@ export const ApplicantManagement: React.FC = () => {
     }
 
     const actionKey = `${status.toLowerCase()}-${applicationId}`;
-    const actionText = status === 'Approved' ? '승인' : '거절';
+    const actionText = status === 'Accepted' ? '승인' : '거절';
 
     try {
       setActionLoading((prev) => ({ ...prev, [actionKey]: true }));
@@ -77,10 +77,10 @@ export const ApplicantManagement: React.FC = () => {
       if (response.success) {
         // UI에서 해당 신청자 제거
         setApplications((prev) =>
-          prev.filter((app) => app.application_id !== applicationId),
+          prev.filter((app) => app.applicationId !== applicationId),
         );
 
-        if (status === 'Approved') {
+        if (status === 'Accepted') {
           // 스터디원 목록 새로고침
           refreshMembers();
         }
@@ -126,13 +126,13 @@ export const ApplicantManagement: React.FC = () => {
       }
 
       if (window.confirm(`${applicantName}님의 신청을 승인하시겠습니까?`)) {
-        await handleStatusChange(applicationId, 'Approved');
+        await handleStatusChange(applicationId, 'Accepted');
       }
     } catch (error) {
       console.error('스터디 정보 조회 실패:', error);
       // 스터디 정보 조회 실패 시에도 승인 진행
       if (window.confirm(`${applicantName}님의 신청을 승인하시겠습니까?`)) {
-        await handleStatusChange(applicationId, 'Approved');
+        await handleStatusChange(applicationId, 'Accepted');
       }
     }
   };
@@ -173,14 +173,14 @@ export const ApplicantManagement: React.FC = () => {
           <div className='grid gap-4'>
             {applications.map((application) => (
               <div
-                key={application.application_id}
+                key={application.applicationId}
                 className='flex items-center justify-between bg-card p-4 rounded-lg shadow-sm border border-border'
               >
                 <div className='flex items-center space-x-3'>
-                  {application.user_detail.file_key ? (
+                  {application.userDetail.file_key ? (
                     <img
-                      src={application.user_detail.file_key}
-                      alt={application.user_detail.nickname}
+                      src={application.userDetail.file_key}
+                      alt={application.nickname}
                       className='h-10 w-10 rounded-full object-cover'
                     />
                   ) : (
@@ -190,17 +190,22 @@ export const ApplicantManagement: React.FC = () => {
                   )}
                   <div>
                     <p className='font-medium text-foreground'>
-                      {application.user_detail.nickname}
+                      {application.nickname}
                     </p>
-                    <p className='text-sm text-muted-foreground'>
-                      {application.user_detail.email}
-                    </p>
+                    {application.userDetail.email && (
+                      <p className='text-sm text-muted-foreground'>
+                        {application.userDetail.email}
+                      </p>
+                    )}
                     <p className='text-xs text-muted-foreground'>
-                      신청일: {application.application_date}
+                      신청일:{' '}
+                      {new Date(application.appliedAt).toLocaleDateString(
+                        'ko-KR',
+                      )}
                     </p>
-                    {application.message && (
+                    {application.applicationMessage && (
                       <p className='text-xs text-muted-foreground mt-1 max-w-md'>
-                        "{application.message}"
+                        "{application.applicationMessage}"
                       </p>
                     )}
                   </div>
@@ -209,16 +214,16 @@ export const ApplicantManagement: React.FC = () => {
                   <button
                     onClick={() =>
                       handleApprove(
-                        application.application_id,
-                        application.user_detail.nickname,
+                        application.applicationId,
+                        application.nickname,
                       )
                     }
                     disabled={
-                      actionLoading[`approved-${application.application_id}`]
+                      actionLoading[`accepted-${application.applicationId}`]
                     }
                     className='px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-medium disabled:opacity-50 flex items-center space-x-1'
                   >
-                    {actionLoading[`approved-${application.application_id}`] ? (
+                    {actionLoading[`accepted-${application.applicationId}`] ? (
                       <Loader2 className='h-3 w-3 animate-spin' />
                     ) : (
                       <>
@@ -230,16 +235,16 @@ export const ApplicantManagement: React.FC = () => {
                   <button
                     onClick={() =>
                       handleReject(
-                        application.application_id,
-                        application.user_detail.nickname,
+                        application.applicationId,
+                        application.nickname,
                       )
                     }
                     disabled={
-                      actionLoading[`rejected-${application.application_id}`]
+                      actionLoading[`rejected-${application.applicationId}`]
                     }
                     className='px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium disabled:opacity-50 flex items-center space-x-1'
                   >
-                    {actionLoading[`rejected-${application.application_id}`] ? (
+                    {actionLoading[`rejected-${application.applicationId}`] ? (
                       <Loader2 className='h-3 w-3 animate-spin' />
                     ) : (
                       <>

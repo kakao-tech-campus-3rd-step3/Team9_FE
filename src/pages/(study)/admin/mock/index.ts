@@ -78,43 +78,40 @@ const initializeMockData = () => {
   if (mockApplications.length === 0) {
     mockApplications = [
       {
-        application_id: 1,
-        user_id: 201,
-        study_id: 1,
-        application_date: '2024-03-01',
-        status: 'Pending',
-        message: '토익 점수 향상을 위해 열심히 참여하겠습니다!',
-        user_detail: {
-          nickname: '홍길동',
+        applicationId: 1,
+        nickname: '홍길동',
+        applicationMessage: '토익 점수 향상을 위해 열심히 참여하겠습니다!',
+        appliedAt: '2024-03-01T00:00:00',
+        userDetail: {
           email: 'honggd@example.com',
           file_key: '/avatars/honggd.jpg',
+          gender: 'Men',
+          interests: ['어학', '취업'],
           location: '서울시 영등포구',
         },
       },
       {
-        application_id: 2,
-        user_id: 202,
-        study_id: 1,
-        application_date: '2024-03-05',
-        status: 'Pending',
-        message: '프론트엔드 개발자로 성장하고 싶어요!',
-        user_detail: {
-          nickname: '박영희',
+        applicationId: 2,
+        nickname: '박영희',
+        applicationMessage: '프론트엔드 개발자로 성장하고 싶어요!',
+        appliedAt: '2024-03-05T00:00:00',
+        userDetail: {
           email: 'parkyh@example.com',
+          gender: 'Women',
+          interests: ['프로그래밍', '취업'],
           location: '서울시 중구',
         },
       },
       {
-        application_id: 3,
-        user_id: 203,
-        study_id: 1,
-        application_date: '2024-03-08',
-        status: 'Pending',
-        message: 'React와 TypeScript를 배우고 싶습니다.',
-        user_detail: {
-          nickname: '최민수',
+        applicationId: 3,
+        nickname: '최민수',
+        applicationMessage: 'React와 TypeScript를 배우고 싶습니다.',
+        appliedAt: '2024-03-08T00:00:00',
+        userDetail: {
           email: 'choims@example.com',
           file_key: '/avatars/choims.jpg',
+          gender: 'Men',
+          interests: ['프로그래밍'],
           location: '서울시 강동구',
         },
       },
@@ -132,14 +129,13 @@ export const getMockMembers = (): StudyMembersResponse => ({
 });
 
 export const getMockApplications = (): StudyApplicationsResponse => ({
-  applications: [...mockApplications],
-  total_count: mockApplications.length,
+  applicants: [...mockApplications],
 });
 
 // 신청 승인 처리 (Mock)
 export const approveApplication = (applicationId: number): boolean => {
   const applicationIndex = mockApplications.findIndex(
-    (app) => app.application_id === applicationId,
+    (app) => app.applicationId === applicationId,
   );
 
   if (applicationIndex === -1) return false;
@@ -152,13 +148,16 @@ export const approveApplication = (applicationId: number): boolean => {
   // 스터디원 목록에 추가
   const newMember: StudyMember = {
     member_id: Math.max(...mockMembers.map((m) => m.member_id), 0) + 1,
-    user_id: application.user_id,
-    nickname: application.user_detail.nickname,
-    email: application.user_detail.email,
+    user_id: applicationId + 1000, // 임시 user_id 생성
+    nickname: application.nickname,
+    email: application.userDetail.email || '',
     role: 'Member',
     join_date: new Date().toISOString().split('T')[0],
-    message: application.message,
-    user_detail: application.user_detail,
+    message: application.applicationMessage,
+    user_detail: {
+      file_key: application.userDetail.file_key,
+      location: application.userDetail.location,
+    },
   };
 
   mockMembers.push(newMember);
@@ -172,7 +171,7 @@ export const approveApplication = (applicationId: number): boolean => {
 // 신청 거절 처리 (Mock)
 export const rejectApplication = (applicationId: number): boolean => {
   const applicationIndex = mockApplications.findIndex(
-    (app) => app.application_id === applicationId,
+    (app) => app.applicationId === applicationId,
   );
 
   if (applicationIndex === -1) return false;

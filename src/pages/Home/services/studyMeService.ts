@@ -1,10 +1,8 @@
 import apiClient from '@/api';
 import { USERS_ENDPOINTS } from '@/api/constants';
+import type { StudyMe } from '../types/study';
 
-type StudyMeResponse = {
-  study_id: number;
-  title: string;
-}[];
+type StudyMeResponse = StudyMe[];
 
 /**
  * 내 스터디 서비스 (axios thin)

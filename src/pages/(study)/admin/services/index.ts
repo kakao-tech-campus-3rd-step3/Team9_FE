@@ -26,14 +26,12 @@ const API_ENDPOINTS = {
     `/api/studies/${studyId}/members/${memberId}/role`,
   REMOVE_MEMBER: (studyId: number, memberId: number) =>
     `/api/studies/${studyId}/members/${memberId}`,
-  STUDY_APPLICATIONS: (studyId: number) =>
-    `/api/studies/${studyId}/applications`,
+  STUDY_APPLICATIONS: (studyId: number) => `/api/studies/${studyId}/applicants`,
   CHANGE_APPLICATION_STATUS: (studyId: number, applicationId: number) =>
-    `/api/studies/${studyId}/applications/${applicationId}/status`,
+    `/api/studies/${studyId}/applications/${applicationId}`,
   STUDY_INFO: (studyId: number) => `/api/studies/${studyId}`,
   UPDATE_STUDY_INFO: (studyId: number) => `/api/studies/${studyId}`,
-  DELEGATE_LEADERSHIP: (studyId: number) =>
-    `/api/studies/${studyId}/delegate-leadership`,
+  DELEGATE_LEADERSHIP: (studyId: number) => `/api/studies/${studyId}/leader`,
 } as const;
 
 /**
@@ -175,9 +173,9 @@ export const delegateLeadership = async (
   request: DelegateLeadershipRequest,
 ): Promise<DelegateLeadershipResponse> => {
   try {
-    const response = await apiClient.post(
+    const response = await apiClient.put(
       API_ENDPOINTS.DELEGATE_LEADERSHIP(studyId),
-      request,
+      { newLeaderMemberId: request.new_leader_id },
       { showToast: false },
     );
     return response.data;
