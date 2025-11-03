@@ -12,6 +12,7 @@ import { getStudyInfo, updateStudyInfo } from '../services';
 import { CATEGORIES, MAX_MEMBER_OPTIONS } from '../constants';
 import type { StudyInfo, UpdateStudyInfoRequest } from '../types';
 import { ROUTE_PARAMS } from '@/constants';
+import { useImageUrl } from '@/hooks';
 
 interface StudyInfoFormData {
   title: string;
@@ -54,6 +55,21 @@ export const StudyInfoManagement: React.FC = () => {
 
   const watchedRegion = watch('region');
 
+  // 스터디 이미지 URL 로드 (file_key가 있을 때)
+  const { imageUrl: studyImageUrl, isLoading: imageLoading } = useImageUrl(
+    studyInfo?.file_key,
+  );
+
+  // 스터디 이미지 URL이 로드되면 preview에 설정
+  useEffect(() => {
+    if (studyImageUrl && !imageLoading) {
+      setImagePreview(studyImageUrl);
+    } else if (!studyInfo?.file_key) {
+      // 이미지가 없으면 preview 초기화
+      setImagePreview(null);
+    }
+  }, [studyImageUrl, imageLoading, studyInfo?.file_key]);
+
   // 스터디 정보가 변경될 때 폼 업데이트
   useEffect(() => {
     if (studyInfo) {
@@ -83,17 +99,121 @@ export const StudyInfoManagement: React.FC = () => {
       console.log(`[스터디 정보 조회] studyId: ${studyId}`);
       const response = await getStudyInfo(studyId);
       console.log('[스터디 정보 조회 성공]', response);
+      console.log('[스터디 정보 응답 구조]', {
+        hasStudy: 'study' in response,
+        responseKeys: Object.keys(response || {}),
+        responseType: typeof response,
+      });
+
+      // 응답 구조가 다를 수 있으므로 유연하게 처리
+      let rawData: unknown = null;
 
       if (response && response.study) {
-        setStudyInfo(response.study);
-        console.log('[스터디 정보 설정 완료]', response.study);
-      } else {
+        // { study: {...} } 형태
+        rawData = response.study;
+      } else if (response && typeof response === 'object') {
+        // 직접 study 객체인 경우 또는 다른 구조
+        // response 자체가 study 데이터일 수 있음
+        rawData = response;
+      }
+
+      if (!rawData) {
         console.warn(
-          '[스터디 정보 조회] 응답에 study 데이터가 없습니다:',
+          '[스터디 정보 조회] 응답에서 데이터를 찾을 수 없습니다:',
           response,
         );
         setStudyInfo(null);
+        return;
       }
+
+      // 백엔드 응답 필드를 프론트엔드 타입으로 매핑
+      // 백엔드: title, detail_description 등
+      // 프론트엔드: study_name, detailed_description 등
+      const data = rawData as Record<string, unknown>;
+      const studyData: StudyInfo = {
+        study_id: (typeof data?.study_id === 'number'
+          ? data.study_id
+          : typeof data?.id === 'number'
+            ? data.id
+            : studyId) as number,
+        study_name: (typeof data?.study_name === 'string'
+          ? data.study_name
+          : typeof data?.title === 'string'
+            ? data.title
+            : '') as string,
+        description: (typeof data?.description === 'string'
+          ? data.description
+          : '') as string,
+        detailed_description: (typeof data?.detailed_description === 'string'
+          ? data.detailed_description
+          : typeof data?.detail_description === 'string'
+            ? data.detail_description
+            : '') as string,
+        category: (typeof data?.category === 'string'
+          ? data.category
+          : typeof data?.category_name === 'string'
+            ? data.category_name
+            : '') as string,
+        max_members: (typeof data?.max_members === 'number'
+          ? data.max_members
+          : typeof data?.maxMembers === 'number'
+            ? data.maxMembers
+            : 2) as number,
+        current_members: (typeof data?.current_members === 'number'
+          ? data.current_members
+          : typeof data?.currentMembers === 'number'
+            ? data.currentMembers
+            : 0) as number,
+        leader_id: (typeof data?.leader_id === 'number'
+          ? data.leader_id
+          : typeof data?.leaderId === 'number'
+            ? data.leaderId
+            : 0) as number,
+        created_at: (typeof data?.created_at === 'string'
+          ? data.created_at
+          : typeof data?.createdAt === 'string'
+            ? data.createdAt
+            : '') as string,
+        updated_at: (typeof data?.updated_at === 'string'
+          ? data.updated_at
+          : typeof data?.updatedAt === 'string'
+            ? data.updatedAt
+            : '') as string,
+        schedule: (typeof data?.schedule === 'string'
+          ? data.schedule
+          : typeof data?.study_time === 'string'
+            ? data.study_time
+            : '') as string,
+        region: (typeof data?.region === 'string'
+          ? data.region
+          : typeof data?.region_name === 'string'
+            ? data.region_name
+            : '') as string,
+        conditions: (Array.isArray(data?.conditions)
+          ? data.conditions
+          : Array.isArray(data?.requirements)
+            ? data.requirements
+            : []) as string[],
+        file_key: (typeof data?.file_key === 'string'
+          ? data.file_key
+          : typeof data?.image_key === 'string'
+            ? data.image_key
+            : undefined) as string | undefined,
+        image_url: (typeof data?.image_url === 'string'
+          ? data.image_url
+          : typeof data?.imageUrl === 'string'
+            ? data.imageUrl
+            : undefined) as string | undefined,
+      };
+
+      console.log('[스터디 정보 매핑 완료]', {
+        원본데이터: rawData,
+        매핑된데이터: studyData,
+        카테고리: studyData.category,
+        인원: studyData.max_members,
+        이미지키: studyData.file_key,
+      });
+      setStudyInfo(studyData);
     } catch (error) {
       console.error('[스터디 정보 조회 실패]', error);
       if (error instanceof AxiosError) {
@@ -466,28 +586,30 @@ export const StudyInfoManagement: React.FC = () => {
             <label className='block text-sm font-medium text-foreground mb-2'>
               스터디 대표 이미지
             </label>
-            <div className='border-2 border-dashed border-border rounded-lg p-6 text-center'>
+            <div className='border-2 border-dashed border-input rounded-lg p-6 text-center'>
               {imagePreview ? (
                 <div className='relative'>
                   <img
                     src={imagePreview}
-                    alt='스터디 대표 이미지'
-                    className='max-w-full h-48 object-cover mx-auto rounded-lg'
+                    alt='미리보기'
+                    className='w-full h-48 object-cover rounded-lg'
                   />
                   <button
                     type='button'
                     onClick={handleImageRemove}
-                    className='absolute top-2 right-2 p-1 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90'
+                    className='absolute top-2 right-2 p-1 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive-light'
                   >
                     <X className='h-4 w-4' />
                   </button>
                 </div>
               ) : (
-                <div>
-                  <Camera className='h-12 w-12 text-muted-foreground mx-auto mb-4' />
-                  <p className='text-muted-foreground mb-4'>
-                    클릭하여 대표 이미지를 설정해주세요
-                  </p>
+                <div className='space-y-4'>
+                  <Camera className='mx-auto h-12 w-12 text-muted-foreground' />
+                  <div>
+                    <p className='text-sm text-muted-foreground'>
+                      클릭하여 대표 이미지를 설정해주세요
+                    </p>
+                  </div>
                   <input
                     type='file'
                     accept='image/*'
@@ -497,10 +619,9 @@ export const StudyInfoManagement: React.FC = () => {
                   />
                   <label
                     htmlFor='image-upload'
-                    className='inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 cursor-pointer transition-colors'
+                    className='inline-flex items-center px-4 py-2 border border-input rounded-lg text-sm font-medium text-foreground bg-background hover:bg-accent cursor-pointer'
                   >
-                    <Camera className='h-4 w-4 mr-2' />
-                    이미지 업로드
+                    이미지 선택
                   </label>
                 </div>
               )}

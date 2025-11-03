@@ -88,7 +88,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
     );
   }
 
-  // 통합된 프로필 버튼 컴포넌트
+  // 통합된 프로필 버튼 컴포넌트 (div로 변경하여 버튼 중첩 문제 해결)
   const ProfileTrigger = () => {
     const isHeader = variant === 'header';
     const avatarSize = isHeader ? 'w-8 h-8 text-sm' : 'w-10 h-10 text-sm';
@@ -107,12 +107,19 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
         : '';
 
     return (
-      <button
+      <div
         className={`${baseTrigger} ${triggerPadding} ${triggerBg} ${triggerOpenBg}`}
-        type='button'
+        role='button'
         aria-label='사용자 프로필 메뉴 열기'
         aria-expanded={isDropdownOpen}
         aria-haspopup='menu'
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setIsDropdownOpen(!isDropdownOpen);
+          }
+        }}
       >
         <div className='relative flex-shrink-0'>
           <UserAvatar
@@ -134,7 +141,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
             </span>
           )}
         </div>
-      </button>
+      </div>
     );
   };
 

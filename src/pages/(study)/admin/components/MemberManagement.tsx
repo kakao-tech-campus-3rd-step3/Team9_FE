@@ -4,6 +4,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+import { AxiosError } from 'axios';
 import { User, Crown, UserMinus, Loader2 } from 'lucide-react';
 import {
   getStudyMembers,
@@ -14,6 +15,9 @@ import {
 import { useAdminPage } from '../AdminPage';
 import type { StudyMember } from '../types';
 import { ROUTE_PARAMS } from '@/constants';
+import { useAuthStore } from '@/stores/auth';
+import { useCurrentStudy } from '@/hooks/study/useCurrentStudy';
+import UserAvatar from '@/components/user/UserAvatar';
 
 export const MemberManagement: React.FC = () => {
   const { setRefreshMembersFn } = useAdminPage();
@@ -21,6 +25,10 @@ export const MemberManagement: React.FC = () => {
   const studyId = params[ROUTE_PARAMS.studyId]
     ? Number(params[ROUTE_PARAMS.studyId])
     : null;
+
+  // 현재 사용자 정보 및 스터디 정보 가져오기
+  const currentStudy = useAuthStore((state) => state.user.currentStudy);
+  const { data: studyInfo } = useCurrentStudy(studyId || undefined);
 
   const [members, setMembers] = useState<StudyMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,15 +46,101 @@ export const MemberManagement: React.FC = () => {
 
     try {
       setLoading(true);
+      console.log(`[스터디원 목록 조회] studyId: ${studyId}`);
       const response = await getStudyMembers(studyId);
-      setMembers(response.members);
+      console.log('[스터디원 목록 조회 성공]', response);
+      console.log('[스터디원 목록 상세]', response.members);
+
+      // 응답 데이터 확인 및 디버깅
+      if (response.members) {
+        response.members.forEach((member, index) => {
+          console.log(`[멤버 ${index}]`, {
+            member_id: member.member_id,
+            user_id: member.user_id,
+            nickname: member.nickname,
+            role: member.role,
+            role_type: typeof member.role,
+            user_detail: member.user_detail,
+          });
+        });
+      }
+
+      // 현재 사용자 정보 가져오기
+      const currentUserNickname = useAuthStore.getState().user.nickname;
+
+      // 리더 여부 확인 (여러 방법으로 확인)
+      const studyInfoRole = studyInfo?.role;
+      const currentStudyRole = currentStudy?.role;
+      const studyInfoRoleStr = String(studyInfoRole || '').toUpperCase();
+      const currentStudyRoleStr = String(currentStudyRole || '').toUpperCase();
+
+      const isCurrentUserLeader =
+        studyInfoRoleStr === 'LEADER' ||
+        currentStudyRoleStr === 'LEADER' ||
+        studyInfoRole === 'LEADER' ||
+        currentStudyRole === 'LEADER';
+
+      console.log('[현재 사용자 정보]', {
+        nickname: currentUserNickname,
+        isLeader: isCurrentUserLeader,
+        studyInfoRole: studyInfo?.role,
+        currentStudyRole: currentStudy?.role,
+        studyInfoRoleStr,
+        currentStudyRoleStr,
+      });
+
+      // 현재 사용자가 리더인지 확인하고 role 보정
+      const normalizedMembers = response.members.map((member) => {
+        // 백엔드 응답의 role이 대소문자가 다를 수 있으므로 정규화
+        let normalizedRole = member.role;
+
+        if (typeof member.role === 'string') {
+          const roleLower = member.role.toLowerCase();
+          if (roleLower === 'leader' || roleLower === '리더') {
+            normalizedRole = 'Leader';
+          } else if (roleLower === 'member' || roleLower === '멤버') {
+            normalizedRole = 'Member';
+          }
+        }
+
+        // 리더 확인 로직 개선: 여러 방법으로 리더 확인
+        const isMemberLeader =
+          normalizedRole === 'Leader' ||
+          (isCurrentUserLeader &&
+            currentUserNickname &&
+            member.nickname === currentUserNickname) ||
+          // 첫 번째 멤버이거나 멤버가 1명뿐이면 리더로 간주
+          (response.members.length === 1 &&
+            (normalizedRole === 'Member' || !normalizedRole));
+
+        if (isMemberLeader) {
+          normalizedRole = 'Leader';
+          console.log(`[Role 보정] ${member.nickname}를 Leader로 설정`, {
+            원본role: member.role,
+            정규화된role: normalizedRole,
+            멤버수: response.members.length,
+          });
+        }
+
+        return {
+          ...member,
+          role: normalizedRole,
+        };
+      });
+
+      console.log('[정규화된 멤버 목록]', normalizedMembers);
+      setMembers(normalizedMembers);
     } catch (error) {
       console.error('스터디원 목록 조회 실패:', error);
+      if (error instanceof AxiosError) {
+        console.error('에러 상세:', error);
+        console.error('응답 데이터:', error.response?.data);
+      }
       setMembers([]);
     } finally {
       setLoading(false);
     }
-  }, [studyId]);
+  }, [studyId, currentStudy?.role, studyInfo?.role]);
 
   useEffect(() => {
     if (studyId) {
@@ -204,17 +298,11 @@ export const MemberManagement: React.FC = () => {
                 className='flex items-center justify-between bg-card p-4 rounded-lg shadow-sm border border-border'
               >
                 <div className='flex items-center space-x-3'>
-                  {member.user_detail.file_key ? (
-                    <img
-                      src={member.user_detail.file_key}
-                      alt={member.nickname}
-                      className='h-10 w-10 rounded-full object-cover'
-                    />
-                  ) : (
-                    <div className='h-10 w-10 rounded-full bg-muted flex items-center justify-center'>
-                      <User className='h-5 w-5 text-muted-foreground' />
-                    </div>
-                  )}
+                  <UserAvatar
+                    imageKey={member.user_detail?.file_key}
+                    name={member.nickname}
+                    className='h-10 w-10'
+                  />
                   <div>
                     <div className='flex items-center space-x-2'>
                       <p className='font-medium text-foreground'>
@@ -226,9 +314,6 @@ export const MemberManagement: React.FC = () => {
                     </div>
                     <p className='text-sm text-muted-foreground'>
                       {member.email}
-                    </p>
-                    <p className='text-xs text-muted-foreground'>
-                      가입일: {member.join_date}
                     </p>
                     {member.message && (
                       <p className='text-xs text-muted-foreground mt-1'>

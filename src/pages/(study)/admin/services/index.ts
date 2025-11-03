@@ -2,6 +2,7 @@
  * 스터디 관리자 페이지 API 서비스 함수들
  */
 
+import { AxiosError } from 'axios';
 import apiClient from '@/api';
 import type {
   StudyMembersResponse,
@@ -116,14 +117,34 @@ export const changeApplicationStatus = async (
   request: ChangeApplicationStatusRequest,
 ): Promise<ChangeApplicationStatusResponse> => {
   try {
-    const response = await apiClient.patch(
-      API_ENDPOINTS.CHANGE_APPLICATION_STATUS(studyId, request.application_id),
-      { status: request.status },
-      { showToast: false },
+    const url = API_ENDPOINTS.CHANGE_APPLICATION_STATUS(
+      studyId,
+      request.application_id,
     );
+    const requestBody = { status: request.status };
+
+    console.log('[API 호출] 신청 상태 변경', {
+      url,
+      method: 'PATCH',
+      requestBody,
+    });
+
+    const response = await apiClient.patch(url, requestBody, {
+      showToast: false,
+    });
+
+    console.log('[API 응답] 신청 상태 변경 성공', response.data);
     return response.data;
   } catch (error) {
-    console.error('신청 상태 변경 실패:', error);
+    console.error('[API 에러] 신청 상태 변경 실패:', error);
+    if (error instanceof AxiosError) {
+      console.error('[API 에러 상세]', {
+        status: error.response?.status,
+        data: error.response?.data,
+        url: error.config?.url,
+        requestData: error.config?.data,
+      });
+    }
     throw error;
   }
 };

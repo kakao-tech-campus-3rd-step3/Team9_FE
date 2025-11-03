@@ -94,6 +94,8 @@ export interface StudyInfo {
   schedule?: string;
   region?: string;
   conditions?: string[];
+  file_key?: string; // 스터디 대표 이미지 키
+  image_url?: string; // 스터디 대표 이미지 URL (deprecated, file_key 사용)
 }
 
 // 스터디 정보 조회 응답
