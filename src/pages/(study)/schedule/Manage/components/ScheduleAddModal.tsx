@@ -5,6 +5,10 @@ import ScheduleAddManage from './ScheduleAddManage';
 import ScheduleAddTune from './ScheduleAddTune';
 import { FormProvider, useForm } from 'react-hook-form';
 import type { SubmitHandler } from 'react-hook-form';
+import { useScheduleAddMutation } from '../hooks/useScheduleAddMutation';
+import dayjs from 'dayjs';
+import { useParams } from 'react-router-dom';
+import { useTuneAdd } from '../hooks/useTuneAdd';
 
 type ScheduleFormValues = {
   title: string;
@@ -28,7 +32,10 @@ type ScheduleAddModalProps = {
 };
 
 const ScheduleAddModal = ({ onClose }: ScheduleAddModalProps) => {
+  const studyId = useParams<{ study_id: string }>().study_id;
   const [isOn, setIsOn] = useState(false);
+  const addSchedule = useScheduleAddMutation();
+  const { mutate: addTune } = useTuneAdd();
 
   const methods = useForm<ScheduleFormValues>({
     shouldUnregister: true,
@@ -41,23 +48,32 @@ const ScheduleAddModal = ({ onClose }: ScheduleAddModalProps) => {
 
   const onSubmit: SubmitHandler<ScheduleFormValues> = (values) => {
     if (isOn) {
-      // 일정 조율하기
-      const payload = {
-        type: 'tune',
+      // 일정 조율 추가
+      addTune({
         title: values.title,
-        description: values.description,
-        tune: values.tune ?? {},
-      };
-      console.log('(tune)', payload);
+        content: values.description ?? '',
+        study_id: Number(studyId),
+        start_date: values.tune?.startDate || '',
+        end_date: values.tune?.endDate || '',
+        available_start_time: values.tune?.startTime || '',
+        available_end_time: values.tune?.endTime || '',
+      });
     } else {
       // 일정 추가
-      const payload = {
-        type: 'fixed',
+      const start_time = dayjs(
+        `${values.fixed?.startDate}T${values.fixed?.startTime}`,
+      ).toISOString();
+      const end_time = dayjs(
+        `${values.fixed?.endDate}T${values.fixed?.endTime}`,
+      ).toISOString();
+
+      addSchedule.mutateAsync({
+        study_id: Number(studyId),
         title: values.title,
-        description: values.description,
-        fixed: values.fixed ?? {},
-      };
-      console.log('(fixed)', payload);
+        content: values.description ?? '',
+        start_time: dayjs(start_time).format('YYYY-MM-DDTHH:mm:ss'),
+        end_time: dayjs(end_time).format('YYYY-MM-DDTHH:mm:ss'),
+      });
     }
     onClose();
   };

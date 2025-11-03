@@ -95,9 +95,7 @@ const Header: React.FC = () => {
 
           {/* 데스크톱 로그인/프로필 영역 */}
           <div className='hidden lg:flex w-40 items-center justify-center px-4 h-full'>
-            <Suspense
-              fallback={<ProfileSkeleton variant='header' showRole={false} />}
-            >
+            <Suspense fallback={<ProfileSkeleton variant='header' />}>
               <UserProfileSection variant='header' />
             </Suspense>
           </div>
@@ -127,9 +125,7 @@ const Header: React.FC = () => {
               );
             })}
             <div className='pt-2 border-t border-border'>
-              <Suspense
-                fallback={<ProfileSkeleton variant='header' showRole={false} />}
-              >
+              <Suspense fallback={<ProfileSkeleton variant='header' />}>
                 <UserProfileSection
                   variant='header'
                   onMobileMenuClose={() => setIsMobileMenuOpen(false)}

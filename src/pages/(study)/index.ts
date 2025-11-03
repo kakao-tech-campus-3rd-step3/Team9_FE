@@ -9,6 +9,7 @@ export * from './dashboard';
 export * from './document';
 export * from './progress';
 export * from './reflection';
+export * from './schedule';
 export * from './admin';
 export {
   MemberManagement,

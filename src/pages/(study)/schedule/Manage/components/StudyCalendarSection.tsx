@@ -14,30 +14,19 @@ type Schedule = {
   end_time: string;
 };
 
-type StudySchedule = {
-  study_id: number;
-  schedule: Schedule[];
-};
-
 type StudyCalendarSectionProps = {
-  schedules: StudySchedule;
+  studyId: number;
+  schedules: Schedule[];
   date: string;
   setDate: (date: string) => void;
 };
 
 const StudyCalendarSection = ({
+  studyId,
   schedules,
   date,
   setDate,
 }: StudyCalendarSectionProps) => {
-  const events = schedules.schedule.map((schedule) => ({
-    id: schedule.schedule_id,
-    title: schedule.title,
-    start_time: dayjs(schedule.start_time).format('YYYY-MM-DD'),
-    end_time: dayjs(schedule.end_time).format('YYYY-MM-DD'),
-    color: studyColor(schedules.study_id),
-  }));
-
   const [popover, setPopover] = useState<{
     top: number;
     left: number;
@@ -53,7 +42,7 @@ const StudyCalendarSection = ({
     event: { start: Date | null; end: Date | null };
   }) => {
     setDate(dayjs(info.event.start).format('YYYY-MM-DD'));
-    const hasSchedules = schedules.schedule.some(
+    const hasSchedules = schedules.some(
       (schedule) =>
         dayjs(schedule.start_time).format('YYYY-MM-DD') ===
         dayjs(info.event.start).format('YYYY-MM-DD'),
@@ -93,11 +82,11 @@ const StudyCalendarSection = ({
           center: 'title',
           right: 'next',
         }}
-        events={events.map((event) => ({
-          title: event.title,
-          date: event.start_time,
-          backgroundColor: event.color,
-          borderColor: event.color,
+        events={schedules.map((schedule) => ({
+          title: schedule.title,
+          date: dayjs(schedule.start_time).format('YYYY-MM-DD'),
+          backgroundColor: studyColor(studyId),
+          borderColor: studyColor(studyId),
         }))}
         dateClick={handleDateClick}
         eventClick={(info) => handleEventClick(info)}
@@ -127,12 +116,12 @@ const StudyCalendarSection = ({
       />
 
       <CalendarPopover
-        schedules={events.map((event) => ({
-          schedule_id: event.id,
-          title: event.title,
-          start_time: event.start_time,
-          end_time: event.end_time,
-          study_id: schedules.study_id,
+        schedules={schedules.map((schedule) => ({
+          schedule_id: schedule.schedule_id,
+          title: schedule.title,
+          start_time: schedule.start_time,
+          end_time: schedule.end_time,
+          study_id: studyId,
         }))}
         popover={popover}
         setPopover={setPopover}
