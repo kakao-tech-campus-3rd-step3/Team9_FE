@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import type { ChatMessage } from '../types';
 
 interface SystemMessageProps {
@@ -37,14 +38,29 @@ const messageConfig = {
 
 export function SystemMessage({ message, type }: SystemMessageProps) {
   const config = messageConfig[type];
+  const navigate = useNavigate();
 
   const handleClick = () => {
-    if (message.link) {
-      const typeText = type === 'notice' ? '공지사항' : '일정';
-      alert(
-        `${typeText} 상세보기: ${message.link}\n\n실제 구현에서는 해당 ${typeText} 페이지로 이동합니다.`,
-      );
+    if (!message.link) return;
+
+    let targetPath = message.link;
+
+    // 절대 URL인 경우 pathname만 추출
+    if (
+      message.link.startsWith('http://') ||
+      message.link.startsWith('https://')
+    ) {
+      try {
+        const url = new URL(message.link);
+        targetPath = url.pathname;
+      } catch {
+        // URL 파싱 실패 시 원본 사용
+        targetPath = message.link;
+      }
     }
+
+    // 내부 경로로 이동
+    navigate(targetPath);
   };
 
   return (
