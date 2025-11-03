@@ -40,6 +40,10 @@ const StudyExplorePage: React.FC = () => {
     handleCategoryToggle,
     handleRegionToggle,
     setActiveModal,
+
+    // 신청 관련
+    applyStudy,
+    isApplying,
   } = useStudyExplore(searchTerm);
 
   // URL의 searchTerm이 변경될 때 inputValue 동기화
@@ -99,6 +103,9 @@ const StudyExplorePage: React.FC = () => {
         isOpen={activeModal === 'apply'}
         onClose={handleModalClose}
         studyTitle={selectedStudy?.title || ''}
+        studyId={selectedStudy?.id}
+        onApply={applyStudy}
+        isApplying={isApplying}
       />
 
       {/* 스터디 상세 모달 */}
