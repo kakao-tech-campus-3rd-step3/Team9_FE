@@ -147,7 +147,7 @@ export const approveApplication = (applicationId: number): boolean => {
 
   // 스터디원 목록에 추가
   const newMember: StudyMember = {
-    member_id: Math.max(...mockMembers.map((m) => m.member_id), 0) + 1,
+    member_id: Math.max(...mockMembers.map((m) => m.member_id ?? 0), 0) + 1,
     user_id: applicationId + 1000, // 임시 user_id 생성
     nickname: application.nickname,
     email: application.userDetail.email || '',

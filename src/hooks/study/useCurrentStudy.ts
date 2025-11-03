@@ -46,6 +46,10 @@ export const useCurrentStudy = (studyId?: number) => {
         query.error instanceof AxiosError &&
         query.error.response?.status === 403
       ) {
+        console.log(
+          '[useCurrentStudy] 403 에러 발생: 스터디 접근 권한 없음, 탐색 페이지로 리다이렉트',
+          { studyId },
+        );
         navigate(`/${ROUTES.STUDY.ROOT}/${ROUTES.STUDY.EXPLORE}`);
       }
     }

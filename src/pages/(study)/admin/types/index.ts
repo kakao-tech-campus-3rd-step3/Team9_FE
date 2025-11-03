@@ -3,24 +3,30 @@
  */
 
 // 스터디원 정보
+// API 문서 기준: { nickname, role, message, user_detail: { file_key, gender, interests, location } }
+// 실제 사용 시 필요한 추가 필드들은 optional로 처리
 export interface StudyMember {
-  member_id: number;
-  user_id: number;
-  nickname: string;
-  email: string;
-  role: 'Leader' | 'Member';
-  join_date: string;
-  message?: string;
+  member_id?: number; // API 문서에 없지만 실제로 필요 (리더 위임, 역할 변경, 탈퇴 등)
+  user_id?: number; // API 문서에 없지만 실제로 필요할 수 있음
+  nickname: string; // API 문서: 필수
+  email?: string; // API 문서에 없지만 UI 표시용
+  role: 'Leader' | 'Member'; // API 문서: 필수
+  join_date?: string; // API 문서에 없음 (이미 UI에서 제거됨)
+  message?: string; // API 문서: 선택
   user_detail: {
-    file_key?: string;
-    location: string;
+    file_key?: string; // API 문서: 선택
+    gender?: string; // API 문서에 있음
+    interests?: string[]; // API 문서에 있음
+    location: string; // API 문서: 필수
+    email?: string; // API 문서에 없지만 필요할 수 있음
   };
 }
 
 // 스터디원 목록 조회 응답
+// API 문서 기준: { members: [...] }
 export interface StudyMembersResponse {
   members: StudyMember[];
-  total_count: number;
+  total_count?: number; // API 문서에 없지만 실제 응답에 포함될 수 있음
 }
 
 // 스터디원 역할 변경 요청

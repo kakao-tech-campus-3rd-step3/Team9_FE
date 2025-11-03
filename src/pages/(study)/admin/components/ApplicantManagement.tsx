@@ -42,6 +42,14 @@ export const ApplicantManagement: React.FC = () => {
       console.log('[신청자 목록 조회] studyId:', studyId);
       const response = await getStudyApplications(studyId);
       console.log('[신청자 목록 조회 성공]', response);
+      console.log('[신청자 목록 상세]', {
+        applicantsCount: response.applicants?.length || 0,
+        applicants: response.applicants?.map((app) => ({
+          applicationId: app.applicationId,
+          nickname: app.nickname,
+          appliedAt: app.appliedAt,
+        })),
+      });
       setApplications(response.applicants || []);
     } catch (error) {
       console.error('[신청자 목록 조회 실패]', error);
@@ -71,6 +79,18 @@ export const ApplicantManagement: React.FC = () => {
       return;
     }
 
+    // 신청자가 목록에 있는지 확인
+    const targetApplication = applications.find(
+      (app) => app.applicationId === applicationId,
+    );
+    if (!targetApplication) {
+      alert(
+        '해당 신청자를 찾을 수 없습니다.\n이미 처리되었거나 목록에서 제거되었을 수 있습니다.\n목록을 새로고침하겠습니다.',
+      );
+      fetchApplications();
+      return;
+    }
+
     const actionKey = `${status.toLowerCase()}-${applicationId}`;
     const actionText = status === 'Accepted' ? '승인' : '거절';
 
@@ -82,6 +102,7 @@ export const ApplicantManagement: React.FC = () => {
         applicationId,
         status,
         actionText,
+        targetApplication,
       });
 
       const response = await changeApplicationStatus(studyId, {
@@ -91,30 +112,77 @@ export const ApplicantManagement: React.FC = () => {
 
       console.log('[신청 상태 변경 응답]', response);
       console.log('[신청 상태 변경 응답 구조]', {
-        hasSuccess: 'success' in response,
-        responseKeys: Object.keys(response || {}),
+        hasSuccess:
+          response && typeof response === 'object' && 'success' in response
+            ? response.success
+            : 'N/A',
+        responseKeys:
+          response && typeof response === 'object' ? Object.keys(response) : [],
         responseType: typeof response,
+        responseValue: response,
       });
 
-      // 응답 처리 (success 필드가 있으면 확인, 없으면 성공으로 간주)
-      if (response && 'success' in response && response.success === false) {
-        console.error('[신청 상태 변경 실패] 응답 success가 false:', response);
-        alert(`${actionText} 처리에 실패했습니다. ${response.message || ''}`);
-        // 실패 시 신청자 목록 새로고침 (상태가 변경되었을 수 있음)
-        fetchApplications();
-      } else {
-        // success가 true이거나 없는 경우 성공으로 간주
-        console.log('[신청 상태 변경 성공]', response);
-        setApplications((prev) =>
-          prev.filter((app) => app.applicationId !== applicationId),
-        );
+      // 응답 처리: response가 undefined이거나 빈 객체여도 성공으로 간주 (204 No Content)
+      // 또는 'success' 필드가 있고 그 값이 true인 경우, 또는 'success' 필드가 없는 경우
+      let isSuccess = false;
 
-        if (status === 'Accepted') {
-          refreshMembers();
+      if (!response) {
+        // 응답이 없으면 성공 (204 No Content 등)
+        isSuccess = true;
+      } else if (typeof response === 'object' && response !== null) {
+        // 객체인 경우 (null 제외)
+        if ('success' in response) {
+          // success 필드가 있으면 그 값을 확인
+          const responseWithSuccess = response as { success?: boolean };
+          isSuccess = responseWithSuccess.success !== false; // false만 실패, 나머지는 성공
+        } else {
+          // success 필드가 없으면 성공으로 간주
+          isSuccess = true;
         }
-
-        alert(`신청이 ${actionText}되었습니다.`);
+      } else {
+        // 객체가 아니면 성공으로 간주
+        isSuccess = true;
       }
+
+      if (!isSuccess) {
+        // 명시적으로 실패인 경우
+        console.error('[신청 상태 변경 실패] 응답 success가 false:', response);
+        alert(
+          `${actionText} 처리에 실패했습니다. ${(response as { message?: string })?.message || ''}`,
+        );
+        // 실패 시 신청자 목록 새로고침 (상태가 변경되었을 수 있음)
+        setTimeout(() => {
+          fetchApplications();
+        }, 300);
+        return;
+      }
+
+      // 성공 처리
+      console.log('[신청 상태 변경 성공]', response);
+
+      // 즉시 목록에서 제거 (UI 반응성 향상)
+      setApplications((prev) =>
+        prev.filter((app) => app.applicationId !== applicationId),
+      );
+
+      // 승인인 경우 스터디원 목록 새로고침 (새 멤버 추가되었으므로)
+      if (status === 'Accepted') {
+        console.log('[승인 완료] 스터디원 목록 새로고침 시작');
+        // 약간의 지연 후 새로고침 (백엔드에서 멤버 추가 처리 시간 확보)
+        setTimeout(() => {
+          refreshMembers();
+        }, 500);
+      }
+
+      // 거절인 경우에도 목록 새로고침 (백엔드 상태 동기화)
+      if (status === 'Rejected') {
+        // 백엔드 상태 반영을 위해 목록 새로고침
+        setTimeout(() => {
+          fetchApplications();
+        }, 300);
+      }
+
+      alert(`신청이 ${actionText}되었습니다.`);
     } catch (error) {
       console.error('[신청 상태 변경 에러]', error);
 
@@ -156,12 +224,14 @@ export const ApplicantManagement: React.FC = () => {
 
           // 에러 코드별 안내 메시지
           let solutionMessage = '';
-          if (
+          const isInvalidStateChange =
             errorCode === 'INVALID_STATE_CHANGE' ||
-            errorMessage.includes('상태 변경')
-          ) {
+            errorMessage.includes('상태 변경') ||
+            errorMessage.includes('유효하지 않습니다');
+
+          if (isInvalidStateChange) {
             solutionMessage =
-              '💡 이 에러는 다음과 같은 이유로 발생할 수 있습니다:\n- 이미 처리된 신청일 수 있습니다.\n- 신청 상태가 변경될 수 없는 상태일 수 있습니다.\n- 다른 관리자가 이미 처리했을 수 있습니다.\n\n콘솔의 [API 에러 상세] 로그를 확인해주세요.';
+              '💡 이 에러는 다음과 같은 이유로 발생할 수 있습니다:\n\n1. 이미 처리된 신청\n   - 다른 관리자가 이미 승인/거절했을 수 있습니다\n   - 신청자가 이미 처리된 상태일 수 있습니다\n\n2. 동시성 문제\n   - 여러 관리자가 동시에 같은 신청을 처리하려고 할 수 있습니다\n\n3. 신청 상태 불일치\n   - 신청자의 상태가 변경될 수 없는 상태일 수 있습니다\n\n💡 신청자 목록을 자동으로 새로고침합니다.\n만약 해당 신청자가 목록에서 사라졌다면 이미 처리된 것입니다.';
           } else {
             solutionMessage =
               '💡 해결 방법:\n- 스터디 정보 관리에서 최대 인원을 늘려주세요.\n- 현재 스터디원 수를 확인해주세요.\n- 신청자 목록을 새로고침해보세요.';
@@ -173,23 +243,96 @@ export const ApplicantManagement: React.FC = () => {
             fullErrorData: errorData,
             requestUrl: error.config?.url,
             requestData: error.config?.data,
+            targetApplication, // 현재 처리하려던 신청 정보
           });
 
-          // 409 에러 발생 시 신청자 목록 새로고침 (상태가 변경되었을 수 있음)
-          fetchApplications();
+          // 409 에러 발생 시 즉시 신청자 목록 새로고침
+          // INVALID_STATE_CHANGE의 경우 신청자가 이미 처리되었을 가능성이 높음
+          console.log('[409 에러] 신청자 목록 새로고침 시작...');
+          console.log('[409 에러] 처리 시도한 신청 정보:', {
+            applicationId,
+            status,
+            targetApplication,
+          });
 
-          alert(
-            `⚠️ ${actionText} 처리에 실패했습니다.\n\n에러: ${errorMessage}\n에러 코드: ${errorCode}${detailMessage}\n\n${solutionMessage}\n\n(에러 코드: 409 Conflict)\n\n💡 신청자 목록이 자동으로 새로고침되었습니다.`,
-          );
+          // 약간의 지연 후 새로고침하여 백엔드 상태 반영 시간 제공
+          setTimeout(async () => {
+            console.log('[409 에러] 신청자 목록 새로고침 실행');
+
+            // 신청자 목록 새로고침
+            await fetchApplications();
+
+            // 새로고침 후 업데이트된 목록에서 확인 (상태 업데이트를 위해 잠시 대기)
+            setTimeout(() => {
+              setApplications((currentApplications) => {
+                const stillExists = currentApplications.some(
+                  (app) => app.applicationId === applicationId,
+                );
+
+                if (stillExists) {
+                  console.warn(
+                    '[409 에러] ⚠️ 경고: 에러 발생 후에도 신청자가 목록에 남아있습니다!',
+                    {
+                      applicationId,
+                      status,
+                      targetApplication,
+                      '문제 분석':
+                        '백엔드에서 INVALID_STATE_CHANGE 에러를 반환했지만 신청자가 목록에서 제거되지 않았습니다.',
+                      '가능한 원인': [
+                        '1. 백엔드에서 신청 상태 변경 요청을 거부했지만, 신청자 목록 API는 여전히 해당 신청을 반환하고 있음',
+                        '2. 신청 상태가 실제로는 변경되었지만, 신청자 목록 필터링 로직에 문제가 있음',
+                        '3. 백엔드 데이터베이스와 API 응답 간 불일치',
+                      ],
+                    },
+                  );
+                } else {
+                  console.log(
+                    '[409 에러] ✅ 신청자가 목록에서 제거되었습니다 (이미 처리된 것으로 보임)',
+                    { applicationId },
+                  );
+                }
+
+                return currentApplications;
+              });
+            }, 100);
+
+            // 승인 시도였다면 스터디원 목록도 새로고침 (실패했지만 상태 확인)
+            if (status === 'Accepted') {
+              console.log('[409 에러] 스터디원 목록도 새로고침');
+              refreshMembers();
+            }
+          }, 500); // 지연 시간 증가 (백엔드 상태 반영 시간 확보)
+
+          // 사용자에게 명확한 안내
+          const alertMessage = isInvalidStateChange
+            ? `⚠️ ${actionText} 처리에 실패했습니다.\n\n에러: ${errorMessage}\n에러 코드: ${errorCode}${detailMessage}\n\n${solutionMessage}\n\n(에러 코드: 409 Conflict)`
+            : `⚠️ ${actionText} 처리에 실패했습니다.\n\n에러: ${errorMessage}\n에러 코드: ${errorCode}${detailMessage}\n\n${solutionMessage}\n\n(에러 코드: 409 Conflict)\n\n💡 신청자 목록을 자동으로 새로고침합니다.`;
+
+          alert(alertMessage);
         } else {
           const errorMessage =
             errorData?.message ||
             errorData?.error ||
             `알 수 없는 오류가 발생했습니다. (${statusCode})`;
 
+          // 에러 발생 시에도 목록 새로고침 (백엔드 상태 확인)
+          setTimeout(() => {
+            fetchApplications();
+            if (status === 'Accepted') {
+              refreshMembers();
+            }
+          }, 300);
+
           alert(`${actionText} 처리에 실패했습니다.\n\n${errorMessage}`);
         }
       } else {
+        // 알 수 없는 에러도 목록 새로고침
+        setTimeout(() => {
+          fetchApplications();
+          if (status === 'Accepted') {
+            refreshMembers();
+          }
+        }, 300);
         alert(`${actionText} 처리에 실패했습니다.`);
       }
     } finally {

@@ -192,6 +192,10 @@ export const MemberManagement: React.FC = () => {
 
   // 스터디원 탈퇴 처리
   const handleRemoveMember = async (memberId: number, memberName: string) => {
+    if (!memberId) {
+      alert('멤버 ID가 없습니다.');
+      return;
+    }
     if (!studyId) {
       alert('스터디 ID가 없습니다.');
       return;
@@ -228,6 +232,10 @@ export const MemberManagement: React.FC = () => {
     memberId: number,
     memberName: string,
   ) => {
+    if (!memberId) {
+      alert('멤버 ID가 없습니다.');
+      return;
+    }
     if (!studyId) {
       alert('스터디 ID가 없습니다.');
       return;
@@ -294,7 +302,7 @@ export const MemberManagement: React.FC = () => {
           <div className='grid gap-4'>
             {members.map((member) => (
               <div
-                key={member.member_id}
+                key={member.member_id || member.nickname}
                 className='flex items-center justify-between bg-card p-4 rounded-lg shadow-sm border border-border'
               >
                 <div className='flex items-center space-x-3'>
@@ -312,9 +320,11 @@ export const MemberManagement: React.FC = () => {
                         <Crown className='h-4 w-4 text-yellow-500' />
                       )}
                     </div>
-                    <p className='text-sm text-muted-foreground'>
-                      {member.email}
-                    </p>
+                    {(member.email || member.user_detail?.email) && (
+                      <p className='text-sm text-muted-foreground'>
+                        {member.email || member.user_detail?.email}
+                      </p>
+                    )}
                     {member.message && (
                       <p className='text-xs text-muted-foreground mt-1'>
                         "{member.message}"
@@ -337,11 +347,14 @@ export const MemberManagement: React.FC = () => {
                     <button
                       onClick={() =>
                         handleDelegateLeadership(
-                          member.member_id,
+                          member.member_id || 0,
                           member.nickname,
                         )
                       }
-                      disabled={actionLoading[`delegate-${member.member_id}`]}
+                      disabled={
+                        !member.member_id ||
+                        actionLoading[`delegate-${member.member_id}`]
+                      }
                       className='px-3 py-1 text-sm text-primary hover:bg-primary/10 rounded-md transition-colors disabled:opacity-50'
                     >
                       {actionLoading[`delegate-${member.member_id}`] ? (
@@ -355,9 +368,12 @@ export const MemberManagement: React.FC = () => {
                   {member.role === 'Member' && (
                     <button
                       onClick={() =>
-                        handleRoleChange(member.member_id, 'Leader')
+                        handleRoleChange(member.member_id || 0, 'Leader')
                       }
-                      disabled={actionLoading[`role-${member.member_id}`]}
+                      disabled={
+                        !member.member_id ||
+                        actionLoading[`role-${member.member_id}`]
+                      }
                       className='px-3 py-1 text-sm text-primary hover:bg-primary/10 rounded-md transition-colors disabled:opacity-50'
                     >
                       {actionLoading[`role-${member.member_id}`] ? (
@@ -371,9 +387,15 @@ export const MemberManagement: React.FC = () => {
                   {member.role !== 'Leader' && (
                     <button
                       onClick={() =>
-                        handleRemoveMember(member.member_id, member.nickname)
+                        handleRemoveMember(
+                          member.member_id || 0,
+                          member.nickname,
+                        )
                       }
-                      disabled={actionLoading[`remove-${member.member_id}`]}
+                      disabled={
+                        !member.member_id ||
+                        actionLoading[`remove-${member.member_id}`]
+                      }
                       className='px-3 py-1 text-sm text-destructive hover:bg-destructive/10 rounded-md transition-colors disabled:opacity-50 flex items-center space-x-1'
                     >
                       {actionLoading[`remove-${member.member_id}`] ? (
