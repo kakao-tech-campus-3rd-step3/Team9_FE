@@ -30,7 +30,7 @@ export interface ChatConnectionState {
 export interface ServerChatMessage {
   messageId: number;
   messageType: MessageType;
-  senderId: number;
+  senderId: number | null; // 시스템 메시지의 경우 null일 수 있음
   senderName: string;
   content: string;
   link?: string;

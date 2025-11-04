@@ -3,6 +3,8 @@ import { MessageRenderer } from '../messages';
 import type { ChatMessage, ChatConnectionState } from '../types';
 import { useScrollToBottom } from '../hooks/useScrollToBottom';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
+import { DateDivider } from './DateDivider';
+import { isSameDay } from '../utils/timeUtils';
 
 interface ChatMessageListProps {
   messages: ChatMessage[];
@@ -71,9 +73,20 @@ export function ChatMessageList({
       ) : (
         <>
           {/* 실제 채팅 기록 및 실시간 메시지 */}
-          {messages.map((message) => (
-            <MessageRenderer key={message.id} message={message} />
-          ))}
+          {messages.map((message, index) => {
+            const shouldShowDateDivider =
+              index === 0 ||
+              !isSameDay(message.timestamp, messages[index - 1].timestamp);
+
+            return (
+              <div key={message.id}>
+                {shouldShowDateDivider && (
+                  <DateDivider date={message.timestamp} />
+                )}
+                <MessageRenderer message={message} />
+              </div>
+            );
+          })}
           <div ref={messagesEndRef} />
         </>
       )}

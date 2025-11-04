@@ -7,15 +7,23 @@ export function transformServerMessage(
   msg: ServerChatMessage,
   currentUserId?: number,
 ): ChatMessage {
+  // senderId가 null인 경우 (시스템 메시지) 'system'으로 처리
+  const senderId = msg.senderId !== null ? msg.senderId.toString() : 'system';
+  // senderId가 null이면 isOwn은 항상 false
+  const isOwn =
+    msg.senderId !== null &&
+    currentUserId !== undefined &&
+    msg.senderId === currentUserId;
+
   return {
     id: `msg-${msg.messageId}`,
     messageId: msg.messageId,
     messageType: msg.messageType,
     content: msg.content,
-    senderId: msg.senderId.toString(),
+    senderId,
     senderName: msg.senderName,
     timestamp: convertUtcToKoreanTime(msg.createdAt),
-    isOwn: currentUserId !== undefined && msg.senderId === currentUserId,
+    isOwn,
     link: msg.link,
     likeCount: msg.likeCount,
     dislikeCount: msg.dislikeCount,

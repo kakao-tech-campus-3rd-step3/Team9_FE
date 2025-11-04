@@ -15,11 +15,17 @@ export function mapServerMessageToChatMessage(
   parsed: Record<string, unknown>,
   currentUserId?: number,
 ): ChatMessage {
-  const senderId = parsed.senderId as number | undefined;
+  const senderId = parsed.senderId as number | null | undefined;
+  // senderId가 null이거나 undefined면 isOwn은 항상 false
   const isOwn =
-    currentUserId !== undefined &&
+    senderId !== null &&
     senderId !== undefined &&
+    currentUserId !== undefined &&
     senderId === currentUserId;
+
+  // senderId가 null인 경우 'system'으로 처리
+  const senderIdString =
+    senderId !== null && senderId !== undefined ? String(senderId) : 'system';
 
   return {
     id: (parsed.id as string) || String(Date.now()),
@@ -27,7 +33,7 @@ export function mapServerMessageToChatMessage(
     messageType:
       (parsed.messageType as 'CHAT' | 'NOTICE' | 'SCHEDULE') || 'CHAT',
     content: (parsed.content as string) || '',
-    senderId: String(parsed.senderId || 'unknown'),
+    senderId: senderIdString,
     senderName: (parsed.senderName as string) || '알 수 없음',
     timestamp: extractTimestamp(parsed),
     isOwn,

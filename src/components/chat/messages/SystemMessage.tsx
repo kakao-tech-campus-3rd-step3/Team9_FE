@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { formatKoreanTime } from '../utils/timeUtils';
 import type { ChatMessage } from '../types';
 
 interface SystemMessageProps {
@@ -95,10 +96,7 @@ export function SystemMessage({ message, type }: SystemMessageProps) {
         {/* 시간 표시 */}
         <div className='flex justify-between items-center mt-1'>
           <div className={`text-xs ${config.colors.secondary}`}>
-            {message.timestamp.toLocaleTimeString('ko-KR', {
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
+            {formatKoreanTime(message.timestamp)}
           </div>
         </div>
       </div>
