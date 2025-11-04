@@ -11,7 +11,7 @@ import {
   StudyDetailModal,
   RegionSelectModal,
 } from '../components';
-import { SearchBar } from '@/components/common';
+import { SearchBar, LoadingSpinner } from '@/components/common';
 
 const StudyExplorePage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -26,6 +26,8 @@ const StudyExplorePage: React.FC = () => {
     selectedStudy,
     filteredStudies,
     categories,
+    isLoading,
+    error,
 
     // 핸들러
     handleApplyClick,
@@ -56,6 +58,29 @@ const StudyExplorePage: React.FC = () => {
       setSearchParams({});
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className='min-h-screen bg-background flex items-center justify-center'>
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='min-h-screen bg-background flex items-center justify-center'>
+        <div className='text-center'>
+          <p className='text-foreground text-lg mb-2'>
+            스터디 목록을 불러오는 중 오류가 발생했습니다.
+          </p>
+          <p className='text-muted-foreground text-sm'>
+            잠시 후 다시 시도해주세요.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='min-h-screen bg-background'>

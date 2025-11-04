@@ -2,9 +2,10 @@
  * 스터디 탐색 페이지 로직을 관리하는 훅
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import type { Study } from '../types';
-import { MOCK_STUDIES, CATEGORIES } from '../constants';
+import { CATEGORIES } from '../constants';
+import { useStudyListQuery } from './useStudyListQuery';
 
 type ModalType = 'apply' | 'detail' | 'region' | null;
 
@@ -16,33 +17,38 @@ export const useStudyExplore = (searchTerm: string) => {
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [selectedStudy, setSelectedStudy] = useState<Study | null>(null);
 
+  // 실제 API로 스터디 목록 조회
+  const { data: studies = [], isLoading, error } = useStudyListQuery();
+
   // 필터링된 스터디 목록
-  const filteredStudies = MOCK_STUDIES.filter((study: Study) => {
-    // 카테고리 필터
-    if (
-      !selectedCategories.includes('전체') &&
-      !selectedCategories.includes(study.category)
-    ) {
-      return false;
-    }
-    // 지역 필터
-    if (
-      !selectedRegions.includes('전체') &&
-      !selectedRegions.includes(study.region)
-    ) {
-      return false;
-    }
-    // 검색어 필터
-    if (searchTerm.trim()) {
-      const searchLower = searchTerm.toLowerCase();
-      return (
-        study.title.toLowerCase().includes(searchLower) ||
-        study.description.toLowerCase().includes(searchLower) ||
-        study.category.toLowerCase().includes(searchLower)
-      );
-    }
-    return true;
-  });
+  const filteredStudies = useMemo(() => {
+    return studies.filter((study: Study) => {
+      // 카테고리 필터
+      if (
+        !selectedCategories.includes('전체') &&
+        !selectedCategories.includes(study.category)
+      ) {
+        return false;
+      }
+      // 지역 필터
+      if (
+        !selectedRegions.includes('전체') &&
+        !selectedRegions.includes(study.region)
+      ) {
+        return false;
+      }
+      // 검색어 필터
+      if (searchTerm.trim()) {
+        const searchLower = searchTerm.toLowerCase();
+        return (
+          study.title.toLowerCase().includes(searchLower) ||
+          study.description.toLowerCase().includes(searchLower) ||
+          study.category.toLowerCase().includes(searchLower)
+        );
+      }
+      return true;
+    });
+  }, [studies, selectedCategories, selectedRegions, searchTerm]);
 
   // 핸들러 함수들
   const handleApplyClick = (study: Study) => {
@@ -108,6 +114,8 @@ export const useStudyExplore = (searchTerm: string) => {
     selectedStudy,
     filteredStudies,
     categories: CATEGORIES,
+    isLoading,
+    error,
 
     // 핸들러
     handleApplyClick,

@@ -58,6 +58,7 @@ export interface StudyApplication {
   nickname: string;
   applicationMessage: string;
   appliedAt: string;
+  status?: 'PENDING' | 'APPROVED' | 'REJECTED'; // 백엔드에서 제공할 수 있는 상태 정보
   userDetail: {
     file_key?: string;
     gender: string;
@@ -72,10 +73,10 @@ export interface StudyApplicationsResponse {
   applicants: StudyApplication[];
 }
 
-// 신청 상태 변경 요청
+// 신청 상태 변경 요청 (API 스펙: PENDING, APPROVED, REJECTED)
 export interface ChangeApplicationStatusRequest {
   application_id: number;
-  status: 'Accepted' | 'Rejected' | 'Pending';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
 }
 
 // 신청 상태 변경 응답
@@ -102,6 +103,7 @@ export interface StudyInfo {
   conditions?: string[];
   file_key?: string; // 스터디 대표 이미지 키
   image_url?: string; // 스터디 대표 이미지 URL (deprecated, file_key 사용)
+  interests?: string[]; // 백엔드 API 스펙: 관심 분야(카테고리) 목록 (배열)
 }
 
 // 스터디 정보 조회 응답
@@ -109,13 +111,17 @@ export interface StudyInfoResponse {
   study: StudyInfo;
 }
 
-// 스터디 정보 수정 요청
+// 스터디 정보 수정 요청 (API 스펙에 맞게 수정)
 export interface UpdateStudyInfoRequest {
-  study_name?: string;
+  title?: string; // study_name → title
   description?: string;
-  detailed_description?: string;
-  category?: string;
+  detail_description?: string; // detailed_description → detail_description
+  interests?: string[]; // category를 interests 배열로 변환
+  region?: string;
+  study_time?: string; // schedule → study_time
   max_members?: number;
+  conditions?: string[];
+  file_key?: string; // 이미지 파일 키
 }
 
 // 스터디 정보 수정 응답
@@ -125,9 +131,9 @@ export interface UpdateStudyInfoResponse {
   study: StudyInfo;
 }
 
-// 리더 위임 요청
+// 리더 위임 요청 (API 스펙: newLeaderMemberId)
 export interface DelegateLeadershipRequest {
-  new_leader_id: number;
+  newLeaderMemberId: number;
 }
 
 // 리더 위임 응답

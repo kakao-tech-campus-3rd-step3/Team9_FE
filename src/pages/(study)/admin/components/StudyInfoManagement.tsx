@@ -6,6 +6,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { AxiosError } from 'axios';
+import { useQueryClient } from '@tanstack/react-query';
 import { MapPin, Plus, X, Camera, Loader2, Save } from 'lucide-react';
 import RegionSelectModal from '../../components/RegionSelectModal';
 import { getStudyInfo, updateStudyInfo } from '../services';
@@ -13,6 +14,7 @@ import { CATEGORIES, MAX_MEMBER_OPTIONS } from '../constants';
 import type { StudyInfo, UpdateStudyInfoRequest } from '../types';
 import { ROUTE_PARAMS } from '@/constants';
 import { useImageUrl } from '@/hooks';
+import { studyKeys } from '@/constants/queryKeys';
 
 interface StudyInfoFormData {
   title: string;
@@ -31,6 +33,8 @@ export const StudyInfoManagement: React.FC = () => {
   const studyId = params[ROUTE_PARAMS.studyId]
     ? Number(params[ROUTE_PARAMS.studyId])
     : null;
+
+  const queryClient = useQueryClient();
 
   const [studyInfo, setStudyInfo] = useState<StudyInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -73,16 +77,29 @@ export const StudyInfoManagement: React.FC = () => {
   // 스터디 정보가 변경될 때 폼 업데이트
   useEffect(() => {
     if (studyInfo) {
+      console.log('[폼 업데이트]', {
+        studyInfo카테고리: studyInfo.category,
+        CATEGORIES에포함: CATEGORIES.includes(
+          studyInfo.category as (typeof CATEGORIES)[number],
+        ),
+        폼에설정할값: studyInfo.category || '',
+      });
+
       reset({
         title: studyInfo.study_name,
         shortDescription: studyInfo.description,
         description: studyInfo.detailed_description,
-        category: studyInfo.category,
+        category: studyInfo.category || '', // 빈 문자열도 허용하여 초기화
         maxMembers: studyInfo.max_members,
         schedule: studyInfo.schedule || '',
         region: studyInfo.region || '',
         conditions: studyInfo.conditions || [],
       });
+
+      // 카테고리가 설정되었는지 확인
+      if (studyInfo.category) {
+        console.log('[카테고리 폼 설정 완료]', studyInfo.category);
+      }
     }
   }, [studyInfo, reset]);
 
@@ -149,11 +166,62 @@ export const StudyInfoManagement: React.FC = () => {
           : typeof data?.detail_description === 'string'
             ? data.detail_description
             : '') as string,
-        category: (typeof data?.category === 'string'
-          ? data.category
-          : typeof data?.category_name === 'string'
-            ? data.category_name
-            : '') as string,
+        category: (() => {
+          // 카테고리 매핑 (다양한 필드명 및 값 형식 지원)
+          // 백엔드 응답: interests 배열 또는 category 문자열
+          let categoryValue = '';
+
+          // 1. interests 배열 확인 (백엔드 API 스펙: interests는 배열)
+          if (Array.isArray(data?.interests) && data.interests.length > 0) {
+            categoryValue = String(data.interests[0]);
+            console.log('[카테고리 매핑] interests 배열에서 추출:', {
+              interests: data.interests,
+              첫번째값: categoryValue,
+            });
+          }
+          // 2. category 문자열 확인
+          else if (typeof data?.category === 'string') {
+            categoryValue = data.category;
+            console.log('[카테고리 매핑] category 문자열 사용:', categoryValue);
+          }
+          // 3. category_name 문자열 확인
+          else if (typeof data?.category_name === 'string') {
+            categoryValue = data.category_name;
+            console.log(
+              '[카테고리 매핑] category_name 문자열 사용:',
+              categoryValue,
+            );
+          }
+
+          // 카테고리 값 정규화 (공백 제거)
+          const normalizedCategory = categoryValue.trim();
+
+          // CATEGORIES 배열에 있는 값인지 확인
+          const matchedCategory = CATEGORIES.find(
+            (cat) =>
+              cat === normalizedCategory ||
+              cat.includes(normalizedCategory) ||
+              normalizedCategory.includes(cat),
+          );
+
+          if (matchedCategory) {
+            console.log('[카테고리 매핑 성공]', {
+              원본값: normalizedCategory,
+              매칭된값: matchedCategory,
+            });
+            return matchedCategory;
+          }
+
+          // 매칭되지 않으면 원본 값 반환 (디버깅을 위해)
+          console.warn('[카테고리 매핑] CATEGORIES에 없는 값:', {
+            원본값: normalizedCategory,
+            CATEGORIES목록: CATEGORIES,
+            원본데이터카테고리필드: data?.category,
+            원본데이터interests: data?.interests,
+          });
+
+          return normalizedCategory;
+        })() as string,
         max_members: (typeof data?.max_members === 'number'
           ? data.max_members
           : typeof data?.maxMembers === 'number'
@@ -212,8 +280,27 @@ export const StudyInfoManagement: React.FC = () => {
         카테고리: studyData.category,
         인원: studyData.max_members,
         이미지키: studyData.file_key,
+        원본카테고리필드: data?.category,
+        원본카테고리필드타입: typeof data?.category,
       });
+
       setStudyInfo(studyData);
+
+      // 카테고리 디버깅
+      if (studyData.category) {
+        console.log('[카테고리 확인]', {
+          매핑된카테고리: studyData.category,
+          CATEGORIES목록: CATEGORIES,
+          포함여부: CATEGORIES.includes(
+            studyData.category as (typeof CATEGORIES)[number],
+          ),
+        });
+      } else {
+        console.warn('[카테고리 경고] 카테고리가 비어있습니다.', {
+          원본데이터: rawData,
+          매핑된데이터: studyData,
+        });
+      }
     } catch (error) {
       console.error('[스터디 정보 조회 실패]', error);
       if (error instanceof AxiosError) {
@@ -264,23 +351,275 @@ export const StudyInfoManagement: React.FC = () => {
     try {
       setSaving(true);
 
-      const updateData: UpdateStudyInfoRequest = {
-        study_name: data.title,
-        description: data.shortDescription,
-        detailed_description: data.description,
-        category: data.category,
-        max_members: data.maxMembers,
+      // API 스펙에 맞게 필드명 변환 및 데이터 구조 수정
+      // 모든 값의 타입을 명시적으로 확인하여 안전하게 전송
+      // 모든 문자열 필드를 안전하게 정리 (JSON 직렬화 안전하게)
+      const sanitizeString = (str: string): string => {
+        if (typeof str !== 'string') return '';
+        // 줄바꿈을 공백으로 변환하고, JSON 직렬화를 방해하는 특수 문자 제거
+        return (
+          str
+            .replace(/\r\n/g, ' ')
+            .replace(/\n/g, ' ')
+            .replace(/\r/g, ' ')
+            .replace(/\t/g, ' ') // 탭 제거
+            // 제어 문자 제거 (eslint no-control-regex 규칙 우회)
+            // eslint-disable-next-line no-control-regex
+            .replace(/[\u0000-\u001F]/g, '')
+            .trim()
+        );
       };
 
-      const response = await updateStudyInfo(studyId, updateData);
+      const updateData: UpdateStudyInfoRequest = {
+        title: typeof data.title === 'string' ? sanitizeString(data.title) : '',
+        description:
+          typeof data.shortDescription === 'string'
+            ? sanitizeString(data.shortDescription)
+            : '',
+        detail_description:
+          typeof data.description === 'string'
+            ? sanitizeString(data.description)
+            : '',
+        // interests는 필수 필드이며 최소 1개 이상이어야 함
+        // 백엔드 Collection Merge 방식에 맞춰 항상 배열로 전송
+        interests: data.category
+          ? [data.category]
+          : studyInfo?.interests &&
+              Array.isArray(studyInfo.interests) &&
+              studyInfo.interests.length > 0
+            ? studyInfo.interests
+            : studyInfo?.category
+              ? [studyInfo.category]
+              : [],
+        region:
+          typeof data.region === 'string' ? sanitizeString(data.region) : '',
+        study_time:
+          typeof data.schedule === 'string'
+            ? sanitizeString(data.schedule)
+            : '',
+        max_members:
+          typeof data.maxMembers === 'number' ? data.maxMembers : undefined,
+        conditions: Array.isArray(data.conditions)
+          ? data.conditions.map((c: string) => String(c))
+          : [],
+        // file_key: 기존 스터디 정보의 file_key를 유지 (이미지 업로드가 없으면 기존 값 유지)
+        file_key: studyInfo?.file_key || undefined,
+      };
 
-      if (response.success) {
-        setStudyInfo(response.study);
-        alert('스터디 정보가 수정되었습니다.');
+      // 조건 배열의 각 문자열을 안전하게 처리 (특수 문자 제거)
+      if (updateData.conditions) {
+        updateData.conditions = updateData.conditions.map(
+          (condition) => String(condition).trim().replace(/['"]/g, ''), // 작은따옴표, 큰따옴표 제거
+        );
+      }
+
+      // undefined와 null만 제거 (단, 필수 필드는 기존 값 유지)
+      const cleanedData: Record<string, unknown> = {};
+      Object.keys(updateData).forEach((key) => {
+        const value = updateData[key as keyof UpdateStudyInfoRequest];
+        // max_members는 API 스펙 필수 필드이므로 undefined일 때 기존 값 사용
+        if (key === 'max_members') {
+          cleanedData[key] =
+            value !== undefined && value !== null
+              ? value
+              : studyInfo?.max_members || 2;
+        } else if (key === 'interests') {
+          // interests는 필수 필드이며 최소 1개 이상이어야 함
+          // 빈 배열이면 기존 interests 사용
+          if (Array.isArray(value) && value.length > 0) {
+            cleanedData[key] = value;
+          } else if (
+            studyInfo?.interests &&
+            Array.isArray(studyInfo.interests) &&
+            studyInfo.interests.length > 0
+          ) {
+            cleanedData[key] = studyInfo.interests;
+          } else if (studyInfo?.category) {
+            cleanedData[key] = [studyInfo.category];
+          } else {
+            // 최소 1개 이상 보장 (빈 배열 방지)
+            cleanedData[key] = value && Array.isArray(value) ? value : [];
+          }
+        } else {
+          // 다른 필드는 undefined와 null만 제거 (빈 문자열, 빈 배열, 0 등은 포함)
+          if (value !== undefined && value !== null) {
+            cleanedData[key] = value;
+          }
+        }
+      });
+
+      const finalUpdateData = cleanedData as UpdateStudyInfoRequest;
+
+      // 기존 스터디 정보와 비교하여 변경된 필드 확인
+      const changes: Record<string, { 이전값: unknown; 새값: unknown }> = {};
+      if (studyInfo) {
+        if (data.title !== studyInfo.study_name) {
+          changes.title = { 이전값: studyInfo.study_name, 새값: data.title };
+        }
+        if (data.shortDescription !== studyInfo.description) {
+          changes.shortDescription = {
+            이전값: studyInfo.description,
+            새값: data.shortDescription,
+          };
+        }
+        if (data.description !== studyInfo.detailed_description) {
+          changes.description = {
+            이전값: studyInfo.detailed_description,
+            새값: data.description,
+          };
+        }
+        if (data.category !== studyInfo.category) {
+          changes.category = {
+            이전값: studyInfo.category,
+            새값: data.category,
+          };
+        }
+        if (data.maxMembers !== studyInfo.max_members) {
+          changes.maxMembers = {
+            이전값: studyInfo.max_members,
+            새값: data.maxMembers,
+          };
+        }
+        if (data.schedule !== (studyInfo.schedule || '')) {
+          changes.schedule = {
+            이전값: studyInfo.schedule || '',
+            새값: data.schedule,
+          };
+        }
+        if (data.region !== (studyInfo.region || '')) {
+          changes.region = {
+            이전값: studyInfo.region || '',
+            새값: data.region,
+          };
+        }
+        if (
+          JSON.stringify(data.conditions || []) !==
+          JSON.stringify(studyInfo.conditions || [])
+        ) {
+          changes.conditions = {
+            이전값: studyInfo.conditions || [],
+            새값: data.conditions || [],
+          };
+        }
+      }
+
+      console.log('[스터디 정보 수정 요청 - 정리된 데이터]', {
+        원본데이터: updateData,
+        정리된데이터: finalUpdateData,
+      });
+
+      console.log('[스터디 정보 수정 요청]', {
+        studyId,
+        updateData: finalUpdateData,
+        원본폼데이터: data,
+        기존스터디정보: studyInfo,
+        변경된필드: Object.keys(changes).length > 0 ? changes : '변경 없음',
+        변경된필드수: Object.keys(changes).length,
+      });
+
+      const response = await updateStudyInfo(studyId, finalUpdateData);
+
+      console.log('[스터디 정보 수정 응답]', response);
+
+      // 응답 처리
+      if (response && (response.success || response.study)) {
+        const updatedStudyInfo = response.study || studyInfo;
+        if (updatedStudyInfo) {
+          setStudyInfo(updatedStudyInfo);
+          // 스터디 정보 새로고침
+          await fetchStudyInfo();
+        }
+
+        // 스터디 정보를 사용하는 모든 쿼리 캐시 무효화
+        // 1. 스터디 목록 (탐색 페이지의 스터디 카드 목록)
+        queryClient.invalidateQueries({
+          queryKey: studyKeys.all,
+        });
+        // 2. 해당 스터디의 상세 정보 (상세 모달 등)
+        queryClient.invalidateQueries({
+          queryKey: studyKeys.detail(String(studyId)),
+        });
+        // 3. 스터디 상세 범위 전체 (모든 스터디 상세 정보)
+        queryClient.invalidateQueries({
+          queryKey: studyKeys.detailScope(),
+        });
+        // 4. 내 스터디 목록 (홈 페이지 등)
+        queryClient.invalidateQueries({
+          queryKey: studyKeys.me,
+        });
+
+        alert(
+          '스터디 정보가 수정되었습니다.\n\n스터디 탐색 페이지와 모든 관련 화면에서 변경 사항이 반영됩니다.',
+        );
+      } else {
+        // 응답이 없거나 성공 표시가 없어도 업데이트된 정보가 있을 수 있음
+        await fetchStudyInfo();
+
+        // 스터디 정보를 사용하는 모든 쿼리 캐시 무효화
+        queryClient.invalidateQueries({
+          queryKey: studyKeys.all,
+        });
+        queryClient.invalidateQueries({
+          queryKey: studyKeys.detail(String(studyId)),
+        });
+        queryClient.invalidateQueries({
+          queryKey: studyKeys.detailScope(),
+        });
+        queryClient.invalidateQueries({
+          queryKey: studyKeys.me,
+        });
+
+        alert(
+          '스터디 정보가 수정되었습니다.\n\n스터디 탐색 페이지에서도 변경 사항이 반영됩니다.',
+        );
       }
     } catch (error) {
       console.error('스터디 정보 수정 실패:', error);
-      alert('스터디 정보 수정에 실패했습니다.');
+
+      if (error instanceof AxiosError) {
+        const statusCode = error.response?.status;
+        const errorData = error.response?.data as
+          | {
+              message?: string;
+              error?: string;
+              code?: string;
+            }
+          | undefined;
+
+        console.error('[스터디 정보 수정 에러 상세]', {
+          statusCode,
+          errorData,
+          전체에러응답: error.response?.data,
+          errorResponse전체: error.response,
+          url: error.config?.url,
+          requestData: error.config?.data,
+          requestHeaders: error.config?.headers,
+        });
+
+        // 백엔드 에러 응답의 모든 필드 확인
+        if (error.response?.data) {
+          console.error('[백엔드 에러 응답 전체 구조]', {
+            전체응답데이터: error.response.data,
+            응답키목록: Object.keys(error.response.data || {}),
+            응답타입: typeof error.response.data,
+          });
+        }
+
+        const errorMessage =
+          errorData?.message ||
+          errorData?.error ||
+          `알 수 없는 오류가 발생했습니다. (${statusCode || 'Unknown'})`;
+
+        if (statusCode === 500) {
+          alert(
+            `스터디 정보 수정에 실패했습니다.\n\n서버 오류가 발생했습니다.\n\n에러: ${errorMessage}\n\n콘솔을 확인해주세요.`,
+          );
+        } else {
+          alert(`스터디 정보 수정에 실패했습니다.\n\n${errorMessage}`);
+        }
+      } else {
+        alert('스터디 정보 수정에 실패했습니다.');
+      }
     } finally {
       setSaving(false);
     }
@@ -394,22 +733,48 @@ export const StudyInfoManagement: React.FC = () => {
                   key={category}
                   name='category'
                   control={control}
-                  render={({ field }) => (
-                    <button
-                      type='button'
-                      onClick={() => field.onChange(category)}
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                        field.value === category
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                      }`}
-                    >
-                      {category}
-                    </button>
-                  )}
+                  render={({ field }) => {
+                    const isSelected = field.value === category;
+                    // 디버깅: 선택된 카테고리 확인
+                    if (isSelected) {
+                      console.log(
+                        '[카테고리 UI] 선택됨:',
+                        category,
+                        '현재값:',
+                        field.value,
+                      );
+                    }
+                    return (
+                      <button
+                        type='button'
+                        onClick={() => {
+                          console.log(
+                            '[카테고리 클릭]',
+                            category,
+                            '기존값:',
+                            field.value,
+                          );
+                          field.onChange(category);
+                        }}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                          isSelected
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                        }`}
+                      >
+                        {category}
+                      </button>
+                    );
+                  }}
                 />
               ))}
             </div>
+            {/* 현재 선택된 카테고리 표시 (디버깅용) */}
+            {watch('category') && (
+              <p className='mt-2 text-xs text-muted-foreground'>
+                현재 선택: {watch('category')}
+              </p>
+            )}
           </div>
 
           {/* 스터디 인원 */}
