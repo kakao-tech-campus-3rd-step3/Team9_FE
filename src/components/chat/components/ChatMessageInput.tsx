@@ -31,8 +31,6 @@ export function ChatMessageInput({
     }
   };
 
-  const isDisabled = disabled;
-
   const getPlaceholder = () => {
     if (connectionState.isConnected) {
       return '메시지를 입력하세요...';
@@ -54,12 +52,12 @@ export function ChatMessageInput({
           onChange={(e) => setNewMessage(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder={getPlaceholder()}
-          disabled={isDisabled}
+          disabled={disabled}
           className='flex-1 px-4 py-3 text-sm border-2 border-input rounded-xl bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
         />
         <button
           onClick={handleSendMessage}
-          disabled={!newMessage.trim() || isDisabled}
+          disabled={!newMessage.trim() || disabled}
           className='p-3 bg-primary text-primary-foreground rounded-xl hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors border-2 border-primary/20 hover:border-primary/40'
         >
           <Send className='w-4 h-4' />
