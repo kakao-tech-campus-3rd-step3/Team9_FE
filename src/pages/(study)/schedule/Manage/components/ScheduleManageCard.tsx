@@ -19,7 +19,7 @@ type ScheduleManageCardProps = {
 const ScheduleManageCard = ({ event }: ScheduleManageCardProps) => {
   const { study_id } = useParams<{ study_id: string }>();
   const user = useAuthStore((s) => s.user);
-  const { data: attendanceData } = useAttendanceMeQuery({
+  const { data: attendanceData, isPending } = useAttendanceMeQuery({
     schedule_id: event.id,
   });
   const { mutate: attendanceMeMutate } = useAttendanceMeMutation({
@@ -64,6 +64,7 @@ const ScheduleManageCard = ({ event }: ScheduleManageCardProps) => {
           type='button'
           className={`text-white px-4 py-2 rounded-lg cursor-pointer transition ${attendanceData.status ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}
           onClick={() => handleAttendanceChange(!attendanceData.status)}
+          disabled={isPending}
         >
           {attendanceData.status ? '참여' : '불참'}
         </button>
