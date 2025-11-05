@@ -6,11 +6,14 @@ export interface Study {
   id: number;
   title: string;
   description: string;
+  shortDescription?: string;
   category: string;
+  interests?: string[]; // 여러 카테고리/관심사
   currentMembers: number;
   maxMembers: number;
   region: string;
   imageUrl?: string;
+  imageKey?: string; // 이미지 키 (API에서 사용)
   detailedDescription?: string;
   schedule?: string;
   duration?: string;
@@ -21,4 +24,17 @@ export interface ToastState {
   isVisible: boolean;
   type: 'success' | 'error' | 'info';
   message: string;
+}
+
+export interface StudyListParams {
+  page?: number;
+  size?: number;
+  keyword?: string;
+  interests?: string[];
+  locations?: string[];
+}
+
+export interface StudyApplyRequest {
+  study_id: number;
+  message?: string;
 }

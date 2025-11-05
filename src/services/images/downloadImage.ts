@@ -1,3 +1,4 @@
+import publicClient from '@/api/publicClient';
 import apiClient from '@/api';
 import { DOWNLOAD_ENDPOINTS } from '@/api/constants';
 
@@ -16,10 +17,9 @@ export const downloadImageService = {
     if (!imageKey) return '';
 
     try {
-      const { data } = await apiClient.post<DownloadPresignResponse>(
+      const { data } = await publicClient.post<DownloadPresignResponse>(
         DOWNLOAD_ENDPOINTS.PHOTOS,
         { file_key: imageKey },
-        { showToast: false },
       );
       return data.presigned_url;
     } catch {
