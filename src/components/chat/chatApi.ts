@@ -17,7 +17,7 @@ export const chatApi = {
 
     const response = await apiClient.get<ServerChatHistoryResponse>(
       CHAT_ENDPOINTS.CHAT_HISTORY(studyId),
-      { params },
+      { params, showToast: false },
     );
 
     // 서버 응답의 userId를 사용하여 본인 메시지 판별
