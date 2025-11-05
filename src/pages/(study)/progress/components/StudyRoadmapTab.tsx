@@ -30,21 +30,42 @@ export const StudyRoadmapTab = ({ studyId }: StudyRoadmapTabProps) => {
   const completeChapterMutation = useCompleteChapterMutation(studyId);
   const deleteChapterMutation = useDeleteChapterMutation(studyId);
 
-  const chapters: Chapter[] = roadmapData?.chapters || [];
+  // API 응답의 chapter를 정규화 (id 또는 chapter_id 모두 처리)
+  const chapters: Chapter[] = (roadmapData?.chapters || []).map(
+    (chapter, index) => {
+      // API 응답에 id가 없을 경우를 대비한 디버깅
+      if (!chapter.id && !chapter.chapter_id) {
+        console.warn('Chapter에 id가 없습니다:', chapter, 'index:', index);
+      }
+      return {
+        ...chapter,
+        id: chapter.id || chapter.chapter_id,
+      };
+    },
+  );
 
   const [isAddingSession, setIsAddingSession] = useState(false);
   const [newContent, setNewContent] = useState('');
   const [editingChapterId, setEditingChapterId] = useState<number | null>(null);
   const [editingContent, setEditingContent] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleAddSession = async () => {
-    if (newContent.trim() && isLeader) {
+    if (
+      newContent.trim() &&
+      isLeader &&
+      !addChapterMutation.isPending &&
+      !isSubmitting
+    ) {
+      setIsSubmitting(true);
       try {
         await addChapterMutation.mutateAsync({ content: newContent.trim() });
         setNewContent('');
         setIsAddingSession(false);
       } catch {
         // 에러는 mutation에서 토스트 처리
+      } finally {
+        setIsSubmitting(false);
       }
     }
   };
@@ -165,27 +186,39 @@ export const StudyRoadmapTab = ({ studyId }: StudyRoadmapTabProps) => {
                   value={newContent}
                   onChange={(e) => setNewContent(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
+                    if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
+                      e.stopPropagation();
                       handleAddSession();
                     }
                   }}
                   className='w-full px-2 py-1 text-sm border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary'
                   placeholder='차시 내용을 입력하세요'
                   autoFocus
-                  disabled={addChapterMutation.isPending}
+                  disabled={addChapterMutation.isPending || isSubmitting}
                 />
                 <div className='flex gap-2'>
                   <button
-                    onClick={handleAddSession}
-                    disabled={addChapterMutation.isPending}
+                    type='button'
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleAddSession();
+                    }}
+                    disabled={addChapterMutation.isPending || isSubmitting}
                     className='px-3 py-1 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90 disabled:opacity-50'
                   >
-                    {addChapterMutation.isPending ? '추가 중...' : '추가하기'}
+                    {addChapterMutation.isPending || isSubmitting
+                      ? '추가 중...'
+                      : '추가하기'}
                   </button>
                   <button
-                    onClick={handleCancelAdd}
-                    disabled={addChapterMutation.isPending}
+                    type='button'
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleCancelAdd();
+                    }}
+                    disabled={addChapterMutation.isPending || isSubmitting}
                     className='px-3 py-1 text-xs text-muted-foreground hover:text-foreground disabled:opacity-50'
                   >
                     취소
@@ -286,25 +319,29 @@ export const StudyRoadmapTab = ({ studyId }: StudyRoadmapTabProps) => {
                       </>
                     )}
                   </div>
-                  {editingChapterId !== chapter.id &&
-                    isLeader &&
-                    chapter.id && (
-                      <div className='flex gap-2 ml-4'>
-                        <button
-                          onClick={() => handleStartEdit(chapter)}
-                          className='p-1 text-muted-foreground hover:text-foreground transition-colors'
-                        >
-                          <Edit className='w-4 h-4' />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteSession(chapter.id!)}
-                          disabled={deleteChapterMutation.isPending}
-                          className='p-1 text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50'
-                        >
-                          <Trash2 className='w-4 h-4' />
-                        </button>
-                      </div>
-                    )}
+                  {editingChapterId !== chapter.id && isLeader && (
+                    <div className='flex gap-2 ml-4'>
+                      {chapter.id && (
+                        <>
+                          <button
+                            onClick={() => handleStartEdit(chapter)}
+                            className='p-1 text-muted-foreground hover:text-foreground transition-colors'
+                            title='수정'
+                          >
+                            <Edit className='w-4 h-4' />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteSession(chapter.id!)}
+                            disabled={deleteChapterMutation.isPending}
+                            className='p-1 text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50'
+                            title='삭제'
+                          >
+                            <Trash2 className='w-4 h-4' />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
                 {editingChapterId !== chapter.id && isLeader && chapter.id && (
                   <div className='flex justify-end'>

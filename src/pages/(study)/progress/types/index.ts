@@ -5,6 +5,7 @@
 // 차시(Chapter) 타입
 export interface Chapter {
   id?: number;
+  chapter_id?: number; // API 응답에서 사용할 수 있는 필드명
   content: string;
   completed: boolean;
 }
