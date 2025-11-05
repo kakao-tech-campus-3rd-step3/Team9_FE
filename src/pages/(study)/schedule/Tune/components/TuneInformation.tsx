@@ -4,7 +4,7 @@ import TuneTable from './TuneTable';
 import {
   buildGrid,
   getAvailablePersons,
-  getGridBoolean,
+  getGridNumber,
   getHourSlots,
   getTuneDay,
 } from '../utils';
@@ -31,11 +31,11 @@ const TuneInformation = ({ tune_id }: TuneInformationProps) => {
     startTime: tuneDetailData.available_start_time,
     endTime: tuneDetailData.available_end_time,
   });
-  const gridBoolean = getGridBoolean({
+  const gridNumber = getGridNumber({
     startTime: tuneDetailData.available_start_time,
     endTime: tuneDetailData.available_end_time,
   });
-  const [personalTune, setPersonalTune] = useState(gridBoolean);
+  const [personalTune, setPersonalTune] = useState(gridNumber);
   const days = getTuneDay({
     startTime: tuneDetailData.available_start_time,
     endTime: tuneDetailData.available_end_time,
@@ -68,6 +68,7 @@ const TuneInformation = ({ tune_id }: TuneInformationProps) => {
               days={days}
               personalTune={personalTune}
               setPersonalTune={setPersonalTune}
+              tune_id={tune_id}
             />
           )}
         </div>

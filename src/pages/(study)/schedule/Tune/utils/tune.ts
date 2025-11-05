@@ -51,7 +51,7 @@ export const getTuneDay = ({
   return days;
 };
 
-export const getGridBoolean = ({
+export const getGridNumber = ({
   startTime,
   endTime,
 }: {
@@ -63,9 +63,9 @@ export const getGridBoolean = ({
     (dayjs(endTime).diff(dayjs(startTime), 'minute') -
       dayjs(endTime).diff(dayjs(startTime), 'day') * 24 * 60) /
     30;
-  const grid: boolean[][] = [];
+  const grid: number[][] = [];
   for (let d = 0; d < days; d++) {
-    grid.push(Array.from({ length: slots }, () => false));
+    grid.push(Array.from({ length: slots }, () => 0));
   }
   return grid;
 };
