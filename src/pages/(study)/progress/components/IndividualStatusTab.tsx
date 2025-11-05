@@ -1,4 +1,7 @@
 import { FileText, ClipboardList, Calendar, User } from 'lucide-react';
+import { useStudyMemberStatusQuery } from '../hooks';
+import { LoadingSpinner } from '@/components';
+import type { ProgressMemberStatus } from '../types';
 
 interface IndividualStatusTabProps {
   studyId: number;
@@ -10,40 +13,28 @@ interface IndividualStatusTabProps {
  * - 출석, 퀴즈, 회고 메트릭 추적
  */
 export const IndividualStatusTab = ({ studyId }: IndividualStatusTabProps) => {
-  // TODO: studyId를 사용하여 API 연동 예정
-  void studyId;
+  const { data, isLoading, error } = useStudyMemberStatusQuery(studyId);
 
-  // TODO: 실제 데이터로 교체 예정
-  const participants = [
-    {
-      id: 1,
-      name: '김경대',
-      attendance: 5,
-      quiz: { completed: 4, total: 10 },
-      retrospective: { completed: 1, total: 2 },
-    },
-    {
-      id: 2,
-      name: '이영희',
-      attendance: 4,
-      quiz: { completed: 3, total: 10 },
-      retrospective: { completed: 2, total: 2 },
-    },
-    {
-      id: 3,
-      name: '박민수',
-      attendance: 6,
-      quiz: { completed: 7, total: 10 },
-      retrospective: { completed: 1, total: 2 },
-    },
-    {
-      id: 4,
-      name: '최지영',
-      attendance: 3,
-      quiz: { completed: 2, total: 10 },
-      retrospective: { completed: 0, total: 2 },
-    },
-  ];
+  const participants: ProgressMemberStatus[] =
+    data?.progressMemberStatusDto || [];
+
+  if (isLoading) {
+    return (
+      <div className='p-6 flex items-center justify-center h-full'>
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='p-6 text-center'>
+        <p className='text-destructive'>
+          현황판을 불러오는 중 오류가 발생했습니다.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className='p-6'>
@@ -82,31 +73,42 @@ export const IndividualStatusTab = ({ studyId }: IndividualStatusTabProps) => {
 
       {/* 참여자 목록 */}
       <div className='space-y-3'>
-        {participants.map((participant) => (
-          <div
-            key={participant.id}
-            className='grid grid-cols-4 py-3 px-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer'
-          >
-            <div className='flex items-center gap-3'>
-              <div className='w-8 h-8 bg-muted rounded-full flex items-center justify-center'>
-                <User className='w-4 h-4 text-muted-foreground' />
-              </div>
-              <span className='font-medium text-foreground'>
-                {participant.name}
-              </span>
-            </div>
-            <div className='text-center text-foreground'>
-              {participant.attendance}회
-            </div>
-            <div className='text-center text-foreground'>
-              {participant.quiz.completed}/{participant.quiz.total}
-            </div>
-            <div className='text-center text-foreground'>
-              {participant.retrospective.completed}/
-              {participant.retrospective.total}
-            </div>
+        {participants.length === 0 ? (
+          <div className='text-center py-12 text-muted-foreground'>
+            <User className='w-12 h-12 mx-auto mb-4 opacity-50' />
+            <p className='text-lg font-medium'>참여자가 없습니다</p>
           </div>
-        ))}
+        ) : (
+          participants.map((participant, index) => (
+            <div
+              key={`${participant.nickname}-${index}`}
+              className='grid grid-cols-4 py-3 px-2 rounded-lg hover:bg-muted/50 transition-colors'
+            >
+              <div className='flex items-center gap-3'>
+                <div className='w-8 h-8 bg-muted rounded-full flex items-center justify-center'>
+                  <User className='w-4 h-4 text-muted-foreground' />
+                </div>
+                <div className='flex flex-col'>
+                  <span className='font-medium text-foreground'>
+                    {participant.nickname}
+                  </span>
+                  {participant.role === 'Leader' && (
+                    <span className='text-xs text-primary'>리더</span>
+                  )}
+                </div>
+              </div>
+              <div className='text-center text-foreground'>
+                {participant.attendance_count}회
+              </div>
+              <div className='text-center text-foreground'>
+                {participant.quiz_count}
+              </div>
+              <div className='text-center text-foreground'>
+                {participant.reflection_count ?? 0}
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
