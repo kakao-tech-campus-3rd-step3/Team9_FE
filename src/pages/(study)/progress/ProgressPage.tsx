@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import {
   StudyRoadmapTab,
   IndividualStatusTab,
@@ -10,7 +11,17 @@ import {
  * - 스터디 로드맵과 개인별 현황판 두 개의 탭으로 구성
  */
 const ProgressPage = () => {
+  const { study_id } = useParams<{ study_id: string }>();
+  const studyId = study_id ? Number(study_id) : undefined;
   const [activeTab, setActiveTab] = useState<'roadmap' | 'status'>('roadmap');
+
+  if (!studyId || !Number.isFinite(studyId)) {
+    return (
+      <div className='h-full flex items-center justify-center'>
+        <p className='text-muted-foreground'>스터디 ID가 올바르지 않습니다.</p>
+      </div>
+    );
+  }
 
   return (
     <div className='h-full flex flex-col bg-background'>
@@ -29,8 +40,8 @@ const ProgressPage = () => {
       {/* 탭 컨텐츠 */}
       <div className='flex-1 px-6 pb-6 mt-6'>
         <div className='bg-card rounded-lg border border-border h-full'>
-          {activeTab === 'roadmap' && <StudyRoadmapTab />}
-          {activeTab === 'status' && <IndividualStatusTab />}
+          {activeTab === 'roadmap' && <StudyRoadmapTab studyId={studyId} />}
+          {activeTab === 'status' && <IndividualStatusTab studyId={studyId} />}
         </div>
       </div>
     </div>

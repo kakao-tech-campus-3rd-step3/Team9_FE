@@ -1,11 +1,18 @@
 import { FileText, ClipboardList, Calendar, User } from 'lucide-react';
 
+interface IndividualStatusTabProps {
+  studyId: number;
+}
+
 /**
  * 개인별 현황판 탭 컴포넌트
  * - 참여자별 진척도를 테이블 형태로 표시
  * - 출석, 퀴즈, 회고 메트릭 추적
  */
-export const IndividualStatusTab = () => {
+export const IndividualStatusTab = ({ studyId }: IndividualStatusTabProps) => {
+  // TODO: studyId를 사용하여 API 연동 예정
+  void studyId;
+
   // TODO: 실제 데이터로 교체 예정
   const participants = [
     {

@@ -9,12 +9,19 @@ type Session = {
   createdAt: string;
 };
 
+interface StudyRoadmapTabProps {
+  studyId: number;
+}
+
 /**
  * 스터디 로드맵 탭 컴포넌트
  * - 차시별 스터디 진행 상황을 타임라인 형태로 표시
  * - 차시 추가, 수정, 삭제, 완료 기능 제공
  */
-export const StudyRoadmapTab = () => {
+export const StudyRoadmapTab = ({ studyId }: StudyRoadmapTabProps) => {
+  // TODO: studyId를 사용하여 API 연동 예정
+  void studyId;
+
   const [sessions, setSessions] = useState<Session[]>([
     {
       id: 1,
