@@ -1,6 +1,6 @@
 import { FileText, User, HardDrive } from 'lucide-react';
-import { getIconByExtension } from '../utils';
-import { SectionCard, DashboardEmpty } from './common';
+import { getIconByExtension } from '../../utils';
+import { SectionCard, DashboardEmpty } from '../common';
 import { ListItemSkeleton } from '@/components/common';
 
 interface RecentMaterialItem {
@@ -11,19 +11,19 @@ interface RecentMaterialItem {
   total_file_size: number;
 }
 
-interface DocumentSectionProps {
-  recent?: RecentMaterialItem[]; // 실데이터
-  isLoading?: boolean; // 로딩 상태
-  onClick: () => void; // 섹션 전체 클릭 시 문서 페이지로 이동
-  onItemClick?: (materialId: number) => void; // 특정 아이템 클릭 시 상세 이동
+interface DocumentWidgetProps {
+  recent?: RecentMaterialItem[];
+  isLoading?: boolean;
+  onClick: () => void;
+  onItemClick?: (materialId: number) => void;
 }
 
-const DocumentSection = ({
+const DocumentWidget = ({
   recent,
   isLoading = false,
   onClick,
   onItemClick,
-}: DocumentSectionProps) => {
+}: DocumentWidgetProps) => {
   const getFileIcon = (title?: string) =>
     title ? (
       getIconByExtension(title)
@@ -31,7 +31,6 @@ const DocumentSection = ({
       <FileText className='w-4 h-4 text-muted-foreground' />
     );
 
-  // 렌더링용 정규화 데이터
   const normalized = (() => {
     if (recent && recent.length > 0) {
       return recent.map((r) => {
@@ -63,7 +62,6 @@ const DocumentSection = ({
     <SectionCard icon={FileText} title='문서' onClick={onClick}>
       <div className='space-y-2'>
         {isLoading ? (
-          // 로딩: 일관된 스켈레톤 스타일 (리스트 형태 유지)
           <>
             <ListItemSkeleton />
             <ListItemSkeleton />
@@ -112,4 +110,4 @@ const DocumentSection = ({
   );
 };
 
-export default DocumentSection;
+export default DocumentWidget;

@@ -1,23 +1,23 @@
 import { Calendar, BookOpen, Users, Clock, User } from 'lucide-react';
 import dayjs from 'dayjs';
-import { SectionCard, DashboardEmpty, SkeletonBlock } from './common';
-import { SCHEDULE_TYPE_CONFIG } from '../constants';
-import type { Schedule } from '../types';
-import { calculateDday, getDdayColor } from '../utils';
+import { SectionCard, DashboardEmpty, SkeletonBlock } from '../common';
+import { SCHEDULE_TYPE_CONFIG } from '../../constants';
+import type { Schedule } from '../../types';
+import { calculateDday, getDdayColor } from '../../utils';
 
-interface ScheduleSectionProps {
+interface ScheduleWidgetProps {
   schedules: Schedule[];
   onClick: () => void;
   isLoading?: boolean;
   isError?: boolean;
 }
 
-const ScheduleSection = ({
+const ScheduleWidget = ({
   schedules,
   onClick,
   isLoading,
   isError,
-}: ScheduleSectionProps) => {
+}: ScheduleWidgetProps) => {
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'study':
@@ -84,7 +84,6 @@ const ScheduleSection = ({
     );
   }
 
-  // 가장 가까운 일정 찾기 (dayjs)
   const today = dayjs();
   const closestSchedule = schedules.reduce((closest, current) => {
     const currentDiff = Math.abs(dayjs(current.date).diff(today, 'day'));
@@ -107,7 +106,6 @@ const ScheduleSection = ({
       borderColor='border-primary'
     >
       <div className='flex items-center justify-between'>
-        {/* 일정 정보 - 왼쪽에 배치 */}
         <div className='flex-1 min-w-0'>
           <div className='mb-4 flex flex-row gap-4 items-center'>
             <h4 className='font-bold text-foreground text-2xl line-clamp-1 mb-2'>
@@ -141,7 +139,6 @@ const ScheduleSection = ({
           </div>
         </div>
 
-        {/* 디데이 배지 - 우측에 크게 배치 */}
         <div className='flex-shrink-0 ml-6'>
           <div className='text-center'>
             <div
@@ -159,4 +156,4 @@ const ScheduleSection = ({
   );
 };
 
-export default ScheduleSection;
+export default ScheduleWidget;

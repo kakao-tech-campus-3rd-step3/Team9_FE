@@ -1,9 +1,9 @@
 import { Bell, AlertCircle, Calendar, User } from 'lucide-react';
 import dayjs from 'dayjs';
-import { SectionCard, DashboardEmpty, SkeletonBlock } from './common';
-import type { Notice } from '../types';
+import { SectionCard, DashboardEmpty, SkeletonBlock } from '../common';
+import type { Notice } from '../../types';
 
-interface NoticeSectionProps {
+interface NoticeWidgetProps {
   notices: Notice[];
   onClick: () => void;
   isLoading?: boolean;
@@ -11,13 +11,13 @@ interface NoticeSectionProps {
   onItemClick?: (noticeId: number) => void;
 }
 
-const NoticeSection = ({
+const NoticeWidget = ({
   notices,
   onClick,
   isLoading,
   isError,
   onItemClick,
-}: NoticeSectionProps) => {
+}: NoticeWidgetProps) => {
   if (isLoading) {
     return (
       <SectionCard
@@ -50,7 +50,7 @@ const NoticeSection = ({
       </SectionCard>
     );
   }
-  const latestNotice = notices[0]; // 가장 최신 공지사항만
+  const latestNotice = notices[0];
   const isRecent = (() => {
     if (!latestNotice) return false;
     const created = dayjs(latestNotice.createdAt);
@@ -136,4 +136,4 @@ const NoticeSection = ({
   );
 };
 
-export default NoticeSection;
+export default NoticeWidget;

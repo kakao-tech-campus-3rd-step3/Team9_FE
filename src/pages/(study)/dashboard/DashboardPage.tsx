@@ -1,9 +1,9 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  NoticeSection,
-  DocumentSection,
-  ScheduleSection,
+  NoticeWidget,
+  DocumentWidget,
+  ScheduleWidget,
   TitleRankingSection,
   ProgressWidget,
   RetrospectWidget,
@@ -56,7 +56,7 @@ const DashboardPage = () => {
 
         {/* 공지 - 가로 쭉 */}
         <DashboardRow cols={1}>
-          <NoticeSection
+          <NoticeWidget
             notices={
               dashboardQuery.data?.latestNotice
                 ? [dashboardQuery.data.latestNotice]
@@ -78,7 +78,7 @@ const DashboardPage = () => {
 
         {/* 문서, 진척도 */}
         <DashboardRow cols={2}>
-          <DocumentSection
+          <DocumentWidget
             recent={
               Array.isArray(recentQuery.data) ? recentQuery.data : undefined
             }
@@ -103,7 +103,7 @@ const DashboardPage = () => {
 
         {/* 일정 */}
         <DashboardRow cols={1}>
-          <ScheduleSection
+          <ScheduleWidget
             schedules={
               dashboardQuery.data?.upcomingSchedule
                 ? [dashboardQuery.data.upcomingSchedule]
