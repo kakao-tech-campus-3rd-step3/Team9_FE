@@ -8,8 +8,8 @@ import { LoadingSpinner } from '@/components';
 const TuneListSection = () => {
   const { study_id } = useParams<{ study_id: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [selectedTune, setSelectedTune] = useState<number | null>(null);
   const { data: tuneList } = useTuneList({ study_id: Number(study_id) });
+  const [selectedTune, setSelectedTune] = useState<number | null>(null);
 
   useEffect(() => {
     const tuneIdParam = searchParams.get('tune');

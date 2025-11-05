@@ -11,6 +11,7 @@ import {
 import TuneAvailableList from './TuneAvailableList';
 import TuneParticipant from './TuneParticipant';
 import { useTuneDetail } from '../hooks/useTuneDetail';
+import { useAuthStore } from '@/stores';
 
 type TuneInformationProps = {
   tune_id: number;
@@ -31,9 +32,14 @@ const TuneInformation = ({ tune_id }: TuneInformationProps) => {
     startTime: tuneDetailData.available_start_time,
     endTime: tuneDetailData.available_end_time,
   });
+  const { user } = useAuthStore();
   const gridNumber = getGridNumber({
     startTime: tuneDetailData.available_start_time,
     endTime: tuneDetailData.available_end_time,
+    candidate_dates: tuneDetailData.candidate_dates,
+    participant_number:
+      tuneDetailData.participants.find((p) => user.nickname === p.name)
+        ?.candidate_number || 0,
   });
   const [personalTune, setPersonalTune] = useState(gridNumber);
   const days = getTuneDay({
@@ -74,7 +80,12 @@ const TuneInformation = ({ tune_id }: TuneInformationProps) => {
         </div>
         <div className='min-w-[600px]'>
           <TuneTable
+            personalTune={personalTune}
             tuneDetailData={tuneDetailData}
+            participant_number={
+              tuneDetailData.participants.find((p) => user.nickname === p.name)
+                ?.candidate_number || 0
+            }
             hourSlots={hourSlots}
             grid={grid}
             days={days}

@@ -54,9 +54,13 @@ export const getTuneDay = ({
 export const getGridNumber = ({
   startTime,
   endTime,
+  candidate_dates,
+  participant_number,
 }: {
   startTime: string;
   endTime: string;
+  candidate_dates: number[];
+  participant_number: number;
 }) => {
   const days = getTuneDayCount({ startTime, endTime });
   const slots =
@@ -64,9 +68,19 @@ export const getGridNumber = ({
       dayjs(endTime).diff(dayjs(startTime), 'day') * 24 * 60) /
     30;
   const grid: number[][] = [];
-  for (let d = 0; d < days; d++) {
-    grid.push(Array.from({ length: slots }, () => 0));
+
+  for (let day = 0; day < days; day++) {
+    const dayStart = day * slots;
+    const dayEnd = (day + 1) * slots;
+    const daySlice = candidate_dates.slice(dayStart, dayEnd);
+
+    // Each element in candidate_dates is a bitmask of participants for that slot.
+    // If the current user's participant_number bit is set in that bitmask,
+    // mark the slot as 1, otherwise 0.
+    const row = daySlice.map((mask) => (mask & participant_number ? 1 : 0));
+    grid.push(row);
   }
+
   return grid;
 };
 

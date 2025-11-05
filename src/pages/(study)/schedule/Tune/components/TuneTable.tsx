@@ -3,7 +3,9 @@ import { countOnes, getBgColor } from '../utils';
 import type { TuneDetailResponse } from '../services';
 
 type TuneTableProps = {
+  personalTune: number[][];
   tuneDetailData: TuneDetailResponse;
+  participant_number: number;
   hourSlots: string[];
   grid: number[][];
   days: string[];
@@ -13,6 +15,8 @@ type TuneTableProps = {
 };
 
 const TuneTable = ({
+  personalTune,
+  participant_number,
   tuneDetailData,
   hourSlots,
   grid,
@@ -56,8 +60,27 @@ const TuneTable = ({
                         </td>
                       )}
                       {grid.map((daySlots, colIdx) => {
-                        const value = daySlots[rowIdx];
-                        const people = countOnes(value);
+                        const value = daySlots[rowIdx] ?? 0;
+
+                        // If the current user has toggled this slot in personalTune (1),
+                        // visually include their participant bit even if the server grid
+                        // doesn't include it yet. This lets users preview their selection.
+                        let displayMask = value;
+
+                        // If personalTune explicitly toggles this slot, honor it:
+                        // - 1: include current user's bit
+                        // - 0: remove current user's bit
+                        const personalValue = Array.isArray(personalTune)
+                          ? personalTune[colIdx]?.[rowIdx]
+                          : undefined;
+
+                        if (personalValue === 1) {
+                          displayMask = value | participant_number;
+                        } else if (personalValue === 0) {
+                          displayMask = value & ~participant_number;
+                        }
+
+                        const people = countOnes(displayMask);
                         return (
                           <td
                             key={`${colIdx}-${rowIdx}`}
