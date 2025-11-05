@@ -3,4 +3,5 @@
  */
 export const attendanceKeys = {
   study: (study_id: number) => ['attendance-study', study_id] as const,
+  me: (schedule_id: number) => ['attendance-me', schedule_id] as const,
 } as const;
