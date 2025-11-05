@@ -5,6 +5,8 @@ export { default as ScheduleSection } from './ScheduleSection';
 export { default as RetrospectSection } from './RetrospectSection';
 export { default as QuizSection } from './QuizSection';
 export { default as TitleRankingSection } from './TitleRankingSection';
+export { default as RankingListModal } from './RankingListModal';
 export { default as DashboardGrid } from './layout/DashboardGrid';
 export { default as DashboardRow } from './layout/DashboardRow';
 export * from './common';
+export * from './widgets';
