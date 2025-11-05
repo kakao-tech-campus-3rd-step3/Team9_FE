@@ -1,14 +1,23 @@
 import { Calendar, BookOpen, Users, Clock, User } from 'lucide-react';
-import { SectionCard } from './common';
+import dayjs from 'dayjs';
+import { SectionCard, DashboardEmpty, SkeletonBlock } from './common';
 import { SCHEDULE_TYPE_CONFIG } from '../constants';
 import type { Schedule } from '../types';
+import { calculateDday, getDdayColor } from '../utils';
 
 interface ScheduleSectionProps {
   schedules: Schedule[];
   onClick: () => void;
+  isLoading?: boolean;
+  isError?: boolean;
 }
 
-const ScheduleSection = ({ schedules, onClick }: ScheduleSectionProps) => {
+const ScheduleSection = ({
+  schedules,
+  onClick,
+  isLoading,
+  isError,
+}: ScheduleSectionProps) => {
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'study':
@@ -22,32 +31,38 @@ const ScheduleSection = ({ schedules, onClick }: ScheduleSectionProps) => {
     }
   };
 
-  const calculateDday = (dateString: string) => {
-    const today = new Date();
-    const targetDate = new Date(dateString);
-    const diffTime = targetDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  if (isLoading) {
+    return (
+      <SectionCard
+        icon={Calendar}
+        title='일정'
+        onClick={onClick}
+        borderColor='border-primary'
+      >
+        <SkeletonBlock minHeightClass='min-h-[140px]' />
+      </SectionCard>
+    );
+  }
 
-    if (diffDays === 0) return '오늘';
-    if (diffDays === 1) return '내일';
-    if (diffDays === -1) return '어제';
-    if (diffDays > 0) return `D-${diffDays}`;
-    if (diffDays < 0) return `D+${Math.abs(diffDays)}`;
-    return '오늘';
-  };
-
-  const getDdayColor = (dateString: string) => {
-    const today = new Date();
-    const targetDate = new Date(dateString);
-    const diffTime = targetDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) return 'bg-primary text-primary-foreground';
-    if (diffDays === 1) return 'bg-warning text-warning-foreground';
-    if (diffDays > 0) return 'bg-success text-success-foreground';
-    if (diffDays < 0) return 'bg-muted text-muted-foreground';
-    return 'bg-primary text-primary-foreground';
-  };
+  if (isError) {
+    return (
+      <SectionCard
+        icon={Calendar}
+        title='일정'
+        onClick={onClick}
+        borderColor='border-destructive'
+      >
+        <div className='text-center py-8'>
+          <p className='text-destructive font-medium'>
+            일정을 불러오지 못했어요.
+          </p>
+          <p className='text-xs text-muted-foreground mt-1'>
+            잠시 후 다시 시도해 주세요.
+          </p>
+        </div>
+      </SectionCard>
+    );
+  }
 
   if (!schedules.length) {
     return (
@@ -57,20 +72,23 @@ const ScheduleSection = ({ schedules, onClick }: ScheduleSectionProps) => {
         onClick={onClick}
         borderColor='border-primary'
       >
-        <div className='text-center py-8'>
-          <p className='text-muted-foreground'>등록된 일정이 없습니다.</p>
-        </div>
+        <DashboardEmpty
+          icon={Calendar}
+          title='일정 없음'
+          description='등록된 일정이 없습니다'
+          minHeightClass='min-h-[140px]'
+          iconClassName='text-primary'
+          iconWrapperClassName='bg-primary/20'
+        />
       </SectionCard>
     );
   }
 
-  // 가장 가까운 일정 찾기
-  const today = new Date();
+  // 가장 가까운 일정 찾기 (dayjs)
+  const today = dayjs();
   const closestSchedule = schedules.reduce((closest, current) => {
-    const currentDate = new Date(current.date);
-    const closestDate = new Date(closest.date);
-    const currentDiff = Math.abs(currentDate.getTime() - today.getTime());
-    const closestDiff = Math.abs(closestDate.getTime() - today.getTime());
+    const currentDiff = Math.abs(dayjs(current.date).diff(today, 'day'));
+    const closestDiff = Math.abs(dayjs(closest.date).diff(today, 'day'));
     return currentDiff < closestDiff ? current : closest;
   });
 
@@ -131,8 +149,8 @@ const ScheduleSection = ({ schedules, onClick }: ScheduleSectionProps) => {
             >
               {dday}
             </div>
-            <div className='mt-2 text-sm text-muted-foreground font-medium'>
-              {closestSchedule.date}
+            <div className='mt-2 text-xs text-muted-foreground font-medium'>
+              {closestSchedule.date} · {closestSchedule.time}
             </div>
           </div>
         </div>
