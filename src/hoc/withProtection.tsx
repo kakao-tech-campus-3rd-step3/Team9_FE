@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuthStatus } from '@/hooks/useAuthStatus';
+import { useAuthStatus } from '@/hooks';
 import { ROUTES } from '@/constants';
 import type { UserRole } from '@/types/auth';
 

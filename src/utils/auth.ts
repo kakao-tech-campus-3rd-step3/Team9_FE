@@ -4,10 +4,9 @@
  */
 import dayjs from 'dayjs';
 import { REMEMBER_ME } from '@/constants';
-import { refreshTokenService } from '@/pages/(auth)/login/services';
-import { getUserProfile } from '@/services';
+import { refreshTokenService } from '@/pages/(auth)/login/services/refreshService';
+import { loadAndCacheAuthUser } from '@/utils/authUserLoader';
 import { useAuthStore } from '@/stores/auth';
-import { mapUserProfileToAuthUser } from '@/utils/mappers';
 
 /**
  * 쿠키 관리
@@ -74,45 +73,43 @@ export const TokenManager = {
 /**
  * 인증 초기화 관리
  */
-let isInitializing = false;
-
 export const AuthInitializer = {
   init: async (): Promise<void> => {
-    if (isInitializing) return;
-    isInitializing = true;
+    const {
+      setIsInitialized,
+      isInitialized,
+      isInitializing,
+      setIsInitializing,
+    } = useAuthStore.getState();
 
-    const { setIsInitialized, isInitialized } = useAuthStore.getState();
+    if (isInitializing) return;
+    setIsInitializing(true);
 
     if (isInitialized) {
-      isInitializing = false;
+      setIsInitializing(false);
       return;
     }
 
     try {
       const refreshSuccess = await TokenManager.refreshAccessToken();
       if (refreshSuccess) {
-        await loadUserProfile();
+        // 토큰 재발급 성공 시 프로필도 로드
+        try {
+          await loadAndCacheAuthUser();
+        } catch (profileError) {
+          console.warn('프로필 로드 실패:', profileError);
+        }
       }
     } catch (error) {
-      console.log('인증 초기화 실패:', error);
+      // CORS나 네트워크 에러는 개발 환경에서 흔한 문제이므로 조용히 처리
+      if (import.meta.env.DEV) {
+        console.warn('인증 초기화 실패 (개발 환경):', error);
+      }
     } finally {
       setIsInitialized(true);
-      isInitializing = false;
+      setIsInitializing(false);
     }
   },
 } as const;
 
-/**
- * 프로필 로드 및 스토어 동기화 공통 함수
- */
-export const loadUserProfile = async (): Promise<void> => {
-  const { setUser, setIsLogin } = useAuthStore.getState();
-  try {
-    const profile = await getUserProfile();
-    setUser(mapUserProfileToAuthUser(profile));
-    setIsLogin(true);
-  } catch (error) {
-    console.warn('프로필 로드 실패:', error);
-    throw error; // 호출자가 에러 처리 결정하도록
-  }
-};
+// loadUserProfile 함수는 useLoadUserProfile 훅으로 대체됨

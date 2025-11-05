@@ -1,3 +1,4 @@
+import { studyColor } from '@/utils';
 import dayjs from 'dayjs';
 import { X } from 'lucide-react';
 import { useEffect, useRef } from 'react';
@@ -10,11 +11,11 @@ type Popover = {
 
 type CalendarPopoverProps = {
   schedules: {
-    id: number;
+    schedule_id: number;
+    study_id: number;
     title: string;
     start_time: string;
     end_time: string;
-    color: string;
   }[];
   popover: Popover | null;
   setPopover: (popover: Popover | null) => void;
@@ -70,10 +71,10 @@ const CalendarPopover = ({
           )
           .map((schedule) => (
             <li
-              key={schedule.id}
+              key={schedule.schedule_id}
               className='p-1 rounded-lg text-white'
               style={{
-                backgroundColor: schedule.color,
+                backgroundColor: studyColor(schedule.study_id),
               }}
             >
               {schedule.title}

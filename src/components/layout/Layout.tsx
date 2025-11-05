@@ -26,19 +26,23 @@ const Layout: React.FC<LayoutProps> = ({ layoutType = 'none' }) => {
         return (
           <div className='min-h-screen bg-background'>
             <Header />
-            <main className='flex-1 overflow-auto'>
-              <Outlet />
+            <main>
+              <div className='max-w-7xl mx-auto'>
+                <Outlet />
+              </div>
             </main>
           </div>
         );
 
       case 'sidebar-only':
         return (
-          <div className='flex min-h-screen bg-background'>
-            <Sidebar />
-            <main className='flex-1 overflow-auto'>
-              <Outlet />
-            </main>
+          <div className='min-h-screen bg-background'>
+            <div className='max-w-7xl mx-auto flex'>
+              <Sidebar />
+              <main className='flex-1'>
+                <Outlet />
+              </main>
+            </div>
           </div>
         );
 
@@ -46,11 +50,13 @@ const Layout: React.FC<LayoutProps> = ({ layoutType = 'none' }) => {
         return (
           <div className='min-h-screen bg-background'>
             <Header />
-            <div className='flex pt-16 h-[calc(100vh-4rem)]'>
-              <Sidebar />
-              <main className='flex-1 overflow-auto'>
-                <Outlet />
-              </main>
+            <div className='max-w-7xl mx-auto'>
+              <div className='flex pt-16'>
+                <Sidebar />
+                <main className='flex-1'>
+                  <Outlet />
+                </main>
+              </div>
             </div>
           </div>
         );
@@ -59,7 +65,9 @@ const Layout: React.FC<LayoutProps> = ({ layoutType = 'none' }) => {
       default:
         return (
           <div className='min-h-screen bg-background'>
-            <Outlet />
+            <div className='max-w-7xl mx-auto'>
+              <Outlet />
+            </div>
           </div>
         );
     }

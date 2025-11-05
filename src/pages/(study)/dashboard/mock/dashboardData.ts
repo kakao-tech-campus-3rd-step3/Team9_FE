@@ -74,6 +74,7 @@ export const mockSchedules: Schedule[] = [
 ];
 
 export const mockStudyInfo: StudyInfo = {
+  id: 101,
   name: '카테캠 FE 스터디 3기',
 };
 

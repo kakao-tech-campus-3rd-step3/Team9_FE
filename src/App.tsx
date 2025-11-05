@@ -1,11 +1,11 @@
 import { Router } from '@/routes';
-import { AuthInitializer } from '@/components';
+import ErrorBoundary from '@/components/common/ErrorBoundary';
 
 function App() {
   return (
-    <AuthInitializer>
+    <ErrorBoundary>
       <Router />
-    </AuthInitializer>
+    </ErrorBoundary>
   );
 }
 

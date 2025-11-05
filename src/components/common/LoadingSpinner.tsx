@@ -1,19 +1,17 @@
-/**
- * 범용 로딩 스피너 컴포넌트
- * - 다양한 상황에서 재사용 가능한 로딩 UI
- * - 크기, 메시지, 전체 화면 여부 등을 커스터마이징 가능
- */
 interface LoadingSpinnerProps {
-  /** 로딩 메시지 (옵션) */
+  // 로딩 메시지 (옵션)
   message?: string;
-  /** 전체 화면 여부 (기본값: false) */
+  // 전체 화면 여부 (기본값: false)
   fullScreen?: boolean;
-  /** 스피너 크기 (기본값: medium) */
+  // 스피너 크기 (기본값: medium)
   size?: 'small' | 'medium' | 'large';
-  /** 컨테이너 클래스명 (옵션) */
+  // 컨테이너 클래스명 (옵션)
   className?: string;
 }
 
+/**
+ * 로딩 스피너 컴포넌트
+ */
 const LoadingSpinner = ({
   message,
   fullScreen = false,
