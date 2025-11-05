@@ -22,8 +22,6 @@ const TunePersonalTable = ({
   const { mutate: saveTune } = useTuneParticipantAdd();
 
   const handleSaveClick = () => {
-    // personalTune is a grid [dayIndex][slotIndex] with values 0 or 1.
-    // The API expects candidate_dates: number[] flattened by day blocks: [day0_slot0, day0_slot1, ..., day1_slot0, ...]
     const candidate_dates = personalTune.flat().map((v) => (v ? 1 : 0));
 
     saveTune({
