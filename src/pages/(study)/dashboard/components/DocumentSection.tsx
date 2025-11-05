@@ -1,8 +1,7 @@
 import { FileText, User, HardDrive } from 'lucide-react';
 import { getIconByExtension } from '../utils';
-import { SectionCard } from './common';
+import { SectionCard, DashboardEmpty } from './common';
 import { ListItemSkeleton } from '@/components/common';
-import type { Document } from '../types';
 
 interface RecentMaterialItem {
   material_id: number;
@@ -13,15 +12,13 @@ interface RecentMaterialItem {
 }
 
 interface DocumentSectionProps {
-  documents?: Document[]; // 구 API (기존 목)
-  recent?: RecentMaterialItem[]; // 신 API (실데이터)
+  recent?: RecentMaterialItem[]; // 실데이터
   isLoading?: boolean; // 로딩 상태
   onClick: () => void; // 섹션 전체 클릭 시 문서 페이지로 이동
   onItemClick?: (materialId: number) => void; // 특정 아이템 클릭 시 상세 이동
 }
 
 const DocumentSection = ({
-  documents = [],
   recent,
   isLoading = false,
   onClick,
@@ -59,29 +56,28 @@ const DocumentSection = ({
         };
       });
     }
-    return documents.map((d) => ({
-      id: d.id,
-      title: d.title,
-      author: d.uploadedBy,
-      meta: d.size,
-      icon: getFileIcon(d.title),
-    }));
+    return [];
   })();
 
   return (
     <SectionCard icon={FileText} title='문서' onClick={onClick}>
       <div className='space-y-2'>
         {isLoading ? (
-          // 로딩 중일 때 스켈레톤 표시
+          // 로딩: 일관된 스켈레톤 스타일 (리스트 형태 유지)
           <>
             <ListItemSkeleton />
             <ListItemSkeleton />
             <ListItemSkeleton />
           </>
         ) : normalized.length === 0 ? (
-          <div className='p-4 text-xs text-muted-foreground bg-muted/30 rounded-lg border border-dashed border-border'>
-            최근 학습 자료가 없습니다.
-          </div>
+          <DashboardEmpty
+            icon={FileText}
+            title='자료 없음'
+            description='최근 학습 자료가 없습니다'
+            minHeightClass='min-h-[140px]'
+            iconClassName='text-primary'
+            iconWrapperClassName='bg-primary/20'
+          />
         ) : (
           normalized.map((item) => (
             <div
