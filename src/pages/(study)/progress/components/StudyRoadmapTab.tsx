@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { Plus, Edit, Trash2, Check, Clock } from 'lucide-react';
-
-type Session = {
-  id: number;
-  title: string;
-  description: string;
-  isCompleted: boolean;
-  createdAt: string;
-};
+import { useCurrentStudy } from '@/hooks/study/useCurrentStudy';
+import {
+  useStudyRoadmapQuery,
+  useAddChapterMutation,
+  useUpdateChapterMutation,
+  useCompleteChapterMutation,
+  useDeleteChapterMutation,
+} from '../hooks';
+import type { Chapter } from '../types';
+import { LoadingSpinner } from '@/components';
 
 interface StudyRoadmapTabProps {
   studyId: number;
@@ -16,113 +18,111 @@ interface StudyRoadmapTabProps {
 /**
  * 스터디 로드맵 탭 컴포넌트
  * - 차시별 스터디 진행 상황을 타임라인 형태로 표시
- * - 차시 추가, 수정, 삭제, 완료 기능 제공
+ * - 차시 추가, 수정, 삭제, 완료 기능 제공 (스터디 리더만 가능)
  */
 export const StudyRoadmapTab = ({ studyId }: StudyRoadmapTabProps) => {
-  // TODO: studyId를 사용하여 API 연동 예정
-  void studyId;
+  const { data: studyInfo } = useCurrentStudy(studyId);
+  const isLeader = studyInfo?.role === 'LEADER';
 
-  const [sessions, setSessions] = useState<Session[]>([
-    {
-      id: 1,
-      title: '1차시 - React 기초개념과 컴포넌트 구조',
-      description: '',
-      isCompleted: false,
-      createdAt: '2024-01-15',
-    },
-    {
-      id: 2,
-      title: '2차시 - State와 Props를 활용한 동적 컴포넌트',
-      description: '',
-      isCompleted: false,
-      createdAt: '2024-01-22',
-    },
-    {
-      id: 3,
-      title: '3차시 - React Hooks를 사용한 함수형 컴포넌트',
-      description: '',
-      isCompleted: false,
-      createdAt: '2024-01-29',
-    },
-    {
-      id: 4,
-      title: '4차시 - React Router를 활용한 SPA 라우팅',
-      description: '',
-      isCompleted: false,
-      createdAt: '2024-02-05',
-    },
-  ]);
+  const { data: roadmapData, isLoading, error } = useStudyRoadmapQuery(studyId);
+  const addChapterMutation = useAddChapterMutation(studyId);
+  const updateChapterMutation = useUpdateChapterMutation(studyId);
+  const completeChapterMutation = useCompleteChapterMutation(studyId);
+  const deleteChapterMutation = useDeleteChapterMutation(studyId);
+
+  const chapters: Chapter[] = roadmapData?.chapters || [];
 
   const [isAddingSession, setIsAddingSession] = useState(false);
-  const [newTitle, setNewTitle] = useState('');
-  const [editingSession, setEditingSession] = useState<number | null>(null);
-  const [editingTitle, setEditingTitle] = useState('');
+  const [newContent, setNewContent] = useState('');
+  const [editingChapterId, setEditingChapterId] = useState<number | null>(null);
+  const [editingContent, setEditingContent] = useState('');
 
-  const handleAddSession = () => {
-    if (newTitle.trim()) {
-      const newSession: Session = {
-        id: Math.max(...sessions.map((s) => s.id)) + 1,
-        title: newTitle.trim(),
-        description: '',
-        isCompleted: false,
-        createdAt: new Date().toISOString().split('T')[0],
-      };
-      setSessions([...sessions, newSession]);
-      setNewTitle('');
-      setIsAddingSession(false);
+  const handleAddSession = async () => {
+    if (newContent.trim() && isLeader) {
+      try {
+        await addChapterMutation.mutateAsync({ content: newContent.trim() });
+        setNewContent('');
+        setIsAddingSession(false);
+      } catch {
+        // 에러는 mutation에서 토스트 처리
+      }
     }
   };
 
   const handleStartAdd = () => {
+    if (!isLeader) return;
     setIsAddingSession(true);
-    setNewTitle('');
+    setNewContent('');
   };
 
   const handleCancelAdd = () => {
     setIsAddingSession(false);
-    setNewTitle('');
+    setNewContent('');
   };
 
-  const handleCompleteSession = (id: number) => {
-    setSessions(
-      sessions.map((session) =>
-        session.id === id
-          ? { ...session, isCompleted: !session.isCompleted }
-          : session,
-      ),
-    );
+  const handleCompleteSession = async (chapterId: number) => {
+    if (!isLeader) return;
+    try {
+      await completeChapterMutation.mutateAsync(chapterId);
+    } catch {
+      // 에러는 mutation에서 토스트 처리
+    }
   };
 
-  const handleDeleteSession = (id: number) => {
-    setSessions(sessions.filter((session) => session.id !== id));
+  const handleDeleteSession = async (chapterId: number) => {
+    if (!isLeader) return;
+    if (confirm('정말 이 차시를 삭제하시겠습니까?')) {
+      try {
+        await deleteChapterMutation.mutateAsync(chapterId);
+      } catch {
+        // 에러는 mutation에서 토스트 처리
+      }
+    }
   };
 
-  const handleStartEdit = (session: Session) => {
-    setEditingSession(session.id);
-    setEditingTitle(session.title);
+  const handleStartEdit = (chapter: Chapter) => {
+    if (!isLeader || !chapter.id) return;
+    setEditingChapterId(chapter.id);
+    setEditingContent(chapter.content);
   };
 
-  const handleSaveEdit = () => {
-    if (editingSession && editingTitle.trim()) {
-      setSessions(
-        sessions.map((session) =>
-          session.id === editingSession
-            ? {
-                ...session,
-                title: editingTitle.trim(),
-              }
-            : session,
-        ),
-      );
-      setEditingSession(null);
-      setEditingTitle('');
+  const handleSaveEdit = async () => {
+    if (editingChapterId && editingContent.trim() && isLeader) {
+      try {
+        await updateChapterMutation.mutateAsync({
+          chapterId: editingChapterId,
+          payload: { content: editingContent.trim() },
+        });
+        setEditingChapterId(null);
+        setEditingContent('');
+      } catch {
+        // 에러는 mutation에서 토스트 처리
+      }
     }
   };
 
   const handleCancelEdit = () => {
-    setEditingSession(null);
-    setEditingTitle('');
+    setEditingChapterId(null);
+    setEditingContent('');
   };
+
+  if (isLoading) {
+    return (
+      <div className='p-6 flex items-center justify-center h-full'>
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='p-6 text-center'>
+        <p className='text-destructive'>
+          로드맵을 불러오는 중 오류가 발생했습니다.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className='p-6'>
@@ -133,17 +133,19 @@ export const StudyRoadmapTab = ({ studyId }: StudyRoadmapTabProps) => {
             스터디 로드맵
           </h2>
           <p className='text-sm text-muted-foreground mt-1'>
-            총 {sessions.length}개 차시 • 완료{' '}
-            {sessions.filter((s) => s.isCompleted).length}개
+            총 {chapters.length}개 차시 • 완료{' '}
+            {chapters.filter((c) => c.completed).length}개
           </p>
         </div>
-        <button
-          onClick={handleStartAdd}
-          className='flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors'
-        >
-          <Plus className='w-4 h-4' />
-          차시 추가하기
-        </button>
+        {isLeader && (
+          <button
+            onClick={handleStartAdd}
+            className='flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors'
+          >
+            <Plus className='w-4 h-4' />
+            차시 추가하기
+          </button>
+        )}
       </div>
 
       {/* 타임라인 */}
@@ -160,22 +162,31 @@ export const StudyRoadmapTab = ({ studyId }: StudyRoadmapTabProps) => {
               <div className='space-y-2'>
                 <input
                   type='text'
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
+                  value={newContent}
+                  onChange={(e) => setNewContent(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddSession();
+                    }
+                  }}
                   className='w-full px-2 py-1 text-sm border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary'
-                  placeholder='차시 제목을 입력하세요'
+                  placeholder='차시 내용을 입력하세요'
                   autoFocus
+                  disabled={addChapterMutation.isPending}
                 />
                 <div className='flex gap-2'>
                   <button
                     onClick={handleAddSession}
-                    className='px-3 py-1 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90'
+                    disabled={addChapterMutation.isPending}
+                    className='px-3 py-1 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90 disabled:opacity-50'
                   >
-                    추가하기
+                    {addChapterMutation.isPending ? '추가 중...' : '추가하기'}
                   </button>
                   <button
                     onClick={handleCancelAdd}
-                    className='px-3 py-1 text-xs text-muted-foreground hover:text-foreground'
+                    disabled={addChapterMutation.isPending}
+                    className='px-3 py-1 text-xs text-muted-foreground hover:text-foreground disabled:opacity-50'
                   >
                     취소
                   </button>
@@ -185,31 +196,33 @@ export const StudyRoadmapTab = ({ studyId }: StudyRoadmapTabProps) => {
           </div>
         )}
 
-        {sessions.length === 0 && !isAddingSession ? (
+        {chapters.length === 0 && !isAddingSession ? (
           <div className='text-center py-12 text-muted-foreground'>
             <Clock className='w-12 h-12 mx-auto mb-4 opacity-50' />
             <p className='text-lg font-medium'>아직 등록된 차시가 없습니다</p>
-            <p className='text-sm'>첫 번째 차시를 추가해보세요!</p>
+            {isLeader && (
+              <p className='text-sm'>첫 번째 차시를 추가해보세요!</p>
+            )}
           </div>
         ) : (
-          sessions.map((session, index) => (
-            <div key={session.id} className='flex items-start gap-4'>
+          chapters.map((chapter, index) => (
+            <div key={chapter.id || index} className='flex items-start gap-4'>
               {/* 차시 번호 */}
               <div className='flex flex-col items-center'>
                 <div
                   className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
-                    session.isCompleted
+                    chapter.completed
                       ? 'bg-green-500 text-white'
                       : 'bg-primary text-primary-foreground'
                   }`}
                 >
-                  {session.isCompleted ? (
+                  {chapter.completed ? (
                     <Check className='w-5 h-5' />
                   ) : (
-                    session.id
+                    index + 1
                   )}
                 </div>
-                {index < sessions.length - 1 && (
+                {index < chapters.length - 1 && (
                   <div className='w-0.5 h-20 bg-border mt-2'></div>
                 )}
               </div>
@@ -217,32 +230,43 @@ export const StudyRoadmapTab = ({ studyId }: StudyRoadmapTabProps) => {
               {/* 차시 내용 */}
               <div
                 className={`flex-1 border rounded-lg p-4 transition-colors ${
-                  session.isCompleted
+                  chapter.completed
                     ? 'bg-green-50 border-green-200'
                     : 'bg-background border-border'
                 }`}
               >
                 <div className='flex justify-between items-start mb-3'>
                   <div className='flex-1'>
-                    {editingSession === session.id ? (
+                    {editingChapterId === chapter.id ? (
                       <div className='space-y-2'>
                         <input
                           type='text'
-                          value={editingTitle}
-                          onChange={(e) => setEditingTitle(e.target.value)}
+                          value={editingContent}
+                          onChange={(e) => setEditingContent(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleSaveEdit();
+                            }
+                          }}
                           className='w-full px-2 py-1 text-sm border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary'
-                          placeholder='차시 제목'
+                          placeholder='차시 내용'
+                          disabled={updateChapterMutation.isPending}
                         />
                         <div className='flex gap-2'>
                           <button
                             onClick={handleSaveEdit}
-                            className='px-2 py-1 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90'
+                            disabled={updateChapterMutation.isPending}
+                            className='px-2 py-1 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90 disabled:opacity-50'
                           >
-                            저장
+                            {updateChapterMutation.isPending
+                              ? '저장 중...'
+                              : '저장'}
                           </button>
                           <button
                             onClick={handleCancelEdit}
-                            className='px-2 py-1 text-xs text-muted-foreground hover:text-foreground'
+                            disabled={updateChapterMutation.isPending}
+                            className='px-2 py-1 text-xs text-muted-foreground hover:text-foreground disabled:opacity-50'
                           >
                             취소
                           </button>
@@ -252,44 +276,52 @@ export const StudyRoadmapTab = ({ studyId }: StudyRoadmapTabProps) => {
                       <>
                         <h3
                           className={`text-sm font-medium ${
-                            session.isCompleted
+                            chapter.completed
                               ? 'text-green-800 line-through'
                               : 'text-foreground'
                           }`}
                         >
-                          {session.title}
+                          {chapter.content}
                         </h3>
                       </>
                     )}
                   </div>
-                  {editingSession !== session.id && (
-                    <div className='flex gap-2 ml-4'>
-                      <button
-                        onClick={() => handleStartEdit(session)}
-                        className='p-1 text-muted-foreground hover:text-foreground transition-colors'
-                      >
-                        <Edit className='w-4 h-4' />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteSession(session.id)}
-                        className='p-1 text-muted-foreground hover:text-destructive transition-colors'
-                      >
-                        <Trash2 className='w-4 h-4' />
-                      </button>
-                    </div>
-                  )}
+                  {editingChapterId !== chapter.id &&
+                    isLeader &&
+                    chapter.id && (
+                      <div className='flex gap-2 ml-4'>
+                        <button
+                          onClick={() => handleStartEdit(chapter)}
+                          className='p-1 text-muted-foreground hover:text-foreground transition-colors'
+                        >
+                          <Edit className='w-4 h-4' />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteSession(chapter.id!)}
+                          disabled={deleteChapterMutation.isPending}
+                          className='p-1 text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50'
+                        >
+                          <Trash2 className='w-4 h-4' />
+                        </button>
+                      </div>
+                    )}
                 </div>
-                {editingSession !== session.id && (
+                {editingChapterId !== chapter.id && isLeader && chapter.id && (
                   <div className='flex justify-end'>
                     <button
-                      onClick={() => handleCompleteSession(session.id)}
-                      className={`px-3 py-1 text-xs rounded-md transition-colors ${
-                        session.isCompleted
+                      onClick={() => handleCompleteSession(chapter.id!)}
+                      disabled={completeChapterMutation.isPending}
+                      className={`px-3 py-1 text-xs rounded-md transition-colors disabled:opacity-50 ${
+                        chapter.completed
                           ? 'bg-green-100 text-green-700 hover:bg-green-200'
                           : 'bg-primary text-primary-foreground hover:bg-primary/90'
                       }`}
                     >
-                      {session.isCompleted ? '완료됨' : '완료하기'}
+                      {completeChapterMutation.isPending
+                        ? '처리 중...'
+                        : chapter.completed
+                          ? '완료됨'
+                          : '완료하기'}
                     </button>
                   </div>
                 )}
