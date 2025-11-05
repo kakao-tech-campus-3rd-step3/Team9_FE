@@ -3,7 +3,7 @@ import {
   scheduleAddService,
   type ScheduleAddRequest,
 } from '../services/scheduleAddService';
-import { scheduleKeys } from '@/constants/queryKeys';
+import { attendanceKeys, scheduleKeys } from '@/constants/queryKeys';
 
 export const useScheduleAddMutation = () => {
   const queryClient = useQueryClient();
@@ -16,6 +16,9 @@ export const useScheduleAddMutation = () => {
       queryClient.invalidateQueries({
         queryKey: scheduleKeys.study(variables.study_id),
         exact: true,
+      });
+      queryClient.invalidateQueries({
+        queryKey: attendanceKeys.study(variables.study_id),
       });
     },
 
