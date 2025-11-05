@@ -8,8 +8,8 @@ type TuneListRequest = {
 type TuneListResponse = {
   tune_id: number;
   title: string;
-  start: string;
-  end: string;
+  start_time: string;
+  end_time: string;
 };
 
 /**

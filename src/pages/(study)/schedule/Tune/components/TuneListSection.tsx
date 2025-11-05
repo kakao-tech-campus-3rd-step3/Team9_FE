@@ -39,8 +39,8 @@ const TuneListSection = () => {
             >
               <h3 className='text-lg font-bold'>{tune.title}</h3>
               <p className='text-sm text-gray-500'>
-                {`${dayjs(tune.start).format('YYYY-MM-DD HH:mm')} - ${dayjs(
-                  tune.end,
+                {`${dayjs(tune.start_time).format('YYYY-MM-DD HH:mm')} - ${dayjs(
+                  tune.end_time,
                 ).format('YYYY-MM-DD HH:mm')}`}
               </p>
             </div>
