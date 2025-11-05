@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import { useParams, useSearchParams } from 'react-router-dom';
 import TuneInformation from './TuneInformation';
 import { useTuneList } from '../hooks/useTuneList';
+import { LoadingSpinner } from '@/components';
 
 const TuneListSection = () => {
   const { study_id } = useParams<{ study_id: string }>();
@@ -44,7 +45,11 @@ const TuneListSection = () => {
               </p>
             </div>
 
-            {selectedTune === tune.tune_id && <TuneInformation />}
+            {selectedTune === tune.tune_id && (
+              <Suspense fallback={<LoadingSpinner />}>
+                <TuneInformation tune_id={tune.tune_id} />
+              </Suspense>
+            )}
           </div>
         ))}
         {tuneList.length === 0 && (

@@ -92,11 +92,23 @@ export const buildGrid = ({
 };
 
 export const getHourSlots = (startTime: string, endTime: string): string[] => {
-  const [startH, startM] = startTime.split(':').map(Number);
-  const [endH, endM] = endTime.split(':').map(Number);
+  // startTime / endTime may come in different formats ("HH:mm", "HH:mm:ss", or ISO datetime).
+  // Use dayjs to safely parse hours and minutes. Fall back to simple split parsing if parsing fails.
+  const parseTime = (t: string) => {
+    const d = dayjs(t);
+    if (d.isValid()) {
+      return { h: d.hour(), m: d.minute() };
+    }
 
-  const totalStart = startH * 60 + startM;
-  const totalEnd = endH === 24 ? 24 * 60 : endH * 60 + endM;
+    const parts = t.split(':').map(Number);
+    return { h: parts[0] ?? 0, m: parts[1] ?? 0 };
+  };
+
+  const { h: sH, m: sM } = parseTime(startTime);
+  const { h: eH, m: eM } = parseTime(endTime);
+
+  const totalStart = sH * 60 + sM;
+  const totalEnd = eH === 24 ? 24 * 60 : eH * 60 + eM;
 
   const slots: string[] = [];
   for (let time = totalStart; time < totalEnd; time += 60) {

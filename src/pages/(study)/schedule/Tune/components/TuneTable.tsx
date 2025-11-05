@@ -1,8 +1,9 @@
 import React from 'react';
-import { tuneCheckData } from '../mock/tuneCheck';
 import { countOnes, getBgColor } from '../utils';
+import type { TuneDetailResponse } from '../services';
 
 type TuneTableProps = {
+  tuneDetailData: TuneDetailResponse;
   hourSlots: string[];
   grid: number[][];
   days: string[];
@@ -12,6 +13,7 @@ type TuneTableProps = {
 };
 
 const TuneTable = ({
+  tuneDetailData,
   hourSlots,
   grid,
   days,
@@ -65,7 +67,7 @@ const TuneTable = ({
                             className={`border-r border-gray-800 px-2 py-1 ${getBgColor(
                               {
                                 count: people,
-                                maxCount: tuneCheckData.participants.length,
+                                maxCount: tuneDetailData.participants.length,
                               },
                             )} ${index === 1 ? 'border-b' : ''}`}
                           />
@@ -83,17 +85,17 @@ const TuneTable = ({
           0명 참가
         </div>
         <div className='border-r border-y h-6 w-6 bg-white' />
-        {tuneCheckData.participants.map((participant, index) => (
+        {tuneDetailData.participants.map((participant, index) => (
           <div
             key={participant.id}
             className={`border-r border-y h-6 w-6 border-gray-800 ${getBgColor({
               count: index + 1,
-              maxCount: tuneCheckData.participants.length,
+              maxCount: tuneDetailData.participants.length,
             })}`}
           ></div>
         ))}
         <div className='px-2 py-1 text-xs font-bold'>
-          {tuneCheckData.participants.length}명 참가
+          {tuneDetailData.participants.length}명 참가
         </div>
       </div>
     </div>
