@@ -10,11 +10,6 @@ const TuneListSection = () => {
   const [selectedTune, setSelectedTune] = useState<number | null>(null);
   const { data: tuneList } = useTuneList({ study_id: Number(study_id) });
 
-  const tuneDataList = (tuneList ?? []).map((tune, index) => ({
-    id: index + 1,
-    ...tune,
-  }));
-
   useEffect(() => {
     const tuneIdParam = searchParams.get('tune');
     if (tuneIdParam) {
@@ -35,11 +30,11 @@ const TuneListSection = () => {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <section className='flex flex-col w-full p-4 gap-3'>
-        {tuneDataList.map((tune) => (
-          <div key={`${tune.id}`} className='flex flex-col gap-2'>
+        {tuneList.map((tune) => (
+          <div key={`${tune.tune_id}`} className='flex flex-col gap-2'>
             <div
               className='flex flex-col px-6 py-4 border border-primary rounded-lg gap-1 bg-blue-50 cursor-pointer'
-              onClick={() => handleClickTune(tune.id)}
+              onClick={() => handleClickTune(tune.tune_id)}
             >
               <h3 className='text-lg font-bold'>{tune.title}</h3>
               <p className='text-sm text-gray-500'>
@@ -49,9 +44,12 @@ const TuneListSection = () => {
               </p>
             </div>
 
-            {selectedTune === tune.id && <TuneInformation />}
+            {selectedTune === tune.tune_id && <TuneInformation />}
           </div>
         ))}
+        {tuneList.length === 0 && (
+          <p className='text-center pt-6'>조율중인 일정이 없습니다.</p>
+        )}
       </section>
     </Suspense>
   );
