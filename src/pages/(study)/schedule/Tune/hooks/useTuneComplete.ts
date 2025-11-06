@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { scheduleKeys } from '@/constants/queryKeys';
+import { attendanceKeys, scheduleKeys } from '@/constants/queryKeys';
 import { toast } from 'react-toastify';
 import {
   tuneCompleteService,
@@ -19,6 +19,10 @@ export const useTuneComplete = ({ study_id }: { study_id: number }) => {
       });
       queryClient.invalidateQueries({
         queryKey: scheduleKeys.study(study_id),
+        exact: true,
+      });
+      queryClient.invalidateQueries({
+        queryKey: attendanceKeys.study(study_id),
         exact: true,
       });
 

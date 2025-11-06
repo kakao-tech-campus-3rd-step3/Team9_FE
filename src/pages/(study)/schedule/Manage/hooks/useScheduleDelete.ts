@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { scheduleKeys } from '@/constants/queryKeys';
+import { attendanceKeys, scheduleKeys } from '@/constants/queryKeys';
 import {
   scheduleDeleteService,
   type ScheduleDeleteRequest,
@@ -16,6 +16,10 @@ export const useScheduleDelete = ({ study_id }: { study_id: number }) => {
       // 일정 삭제 성공 시 해당 스터디의 일정 목록 쿼리 무효화
       queryClient.invalidateQueries({
         queryKey: scheduleKeys.study(study_id),
+        exact: true,
+      });
+      queryClient.invalidateQueries({
+        queryKey: attendanceKeys.study(study_id),
         exact: true,
       });
     },
