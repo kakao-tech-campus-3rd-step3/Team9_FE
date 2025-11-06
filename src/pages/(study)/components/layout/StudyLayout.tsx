@@ -6,6 +6,7 @@ import { ChatWidget } from '@/components/chat';
 import { useChatConnection } from '@/components/chat/hooks';
 import { useAuthStore } from '@/stores/auth';
 import { ROUTE_PARAMS } from '@/constants';
+import { useCurrentStudy } from '@/hooks/study/useCurrentStudy';
 
 /**
  * (study) 도메인 전용 레이아웃
@@ -18,6 +19,14 @@ function StudyLayout() {
   const { [ROUTE_PARAMS.studyId]: studyId } = useParams();
   const { connectWebSocket } = useChatConnection();
   const { accessToken, isInitialized } = useAuthStore();
+
+  // 스터디 진입 시 현재 스터디 정보 동기화 (역할/타이틀)
+  const numericStudyId = studyId ? Number(studyId) : undefined;
+  useCurrentStudy(
+    typeof numericStudyId === 'number' && !isNaN(numericStudyId)
+      ? numericStudyId
+      : undefined,
+  );
 
   // 스터디 페이지 진입 시 웹소켓 연결 시작 (구독은 ChatWidget에서 관리)
   // 인증 토큰이 준비된 후에만 연결 시도

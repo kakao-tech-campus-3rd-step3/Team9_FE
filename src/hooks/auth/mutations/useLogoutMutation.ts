@@ -5,6 +5,7 @@ import apiClient from '@/api';
 import { AUTH_ENDPOINTS } from '@/api/constants';
 import { useAuthStore } from '@/stores/auth';
 import { ROUTES } from '@/constants';
+import { queryClient } from '@/libs/queryClient';
 
 /**
  * 로그아웃 뮤테이션 훅
@@ -18,6 +19,8 @@ export const useLogoutMutation = () => {
   return useMutation({
     // 즉시 UX 응답: 낙관적 내비게이션 + 스토어 리셋
     onMutate: () => {
+      // React Query 캐시를 먼저 정리하여 이전 계정 데이터 잔존 방지
+      queryClient.clear();
       reset();
       // 초기화 완료 상태를 유지하여 게스트 UI가 즉시 렌더링되도록 보장
       setIsInitialized(true);
