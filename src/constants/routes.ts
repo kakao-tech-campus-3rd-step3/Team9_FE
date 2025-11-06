@@ -25,7 +25,11 @@ export const ROUTES = {
     },
     PROGRESS: 'progress',
     SCHEDULE: 'schedule',
-    QUIZ: 'quiz',
+    QUIZ: {
+      ROOT: 'quiz',
+      SOLVE: 'solve/:id',
+      EXPLAIN: 'explain/:id',
+    },
     REFLECTION: 'reflection',
     ADMIN: {
       ROOT: 'admin',

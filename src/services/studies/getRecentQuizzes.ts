@@ -1,7 +1,11 @@
 import apiClient from '@/api';
 import { DASHBOARD_ENDPOINTS } from '@/api/constants';
 
-export type SubmissionStatus = 'NOT_TAKEN' | 'TAKEN' | 'SUBMITTED' | string;
+export type SubmissionStatus =
+  | 'NOT_TAKEN'
+  | 'IN_PROGRESS'
+  | 'COMPLETED'
+  | string;
 
 export interface RecentQuizItem {
   quiz_id: number;

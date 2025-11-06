@@ -31,7 +31,7 @@ export const STUDY_NAV_ITEMS = [
     icon: Calendar,
   },
   {
-    to: ROUTES.STUDY.QUIZ,
+    to: ROUTES.STUDY.QUIZ.ROOT,
     label: '퀴즈',
     icon: HelpCircle,
   },

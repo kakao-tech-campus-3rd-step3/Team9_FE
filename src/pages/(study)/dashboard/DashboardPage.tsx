@@ -126,7 +126,10 @@ const DashboardPage = () => {
           <QuizWidget
             data={quizzesRecentQuery.data}
             isLoading={quizzesRecentQuery.isLoading}
-            onClick={() => navigateToStudy(ROUTES.STUDY.QUIZ)}
+            onClick={() => navigateToStudy(ROUTES.STUDY.QUIZ.ROOT)}
+            onItemClick={() => {
+              navigateToStudy(ROUTES.STUDY.QUIZ.ROOT);
+            }}
           />
         </DashboardRow>
       </DashboardGrid>
