@@ -52,7 +52,7 @@ export async function uploadPhotoWithPresignedUrl(file: File): Promise<string> {
   });
 
   const fileKey = await presignedUpload(UPLOAD_ENDPOINTS.PHOTOS, file);
-  
+
   console.log('✅ 이미지 업로드 완료:', { fileKey });
   return fileKey;
 }
@@ -79,7 +79,7 @@ export async function uploadFileWithPresignedUrl(file: File): Promise<string> {
   return data.file_key;
 }
 
-/** 
+/**
  * 범용 업로드 함수 (이미지용)
  * @deprecated uploadPhotoWithPresignedUrl 사용 권장
  */

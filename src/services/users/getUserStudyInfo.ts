@@ -7,6 +7,9 @@ export const getUserStudyInfo = async (
 ): Promise<UserStudyInfo> => {
   const { data } = await apiClient.get<UserStudyInfo>(
     USERS_ENDPOINTS.STUDY_BY_ID(studyId),
+    {
+      showToast: false, // 403 에러는 자동 토스트 표시하지 않음 (권한 문제)
+    },
   );
   return data;
 };

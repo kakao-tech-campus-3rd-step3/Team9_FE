@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Crown } from 'lucide-react';
 import type { StudyMe } from '../types/study';
 import { studyColor } from '@/utils';
 import { Link } from 'react-router-dom';
@@ -37,6 +37,9 @@ const StudyList = ({
               style={{ backgroundColor: studyColor(study.study_id) }}
             />
             <div className='font-medium line-clamp-1'>{study.title}</div>
+            {study.role === 'LEADER' && (
+              <Crown className='h-4 w-4 text-yellow-500 flex-shrink-0' />
+            )}
           </div>
         </Link>
       ))}

@@ -279,11 +279,8 @@ export const useStudyExplore = (searchTerm: string) => {
     selectedStudy,
     filteredStudies,
     categories: CATEGORIES,
-
-    // React Query 상태
     isLoading,
     error,
-    isApplying: applyStudyMutation.isPending,
 
     // 핸들러
     handleApplyClick,
@@ -299,5 +296,6 @@ export const useStudyExplore = (searchTerm: string) => {
     applyStudy: (studyId: number, message: string) => {
       applyStudyMutation.mutate({ studyId, message });
     },
+    isApplying: applyStudyMutation.isPending,
   };
 };

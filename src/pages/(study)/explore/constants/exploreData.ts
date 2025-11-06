@@ -78,6 +78,15 @@ export const MOCK_STUDIES: Study[] = [
       'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&h=300&fit=crop',
     imageKey: 'studies/algorithm-study-1.jpg',
   },
+  {
+    id: 107,
+    title: '온라인 React 스터디',
+    description: '온라인으로 진행하는 React 기초 스터디',
+    category: '프로그래밍',
+    currentMembers: 3,
+    maxMembers: 8,
+    region: '온라인',
+  },
 ];
 
 // 카테고리 목록
