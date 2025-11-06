@@ -54,13 +54,22 @@ const Dropdown: React.FC<DropdownProps> = ({
 
   return (
     <div className='relative w-full' ref={dropdownRef}>
-      <button
-        type='button'
+      <div
         onClick={() => onOpenChange(!isOpen)}
         className='w-full'
+        role='button'
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onOpenChange(!isOpen);
+          }
+        }}
+        aria-haspopup='menu'
+        aria-expanded={isOpen}
       >
         {trigger}
-      </button>
+      </div>
 
       {isOpen && (
         <div

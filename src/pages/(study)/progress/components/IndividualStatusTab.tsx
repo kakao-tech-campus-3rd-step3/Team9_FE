@@ -101,10 +101,10 @@ export const IndividualStatusTab = ({ studyId }: IndividualStatusTabProps) => {
                 {participant.attendance_count}회
               </div>
               <div className='text-center text-foreground'>
-                {participant.quiz_count}
+                {participant.quiz_count}회
               </div>
               <div className='text-center text-foreground'>
-                {participant.reflection_count ?? 0}
+                {participant.reflection_count ?? 0}회
               </div>
             </div>
           ))

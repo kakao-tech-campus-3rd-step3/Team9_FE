@@ -9,10 +9,10 @@ export const PROGRESS_ENDPOINTS = {
   // 로드맵 차시 추가
   ADD_CHAPTER: (study_id: number) => `/api/studies/${study_id}/chapter`,
   // 로드맵 차시 수정
-  UPDATE_CHAPTER: (chapter_id: number) => `/api/studies/${chapter_id}`,
+  UPDATE_CHAPTER: (chapter_id: number) => `/api/studies/chapters/${chapter_id}`,
   // 로드맵 차시 완료 처리
   COMPLETE_CHAPTER: (chapter_id: number) =>
-    `/api/studies/${chapter_id}/complete`,
+    `/api/studies/chapters/${chapter_id}/complete`,
   // 로드맵 차시 삭제
-  DELETE_CHAPTER: (chapter_id: number) => `/api/studies/${chapter_id}`,
+  DELETE_CHAPTER: (chapter_id: number) => `/api/studies/chapters/${chapter_id}`,
 } as const;
