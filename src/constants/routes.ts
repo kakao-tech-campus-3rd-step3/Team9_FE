@@ -59,9 +59,5 @@ export const ROUTE_BUILDERS = {
       edit: (studyId: string | number, materialId: string | number) =>
         `/${ROUTES.STUDY.ROOT}/${studyId}/${ROUTES.STUDY.DOCUMENT.ROOT}/${materialId}/edit`,
     },
-    quiz: {
-      list: (studyId: string | number) =>
-        `/${ROUTES.STUDY.ROOT}/${studyId}/${ROUTES.STUDY.QUIZ.ROOT}`,
-    },
   },
 } as const;
