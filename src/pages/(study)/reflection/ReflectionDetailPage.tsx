@@ -2,9 +2,15 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ROUTES, ROUTE_BUILDERS, ROUTE_PARAMS } from '@/constants';
 import { REFLECTION_TEXTS, SCORE_LABELS, SCORE_RANGE } from './constants';
-import { mockSchedules, mockReflectionDetails } from './mock';
+import { mockSchedules } from './mock';
 import { ScoreSlider, ScheduleDropdown } from './components';
-import { useReflectionForm } from './hooks';
+import {
+  useReflectionForm,
+  useReflectionDetailQuery,
+  useCreateReflectionMutation,
+  useUpdateReflectionMutation,
+} from './hooks';
+import { LoadingSpinner } from '@/components/common';
 import type { Schedule } from './types';
 import type { ReflectionFormData } from './schemas';
 
@@ -16,7 +22,10 @@ const ReflectionDetailPage = () => {
   const { [ROUTE_PARAMS.reflectionId]: reflection_id, study_id } = useParams();
   const isEdit = Boolean(reflection_id);
 
-  // 스케줄 목록
+  const studyId = study_id ? Number(study_id) : 0;
+  const reflectionId = reflection_id ? Number(reflection_id) : 0;
+
+  // 스케줄 목록 (TODO: 추후 스케줄 API 연동)
   const [schedules] = useState<Schedule[]>(mockSchedules);
 
   // 폼 상태 관리
@@ -31,36 +40,52 @@ const ReflectionDetailPage = () => {
     resetForm,
   } = useReflectionForm();
 
-  // 수정 모드일 때 기존 데이터 로드
+  // 수정 모드일 때 기존 데이터 조회
+  const { data: existingReflection, isLoading: isLoadingDetail } =
+    useReflectionDetailQuery(studyId, reflectionId);
+
+  // 작성/수정 Mutation
+  const createMutation = useCreateReflectionMutation(studyId);
+  const updateMutation = useUpdateReflectionMutation(studyId, reflectionId);
+
+  // 수정 모드일 때 기존 데이터로 폼 초기화
   useEffect(() => {
-    if (isEdit && reflection_id) {
-      // 실제로는 API 호출로 데이터를 가져와야 함
-      const existingData = mockReflectionDetails.find(
-        (r) => r.id === parseInt(reflection_id),
-      );
-      if (existingData) {
-        resetForm({
-          schedule_id: existingData.schedule_id,
-          title: existingData.title,
-          satisfaction_score: existingData.satisfaction_score,
-          understanding_score: existingData.understanding_score,
-          participation_score: existingData.participation_score,
-          learned_content: existingData.learned_content,
-          improvement: existingData.improvement,
-        });
-      }
+    if (isEdit && existingReflection) {
+      resetForm({
+        schedule_id: existingReflection.schedule_id,
+        title: existingReflection.title,
+        satisfaction_score: existingReflection.satisfaction_score,
+        understanding_score: existingReflection.understanding_score,
+        participation_score: existingReflection.participation_score,
+        learned_content: existingReflection.learned_content,
+        improvement: existingReflection.improvement,
+      });
     }
-  }, [isEdit, reflection_id, resetForm]);
+  }, [isEdit, existingReflection, resetForm]);
 
   // 폼 제출 핸들러
   const onSubmit = (data: ReflectionFormData) => {
-    // 실제로는 API 호출
-    console.log('저장할 데이터:', data);
-    // 성공 시 목록으로 이동
     if (!study_id) return;
-    navigate(
-      `${ROUTE_BUILDERS.study.root(study_id)}/${ROUTES.STUDY.REFLECTION}`,
-    );
+
+    if (isEdit) {
+      // 수정
+      updateMutation.mutate(data, {
+        onSuccess: () => {
+          navigate(
+            `${ROUTE_BUILDERS.study.root(study_id)}/${ROUTES.STUDY.REFLECTION}`,
+          );
+        },
+      });
+    } else {
+      // 작성
+      createMutation.mutate(data, {
+        onSuccess: () => {
+          navigate(
+            `${ROUTE_BUILDERS.study.root(study_id)}/${ROUTES.STUDY.REFLECTION}`,
+          );
+        },
+      });
+    }
   };
 
   // 취소 핸들러
@@ -70,6 +95,18 @@ const ReflectionDetailPage = () => {
       `${ROUTE_BUILDERS.study.root(study_id)}/${ROUTES.STUDY.REFLECTION}`,
     );
   };
+
+  const isLoading = isEdit && isLoadingDetail;
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+
+  // 수정 모드에서 데이터 로딩 중
+  if (isLoading) {
+    return (
+      <div className='h-full flex items-center justify-center'>
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   return (
     <div className='h-full flex flex-col bg-background'>
@@ -229,10 +266,10 @@ const ReflectionDetailPage = () => {
             </button>
             <button
               type='submit'
-              disabled={!isValid}
+              disabled={!isValid || isSubmitting}
               className='px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed'
             >
-              {isEdit ? '수정 완료' : '작성 완료'}
+              {isSubmitting ? '처리 중...' : isEdit ? '수정 완료' : '작성 완료'}
             </button>
           </div>
         </div>
