@@ -3,14 +3,20 @@
  */
 
 import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
-import type { StudyFormData } from '../types';
+import type { StudyFormData, CreateStudyRequest } from '../types';
+import { studyCreateService } from '../services';
 
 export const useStudyCreate = () => {
+  const queryClient = useQueryClient();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
   const [currentStudyTitle, setCurrentStudyTitle] = useState<string>('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [createdStudyData, setCreatedStudyData] =
+    useState<StudyFormData | null>(null);
 
   const handleCategoryToggle = (category: string) => {
     setSelectedCategories((prev) => {
@@ -22,14 +28,20 @@ export const useStudyCreate = () => {
     });
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
+      // 이미지 미리보기만 설정 (실제 업로드는 스터디 생성 시)
       const reader = new FileReader();
       reader.onload = (e) => {
         setImagePreview(e.target?.result as string);
       };
       reader.readAsDataURL(file);
+
+      // 파일을 상태에 저장 (스터디 생성 시 업로드)
+      setSelectedFile(file);
     }
   };
 
@@ -39,24 +51,182 @@ export const useStudyCreate = () => {
     setSelectedCategories([]);
     setImagePreview(null);
     setCurrentStudyTitle('');
+    setSelectedFile(null);
+    setCreatedStudyData(null);
   };
 
+  // React Query로 스터디 생성
+  const createStudyMutation = useMutation({
+    mutationFn: async (data: StudyFormData) => {
+      if (selectedCategories.length === 0) {
+        throw new Error('최소 하나의 카테고리를 선택해주세요.');
+      }
+
+      let fileKey: string | undefined = undefined;
+
+      // 이미지가 선택된 경우 업로드
+      if (selectedFile) {
+        try {
+          const uploadResult =
+            await studyCreateService.uploadImage(selectedFile);
+          fileKey = uploadResult.file_key;
+          console.log('✅ 스터디 이미지 업로드 성공:', fileKey);
+        } catch (error) {
+          console.error('❌ 스터디 이미지 업로드 실패:', error);
+          // 이미지 업로드 실패 시에도 스터디는 생성 가능하도록 계속 진행
+          // fileKey는 undefined로 두고 계속 진행
+        }
+      }
+
+      // CreateStudyRequest 형태로 변환
+      const requestData: CreateStudyRequest = {
+        title: data.title.trim(),
+        description: data.description.trim(),
+        short_description: data.shortDescription.trim(),
+        interests: selectedCategories, // 선택된 모든 카테고리
+        max_members: data.maxMembers,
+        schedule: data.schedule.trim(),
+        region: data.region,
+        conditions: data.conditions.filter((c) => c.trim().length > 0), // 빈 문자열 제거
+        file_key: fileKey && fileKey.trim() ? fileKey.trim() : undefined, // 빈 문자열이면 undefined로
+      };
+
+      // 필수 필드 검증
+      if (!requestData.title || requestData.title.length === 0) {
+        throw new Error('스터디 이름을 입력해주세요.');
+      }
+      // 백엔드 description = 한 줄 소개 (100자 제한)
+      if (
+        !requestData.short_description ||
+        requestData.short_description.length === 0
+      ) {
+        throw new Error('스터디 한 줄 소개를 입력해주세요.');
+      }
+      if (requestData.short_description.length > 100) {
+        throw new Error('한 줄 소개는 100자를 초과할 수 없습니다.');
+      }
+      // 백엔드 detail_description = 상세 설명
+      if (!requestData.description || requestData.description.length === 0) {
+        throw new Error('스터디 설명을 입력해주세요.');
+      }
+      if (!requestData.region || requestData.region.length === 0) {
+        throw new Error('지역을 선택해주세요.');
+      }
+      if (requestData.interests.length === 0) {
+        throw new Error('최소 하나의 카테고리를 선택해주세요.');
+      }
+
+      // 실제 백엔드 서버로 스터디 생성 요청
+      console.log(
+        '✅ 스터디 생성 요청 데이터:',
+        JSON.stringify(requestData, null, 2),
+      );
+      return studyCreateService.createStudy(requestData);
+    },
+    onSuccess: (data, variables) => {
+      // 현재 스터디 제목 저장
+      setCurrentStudyTitle(variables.title);
+      // 생성된 스터디 데이터 저장 (탐색 페이지에서 사용)
+      setCreatedStudyData(variables);
+
+      console.log('✅ 스터디 생성 성공:', data);
+      console.log('백엔드 응답 데이터:', {
+        id: data.id,
+        title: data.title,
+        file_key: data.file_key, // 이미지 file_key 확인
+        created: data.created_at,
+        backendResponse: data,
+      });
+
+      // 완료 모달 열기 (토스트는 모달에서 처리)
+      setIsCompleteModalOpen(true);
+
+      // React Query 캐시 무효화하여 탐색 페이지에서 자동으로 새 데이터 가져오기
+      // 탐색 페이지로 이동하면 자동으로 refetch됨
+      queryClient.invalidateQueries({ queryKey: ['studies'] });
+
+      // 이벤트도 발생시켜 이미 탐색 페이지에 있는 경우에도 대응
+      window.dispatchEvent(new CustomEvent('studyCreated'));
+    },
+    onError: (error, variables) => {
+      console.error('❌ 스터디 생성 실패:', error);
+
+      // axios 에러인 경우 상세 정보 출력
+      const axiosError = error as {
+        response?: {
+          data?: {
+            message?: string;
+            detail?: string;
+            errors?: unknown;
+            [key: string]: unknown;
+          };
+          status?: number;
+          statusText?: string;
+        };
+      };
+
+      const errorDetail = {
+        message: error.message,
+        response: axiosError.response?.data,
+        status: axiosError.response?.status,
+        statusText: axiosError.response?.statusText,
+      };
+
+      console.error('에러 상세:', JSON.stringify(errorDetail, null, 2));
+
+      // 백엔드 에러 메시지가 있으면 사용자에게 표시
+      const backendMessage =
+        axiosError.response?.data?.message ||
+        axiosError.response?.data?.detail ||
+        error.message;
+
+      toast.error(backendMessage || '스터디 생성에 실패했습니다.');
+
+      // 백엔드 실패 시 로컬에 저장
+      console.log('백엔드 실패로 로컬에 저장합니다.');
+
+      const newStudy = {
+        id: Date.now(),
+        title: variables.title,
+        description: variables.description,
+        shortDescription: variables.shortDescription || '',
+        category: variables.category || '프로그래밍',
+        interests: [variables.category || '프로그래밍'],
+        currentMembers: 1,
+        maxMembers: variables.maxMembers || 4,
+        region: variables.region,
+        imageUrl: undefined,
+        detailedDescription: variables.description,
+        schedule: variables.schedule,
+        requirements: variables.conditions || [],
+      };
+
+      // 기존 로컬 스터디 불러오기
+      const existingStudies = JSON.parse(
+        localStorage.getItem('persistentStudies') || '[]',
+      );
+      existingStudies.push(newStudy);
+      localStorage.setItem(
+        'persistentStudies',
+        JSON.stringify(existingStudies),
+      );
+
+      // 새로 생성한 스터디를 즉시 반영하기 위해 상태에 추가
+      setCreatedStudyData(variables);
+
+      // 완료 모달 열기
+      setCurrentStudyTitle(variables.title);
+      setIsCompleteModalOpen(true);
+
+      // 백엔드 데이터 새로고침을 위한 이벤트 발생
+      window.dispatchEvent(new CustomEvent('studyCreated'));
+
+      toast.error('백엔드 실패로 로컬에 저장되었습니다.');
+    },
+  });
+
   const handleSubmit = (data: StudyFormData) => {
-    if (selectedCategories.length === 0) {
-      toast.error('최소 하나의 카테고리를 선택해주세요.');
-      return;
-    }
-
-    // 현재 스터디 제목 저장
-    setCurrentStudyTitle(data.title);
-
-    console.log('스터디 생성 데이터:', {
-      ...data,
-      categories: selectedCategories,
-    });
-
-    // 완료 모달 열기
-    setIsCompleteModalOpen(true);
+    createStudyMutation.mutate(data);
   };
 
   return {
@@ -65,6 +235,11 @@ export const useStudyCreate = () => {
     imagePreview,
     isCompleteModalOpen,
     currentStudyTitle,
+    createdStudyData,
+
+    // React Query 상태
+    isCreating: createStudyMutation.isPending,
+    createError: createStudyMutation.error,
 
     // 핸들러
     handleCategoryToggle,

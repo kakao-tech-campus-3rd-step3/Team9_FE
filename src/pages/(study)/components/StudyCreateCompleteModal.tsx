@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CheckCircle } from 'lucide-react';
+import { toast } from 'react-toastify';
 import BaseModal from '@/components/common/BaseModal';
 
 interface StudyCreateCompleteModalProps {
@@ -16,6 +17,9 @@ const StudyCreateCompleteModal: React.FC<StudyCreateCompleteModalProps> = ({
   const [isCompleted, setIsCompleted] = useState(false);
 
   const handleComplete = () => {
+    // 토스트 메시지 표시
+    toast.success('스터디가 성공적으로 생성되었습니다!');
+
     setIsCompleted(true);
     setTimeout(() => {
       setIsCompleted(false);

@@ -6,24 +6,51 @@ interface StudyApplyModalProps {
   isOpen: boolean;
   onClose: () => void;
   studyTitle: string;
+  studyId?: number;
+  onApply?: (studyId: number, message: string) => void;
+  isApplying?: boolean;
 }
 
 const StudyApplyModal: React.FC<StudyApplyModalProps> = ({
   isOpen,
   onClose,
   studyTitle,
+  studyId,
+  onApply,
+  isApplying = false,
 }) => {
   const [message, setMessage] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
 
+  // 모달이 닫힐 때 메시지 초기화
+  React.useEffect(() => {
+    if (!isOpen) {
+      setMessage('');
+      setIsSubmitted(false);
+    }
+  }, [isOpen]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('스터디 신청:', { studyTitle, message });
-    setIsSubmitted(true);
-    setTimeout(() => {
-      setIsSubmitted(false);
-      onClose();
-    }, 3000);
+
+    // studyId와 onApply가 있으면 실제 API 호출
+    if (studyId && onApply) {
+      onApply(studyId, message);
+      setIsSubmitted(true);
+      // API 호출 완료 후 모달 닫기 (성공/실패는 onApply 내부에서 처리)
+      setTimeout(() => {
+        setIsSubmitted(false);
+        onClose();
+      }, 3000);
+    } else {
+      // 개발용: API 연결이 안 된 경우
+      console.log('스터디 신청:', { studyTitle, message });
+      setIsSubmitted(true);
+      setTimeout(() => {
+        setIsSubmitted(false);
+        onClose();
+      }, 3000);
+    }
   };
 
   return (
@@ -54,9 +81,10 @@ const StudyApplyModal: React.FC<StudyApplyModalProps> = ({
               </button>
               <button
                 type='submit'
-                className='px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary-hover transition-colors'
+                disabled={isApplying}
+                className='px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
               >
-                참여하기
+                {isApplying ? '신청 중...' : '참여하기'}
               </button>
             </div>
           </form>

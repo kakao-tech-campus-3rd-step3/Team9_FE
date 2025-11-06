@@ -19,6 +19,11 @@ const StudyCreatePage: React.FC = () => {
     imagePreview,
     isCompleteModalOpen,
     currentStudyTitle,
+    createdStudyData,
+
+    // React Query 상태
+    isCreating,
+    createError,
 
     // 핸들러
     handleCategoryToggle,
@@ -30,8 +35,36 @@ const StudyCreatePage: React.FC = () => {
 
   const handleCompleteModalCloseWithNavigation = () => {
     handleCompleteModalClose();
-    // 스터디 탐색 페이지로 이동
-    navigate(ROUTES.STUDY.EXPLORE);
+
+    if (!createdStudyData) return;
+
+    // 스터디 탐색 페이지로 이동 (새로 생성한 스터디 정보 포함)
+    // 로컬 스토리지에 스터디 데이터 저장 (이미지 포함)
+    const studyData = {
+      title: createdStudyData.title,
+      category: selectedCategories[0] || '기타', // 첫 번째 카테고리 (호환성)
+      interests: selectedCategories, // 모든 선택된 카테고리
+      description: createdStudyData.description,
+      shortDescription: createdStudyData.shortDescription,
+      region: createdStudyData.region,
+      maxMembers: createdStudyData.maxMembers,
+      schedule: createdStudyData.schedule,
+      conditions: createdStudyData.conditions,
+      imageUrl: imagePreview || '',
+    };
+
+    console.log('저장할 이미지 데이터:', imagePreview);
+    console.log('저장할 스터디 데이터:', studyData);
+
+    localStorage.setItem('newlyCreatedStudy', JSON.stringify(studyData));
+
+    const params = new URLSearchParams({
+      newStudy: 'true',
+    });
+
+    navigate(
+      `/${ROUTES.STUDY.ROOT}/${ROUTES.STUDY.EXPLORE}?${params.toString()}`,
+    );
   };
 
   return (
@@ -62,6 +95,8 @@ const StudyCreatePage: React.FC = () => {
                 toast.success(message);
               }
             }}
+            isCreating={isCreating}
+            createError={createError}
           />
         </div>
       </div>

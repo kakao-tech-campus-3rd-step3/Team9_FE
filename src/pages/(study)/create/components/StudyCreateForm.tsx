@@ -18,6 +18,8 @@ interface StudyCreateFormProps {
   onImageRemove: () => void;
   onSubmit: (data: StudyFormData) => void;
   onShowToast: (message: string, type: 'success' | 'error') => void;
+  isCreating?: boolean;
+  createError?: Error | null;
 }
 
 const StudyCreateForm: React.FC<StudyCreateFormProps> = ({
@@ -30,6 +32,8 @@ const StudyCreateForm: React.FC<StudyCreateFormProps> = ({
   onImageRemove,
   onSubmit,
   onShowToast,
+  isCreating = false,
+  createError = null,
 }) => {
   const [isRegionModalOpen, setIsRegionModalOpen] = useState(false);
   const [conditionInput, setConditionInput] = useState('');
@@ -95,8 +99,13 @@ const StudyCreateForm: React.FC<StudyCreateFormProps> = ({
                 value: 10,
                 message: '스터디 소개는 최소 10글자 이상이어야 합니다.',
               },
+              maxLength: {
+                value: 100,
+                message: '한 줄 소개는 100자를 초과할 수 없습니다.',
+              },
             })}
-            placeholder='스터디에 대한 간략한 설명'
+            placeholder='스터디에 대한 간략한 설명 (최대 100자)'
+            maxLength={100}
             className='w-full px-4 py-2 border border-input rounded-lg focus:border-primary focus:ring-0 bg-background text-foreground'
           />
           {errors.shortDescription && (
@@ -386,11 +395,21 @@ const StudyCreateForm: React.FC<StudyCreateFormProps> = ({
         <div className='flex justify-end'>
           <button
             type='submit'
-            className='px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors'
+            disabled={isCreating}
+            className='px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
           >
-            생성하기
+            {isCreating ? '생성 중...' : '생성하기'}
           </button>
         </div>
+
+        {/* 에러 메시지 */}
+        {createError && (
+          <div className='mt-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg'>
+            <p className='text-sm text-destructive'>
+              {createError.message || '스터디 생성 중 오류가 발생했습니다.'}
+            </p>
+          </div>
+        )}
       </form>
 
       {/* 지역 선택 모달 */}
