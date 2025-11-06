@@ -50,16 +50,25 @@ const StudyQuizSolvePage = () => {
                 {Array.from({ length: totalQuestions || 1 }).map((_, index) => {
                   const num = index + 1;
                   const isActive = num === current;
+                  const question = quizData?.questions?.[index];
+                  const questionId = question?.question_id;
+                  const isAnswered =
+                    questionId !== undefined &&
+                    answers[questionId] !== undefined;
+                  let btnClass =
+                    'flex items-center justify-center p-1 cursor-pointer rounded-lg border ';
+                  if (isActive)
+                    btnClass += 'bg-primary text-white border-primary';
+                  if (isAnswered)
+                    btnClass +=
+                      'bg-success text-success-foreground border-success';
+                  else btnClass += 'bg-white text-primary border-primary';
                   return (
                     <button
                       key={num}
                       type='button'
                       onClick={() => goToQuestion(num)}
-                      className={`flex items-center justify-center p-1 cursor-pointer rounded-lg border ${
-                        isActive
-                          ? 'bg-primary text-white border-primary'
-                          : 'bg-white text-primary border-primary'
-                      }`}
+                      className={btnClass}
                       aria-current={isActive ? 'true' : undefined}
                     >
                       {num}
