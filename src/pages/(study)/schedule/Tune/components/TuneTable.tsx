@@ -103,7 +103,7 @@ const TuneTable = ({
             })}
         </tbody>
       </table>
-      <div className='flex mt-4'>
+      <div className='flex mt-4 mb-6'>
         <div className='border-r border-gray-800 px-2 py-1 text-xs font-bold'>
           0명 참가
         </div>

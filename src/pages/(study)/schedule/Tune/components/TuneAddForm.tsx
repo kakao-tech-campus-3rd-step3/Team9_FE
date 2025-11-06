@@ -77,9 +77,10 @@ const TuneAddForm = ({ tune_id, title, content }: TuneAddFormProps) => {
 
   return (
     <FormProvider {...methods}>
+      <h2 className='text-xl font-bold mb-4'>일정 추가하기</h2>
       <form
         onSubmit={methods.handleSubmit(onSubmit)}
-        className='flex gap-8 justify-center items-stretch h-full'
+        className='flex flex-col gap-4 justify-center'
       >
         <div className='flex flex-col gap-2'>
           <label className='font-bold'>일정 제목</label>
