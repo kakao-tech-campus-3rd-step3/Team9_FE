@@ -28,7 +28,7 @@ const QuizCard = ({
     return <QuizCardCreating title={title} />;
   }
   if (quiz_status == 'FAILED') {
-    return <QuizCardFailed title={title} />;
+    return <QuizCardFailed title={title} quiz_id={quizId} />;
   }
 
   return (

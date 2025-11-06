@@ -3,6 +3,8 @@ export const QUIZ_ENDPOINTS = {
   CREATE: (studyId: number) => `/api/studies/${studyId}/quizzes`,
 
   LIST: (studyId: number) => `/api/studies/${studyId}/quizzes`,
+
+  REGENERATE: (quizId: number) => `/api/quizzes/${quizId}/regenerate`,
 } as const;
 
 export type QuizEndpointKey = keyof typeof QUIZ_ENDPOINTS;
