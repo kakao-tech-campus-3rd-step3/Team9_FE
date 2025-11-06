@@ -21,16 +21,6 @@ export const STUDY_ENDPOINTS = {
   // 신청 상태 변경
   CHANGE_APPLICATION_STATUS: (study_id: number, application_id: number) =>
     `/api/studies/${study_id}/applications/${application_id}`,
-  // 스터디원 목록 조회
-  STUDY_MEMBERS: (study_id: number) => `/api/studies/${study_id}/members`,
-  // 스터디원 역할 변경
-  CHANGE_MEMBER_ROLE: (study_id: number, member_id: number) =>
-    `/api/studies/${study_id}/members/${member_id}/role`,
-  // 스터디원 탈퇴
-  REMOVE_MEMBER: (study_id: number, member_id: number) =>
-    `/api/studies/${study_id}/members/${member_id}`,
-  // 리더 위임
-  DELEGATE_LEADERSHIP: (study_id: number) => `/api/studies/${study_id}/leader`,
   // 이미지 업로드 (스웨거에 있는 API)
   IMAGE_UPLOAD: '/api/upload/photos',
 } as const;
