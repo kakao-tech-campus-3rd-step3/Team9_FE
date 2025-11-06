@@ -51,22 +51,36 @@ export const getTuneDay = ({
   return days;
 };
 
-export const getGridBoolean = ({
+export const getGridNumber = ({
   startTime,
   endTime,
+  candidate_dates,
+  participant_number,
 }: {
   startTime: string;
   endTime: string;
+  candidate_dates: number[];
+  participant_number: number;
 }) => {
   const days = getTuneDayCount({ startTime, endTime });
   const slots =
     (dayjs(endTime).diff(dayjs(startTime), 'minute') -
       dayjs(endTime).diff(dayjs(startTime), 'day') * 24 * 60) /
     30;
-  const grid: boolean[][] = [];
-  for (let d = 0; d < days; d++) {
-    grid.push(Array.from({ length: slots }, () => false));
+  const grid: number[][] = [];
+
+  for (let day = 0; day < days; day++) {
+    const dayStart = day * slots;
+    const dayEnd = (day + 1) * slots;
+    const daySlice = candidate_dates.slice(dayStart, dayEnd);
+
+    // Each element in candidate_dates is a bitmask of participants for that slot.
+    // If the current user's participant_number bit is set in that bitmask,
+    // mark the slot as 1, otherwise 0.
+    const row = daySlice.map((mask) => (mask & participant_number ? 1 : 0));
+    grid.push(row);
   }
+
   return grid;
 };
 
@@ -92,11 +106,23 @@ export const buildGrid = ({
 };
 
 export const getHourSlots = (startTime: string, endTime: string): string[] => {
-  const [startH, startM] = startTime.split(':').map(Number);
-  const [endH, endM] = endTime.split(':').map(Number);
+  // startTime / endTime may come in different formats ("HH:mm", "HH:mm:ss", or ISO datetime).
+  // Use dayjs to safely parse hours and minutes. Fall back to simple split parsing if parsing fails.
+  const parseTime = (t: string) => {
+    const d = dayjs(t);
+    if (d.isValid()) {
+      return { h: d.hour(), m: d.minute() };
+    }
 
-  const totalStart = startH * 60 + startM;
-  const totalEnd = endH === 24 ? 24 * 60 : endH * 60 + endM;
+    const parts = t.split(':').map(Number);
+    return { h: parts[0] ?? 0, m: parts[1] ?? 0 };
+  };
+
+  const { h: sH, m: sM } = parseTime(startTime);
+  const { h: eH, m: eM } = parseTime(endTime);
+
+  const totalStart = sH * 60 + sM;
+  const totalEnd = eH === 24 ? 24 * 60 : eH * 60 + eM;
 
   const slots: string[] = [];
   for (let time = totalStart; time < totalEnd; time += 60) {

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 
 type UseDragParams = {
-  personalTune: boolean[][];
-  setPersonalTune: React.Dispatch<React.SetStateAction<boolean[][]>>;
+  personalTune: number[][];
+  setPersonalTune: React.Dispatch<React.SetStateAction<number[][]>>;
 };
 
 export const useDrag = ({ personalTune, setPersonalTune }: UseDragParams) => {
@@ -15,7 +15,7 @@ export const useDrag = ({ personalTune, setPersonalTune }: UseDragParams) => {
     row: number;
     col: number;
   } | null>(null);
-  const [dragStartValue, setDragStartValue] = useState<boolean | null>(null);
+  const [dragStartValue, setDragStartValue] = useState<number | null>(null);
 
   const handleMouseDown = (row: number, col: number) => {
     setIsDragging(true);
@@ -46,7 +46,8 @@ export const useDrag = ({ personalTune, setPersonalTune }: UseDragParams) => {
             rowIdx >= startRow &&
             rowIdx <= endRow
           ) {
-            return !dragStartValue;
+            if (dragStartValue === 1) return 0;
+            else return 1;
           }
           return slot;
         }),

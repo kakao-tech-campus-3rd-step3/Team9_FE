@@ -12,4 +12,11 @@ export const SCHEDULE_ENDPOINTS = {
   TUNE_ADD: (study_id: number) => `/api/studies/${study_id}/schedule-tunes`,
 
   TUNE_LIST: (study_id: number) => `/api/studies/${study_id}/schedule-tunes`,
+
+  TUNE_DETAIL: (tune_id: number) => `/api/schedule-tunes/${tune_id}`,
+
+  TUNE_PARTICIPANT_ADD: (tune_id: number) =>
+    `/api/schedule-tunes/${tune_id}/participants`,
+
+  TUNE_COMPLETE: (tune_id: number) => `/api/schedule-tunes/${tune_id}/complete`,
 } as const;

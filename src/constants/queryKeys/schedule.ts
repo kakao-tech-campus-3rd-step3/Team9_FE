@@ -6,4 +6,6 @@ export const scheduleKeys = {
   study: (study_id: number) => ['schedule-study', study_id] as const,
 
   tune: (study_id: number) => ['schedule-tune', study_id] as const,
+
+  tune_detail: (tune_id: number) => ['schedule-tune-detail', tune_id] as const,
 } as const;
