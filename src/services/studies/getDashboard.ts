@@ -1,5 +1,5 @@
 import apiClient from '@/api';
-import { studyEndpoints } from '@/api/constants';
+import { DASHBOARD_ENDPOINTS } from '@/api/constants';
 
 export interface DashboardApiResponse {
   study_title: string;
@@ -23,7 +23,7 @@ export const getStudyDashboard = async (
   studyId: number,
 ): Promise<DashboardApiResponse> => {
   const { data } = await apiClient.get<DashboardApiResponse>(
-    studyEndpoints.dashboard(studyId),
+    DASHBOARD_ENDPOINTS.DASHBOARD(studyId),
     { showToast: false },
   );
   return data;

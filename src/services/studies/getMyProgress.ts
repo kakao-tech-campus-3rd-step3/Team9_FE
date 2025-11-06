@@ -1,5 +1,5 @@
 import apiClient from '@/api';
-import { studyEndpoints } from '@/api/constants';
+import { DASHBOARD_ENDPOINTS } from '@/api/constants';
 
 export interface ProgressMeApiResponse {
   progressMemberStatusDto: Array<{
@@ -15,7 +15,7 @@ export const getMyProgress = async (
   studyId: number,
 ): Promise<ProgressMeApiResponse> => {
   const { data } = await apiClient.get<ProgressMeApiResponse>(
-    studyEndpoints.myStatus(studyId),
+    DASHBOARD_ENDPOINTS.MY_STATUS(studyId),
     { showToast: false },
   );
   return data;

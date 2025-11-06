@@ -1,5 +1,5 @@
 import apiClient from '@/api';
-import { studyEndpoints } from '@/api/constants';
+import { DASHBOARD_ENDPOINTS } from '@/api/constants';
 
 export interface PastSchedulesApiResponseItem {
   schedule_id: number;
@@ -12,7 +12,7 @@ export const getPastSchedules = async (
   studyId: number,
 ): Promise<PastSchedulesApiResponse> => {
   const { data } = await apiClient.get<PastSchedulesApiResponse>(
-    studyEndpoints.pastSchedules(studyId),
+    DASHBOARD_ENDPOINTS.PAST_SCHEDULES(studyId),
     { showToast: false },
   );
   return data;

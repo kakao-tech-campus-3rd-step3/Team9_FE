@@ -1,5 +1,5 @@
 import apiClient from '@/api';
-import { studyEndpoints } from '@/api/constants';
+import { DASHBOARD_ENDPOINTS } from '@/api/constants';
 
 export type SubmissionStatus = 'NOT_TAKEN' | 'TAKEN' | 'SUBMITTED' | string;
 
@@ -16,7 +16,7 @@ export const getRecentQuizzes = async (
   size: number = 3,
 ): Promise<RecentQuizzesApiResponse> => {
   const { data } = await apiClient.get<RecentQuizzesApiResponse>(
-    studyEndpoints.quizzesRecent(studyId),
+    DASHBOARD_ENDPOINTS.QUIZZES_RECENT(studyId),
     { params: { size }, showToast: false },
   );
   return data;

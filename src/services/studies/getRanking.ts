@@ -1,5 +1,5 @@
 import apiClient from '@/api';
-import { studyEndpoints } from '@/api/constants';
+import { DASHBOARD_ENDPOINTS } from '@/api/constants';
 
 export interface RankingListApiResponseItem {
   rank: number;
@@ -20,7 +20,7 @@ export const getRankingList = async (
   studyId: number,
 ): Promise<RankingListApiResponse> => {
   const { data } = await apiClient.get<RankingListApiResponse>(
-    studyEndpoints.ranking(studyId),
+    DASHBOARD_ENDPOINTS.RANKING(studyId),
     { showToast: false },
   );
   return data;
@@ -30,7 +30,7 @@ export const getMyRanking = async (
   studyId: number,
 ): Promise<MyRankingApiResponse> => {
   const { data } = await apiClient.get<MyRankingApiResponse>(
-    studyEndpoints.myRanking(studyId),
+    DASHBOARD_ENDPOINTS.MY_RANKING(studyId),
     { showToast: false },
   );
   return data;
