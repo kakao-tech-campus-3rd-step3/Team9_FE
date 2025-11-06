@@ -1,8 +1,12 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ROUTES, ROUTE_BUILDERS, ROUTE_PARAMS } from '@/constants';
 import { ArrowLeft, Edit, Calendar, User, Trash2 } from 'lucide-react';
-import { useReflectionDetailQuery, useDeleteReflectionMutation } from './hooks';
+import {
+  useReflectionDetailQuery,
+  useDeleteReflectionMutation,
+  useReflectionsQuery,
+} from './hooks';
 import { LoadingSpinner } from '@/components/common';
 import ConfirmDialog from '@/pages/(study)/document/components/ConfirmDialog';
 
@@ -23,6 +27,21 @@ const ReflectionViewPage = () => {
     isLoading,
     error,
   } = useReflectionDetailQuery(studyId, reflectionId);
+
+  // 목록 조회로 작성자 이름 가져오기 (캐시 활용)
+  const { data: reflectionsList } = useReflectionsQuery(studyId, {
+    page: 0,
+    size: 100, // 충분히 큰 수로 설정하여 해당 회고를 찾을 수 있도록
+  });
+
+  // 작성자 이름 찾기
+  const authorName = useMemo(() => {
+    if (!reflectionsList?.reflections || !reflectionId) return null;
+    const found = reflectionsList.reflections.find(
+      (r) => r.id === reflectionId,
+    );
+    return found?.author || null;
+  }, [reflectionsList, reflectionId]);
 
   // 삭제 Mutation
   const deleteMutation = useDeleteReflectionMutation(studyId);
@@ -131,7 +150,9 @@ const ReflectionViewPage = () => {
             <div className='flex items-center gap-4 text-sm text-muted-foreground'>
               <div className='flex items-center gap-1'>
                 <User className='w-4 h-4' />
-                <span>작성자 ID: {reflection.study_member_id}</span>
+                <span>
+                  작성자: {authorName || `ID: ${reflection.study_member_id}`}
+                </span>
               </div>
               <div className='flex items-center gap-1'>
                 <Calendar className='w-4 h-4' />
