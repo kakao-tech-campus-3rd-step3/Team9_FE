@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ROUTES, ROUTE_BUILDERS } from '@/constants';
 import { Plus, Filter } from 'lucide-react';
 import { REFLECTION_TEXTS } from './constants';
-import { mockReflections } from './mock';
+import { useReflectionsQuery } from './hooks';
+import { LoadingSpinner } from '@/components/common';
 import type { ReflectionListItem } from './types';
 
 /**
@@ -12,8 +13,44 @@ import type { ReflectionListItem } from './types';
 const ReflectionPage = () => {
   const navigate = useNavigate();
   const [showMyReflectionsOnly, setShowMyReflectionsOnly] = useState(false);
+  const [page, setPage] = useState(0);
+  const [allReflections, setAllReflections] = useState<ReflectionListItem[]>(
+    [],
+  );
   const { study_id } = useParams<{ study_id: string }>();
-  const [reflections] = useState<ReflectionListItem[]>(mockReflections);
+  const studyId = study_id ? Number(study_id) : 0;
+
+  // API로 회고 목록 조회
+  const {
+    data: reflectionData,
+    isLoading,
+    error,
+  } = useReflectionsQuery(studyId, {
+    author: showMyReflectionsOnly ? 'me' : undefined,
+    page,
+    size: 10,
+  });
+
+  // 필터 변경 시 페이지 리셋 및 목록 초기화
+  useEffect(() => {
+    setPage(0);
+    setAllReflections([]);
+  }, [showMyReflectionsOnly]);
+
+  // 새 데이터가 오면 목록에 추가 (누적)
+  useEffect(() => {
+    if (reflectionData?.reflections) {
+      if (page === 0) {
+        // 첫 페이지면 전체 교체
+        setAllReflections(reflectionData.reflections);
+      } else {
+        // 이후 페이지면 추가
+        setAllReflections((prev) => [...prev, ...reflectionData.reflections]);
+      }
+    }
+  }, [reflectionData, page]);
+
+  const hasNext = reflectionData?.hasNext ?? false;
 
   const handleWriteReflection = () => {
     if (!study_id) return;
@@ -29,9 +66,11 @@ const ReflectionPage = () => {
     );
   };
 
-  const filteredReflections = showMyReflectionsOnly
-    ? reflections.filter((reflection) => reflection.author === '김경대') // 실제로는 현재 사용자와 비교
-    : reflections;
+  const handleLoadMore = () => {
+    if (hasNext) {
+      setPage((prev) => prev + 1);
+    }
+  };
 
   return (
     <div className='h-full flex flex-col bg-background'>
@@ -68,13 +107,21 @@ const ReflectionPage = () => {
 
       {/* 메인 컨텐츠 영역 */}
       <div className='flex-1 overflow-y-auto bg-background p-6'>
-        <div className='space-y-4'>
-          {filteredReflections.length === 0 ? (
-            <div className='text-center py-12 text-muted-foreground'>
-              작성된 회고가 없습니다.
-            </div>
-          ) : (
-            filteredReflections.map((reflection) => (
+        {isLoading && page === 0 ? (
+          <div className='flex justify-center items-center py-12'>
+            <LoadingSpinner />
+          </div>
+        ) : error ? (
+          <div className='text-center py-12 text-destructive'>
+            회고 목록을 불러오는 중 오류가 발생했습니다.
+          </div>
+        ) : allReflections.length === 0 ? (
+          <div className='text-center py-12 text-muted-foreground'>
+            작성된 회고가 없습니다.
+          </div>
+        ) : (
+          <div className='space-y-4'>
+            {allReflections.map((reflection) => (
               <div
                 key={reflection.id}
                 onClick={() => handleReflectionClick(reflection.id)}
@@ -108,9 +155,22 @@ const ReflectionPage = () => {
                   </div>
                 </div>
               </div>
-            ))
-          )}
-        </div>
+            ))}
+
+            {/* 더보기 버튼 */}
+            {hasNext && (
+              <div className='flex justify-center pt-4'>
+                <button
+                  onClick={handleLoadMore}
+                  disabled={isLoading}
+                  className='px-6 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary-hover transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed'
+                >
+                  {isLoading ? '로딩 중...' : '더보기'}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* 플로팅 액션 버튼 */}
