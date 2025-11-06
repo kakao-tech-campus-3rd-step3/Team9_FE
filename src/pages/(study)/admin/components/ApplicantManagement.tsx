@@ -6,6 +6,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { AxiosError } from 'axios';
 import { toast } from 'react-toastify';
+import { useQueryClient } from '@tanstack/react-query';
 import { User, Loader2, Check, X } from 'lucide-react';
 import {
   getStudyApplications,
@@ -15,10 +16,12 @@ import {
 import { useAdminPage } from '../AdminPage';
 import type { StudyApplication } from '../types';
 import { ROUTE_PARAMS } from '@/constants';
+import { studyKeys } from '@/constants/queryKeys';
 import UserAvatar from '@/components/user/UserAvatar';
 
 export const ApplicantManagement: React.FC = () => {
-  const { refreshMembers } = useAdminPage();
+  const { refreshMembers, refreshStudyInfo } = useAdminPage();
+  const queryClient = useQueryClient();
   const params = useParams<{ [ROUTE_PARAMS.studyId]: string }>();
   const studyId = params[ROUTE_PARAMS.studyId]
     ? Number(params[ROUTE_PARAMS.studyId])
@@ -175,9 +178,21 @@ export const ApplicantManagement: React.FC = () => {
 
       // 승인인 경우 스터디원 목록 새로고침 (새 멤버 추가 반영)
       if (status === 'APPROVED') {
-        console.log('[승인 완료] 스터디원 목록 새로고침');
-        setTimeout(() => {
+        console.log('[승인 완료] 스터디원 목록 및 스터디 정보 새로고침');
+        setTimeout(async () => {
           refreshMembers();
+          // 스터디 정보도 새로고침하여 current_members 업데이트
+          refreshStudyInfo();
+
+          // 탐색 페이지의 스터디 목록 쿼리도 무효화하여 current_members 반영
+          await queryClient.invalidateQueries({
+            queryKey: studyKeys.all,
+            refetchType: 'active',
+          });
+          await queryClient.invalidateQueries({
+            queryKey: ['studies'],
+            refetchType: 'active',
+          });
         }, 300);
       }
     } catch (error) {

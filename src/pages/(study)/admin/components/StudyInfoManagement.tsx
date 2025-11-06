@@ -16,6 +16,8 @@ import type { StudyInfo, UpdateStudyInfoRequest } from '../types';
 import { ROUTE_PARAMS } from '@/constants';
 import { useImageUrl } from '@/hooks';
 import { studyKeys } from '@/constants/queryKeys';
+import { useAdminPage } from '../AdminPage';
+import { uploadPhotoWithPresignedUrl } from '@/utils/upload';
 
 interface StudyInfoFormData {
   title: string;
@@ -36,6 +38,7 @@ export const StudyInfoManagement: React.FC = () => {
     : null;
 
   const queryClient = useQueryClient();
+  const { setRefreshStudyInfoFn } = useAdminPage();
 
   const [studyInfo, setStudyInfo] = useState<StudyInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -43,6 +46,7 @@ export const StudyInfoManagement: React.FC = () => {
   const [isRegionModalOpen, setIsRegionModalOpen] = useState(false);
   const [conditionInput, setConditionInput] = useState('');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   const { control, register, handleSubmit, setValue, watch, reset } =
@@ -273,6 +277,12 @@ export const StudyInfoManagement: React.FC = () => {
           : typeof data?.imageUrl === 'string'
             ? data.imageUrl
             : undefined) as string | undefined,
+        // interests 배열 설정 (백엔드 API 스펙)
+        interests: (Array.isArray(data?.interests) && data.interests.length > 0
+          ? data.interests
+          : typeof data?.category === 'string'
+            ? [data.category]
+            : []) as string[],
       };
 
       setStudyInfo(studyData);
@@ -285,6 +295,13 @@ export const StudyInfoManagement: React.FC = () => {
     }
   }, [studyId]);
 
+  // fetchStudyInfo를 컨텍스트에 등록 (다른 컴포넌트에서 호출 가능하도록)
+  useEffect(() => {
+    setRefreshStudyInfoFn(() => {
+      fetchStudyInfo();
+    });
+  }, [fetchStudyInfo, setRefreshStudyInfoFn]);
+
   useEffect(() => {
     if (studyId) {
       fetchStudyInfo();
@@ -294,6 +311,10 @@ export const StudyInfoManagement: React.FC = () => {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // 파일을 상태에 저장 (실제 업로드는 onSubmit에서)
+      setSelectedFile(file);
+
+      // 미리보기 설정
       const reader = new FileReader();
       reader.onload = () => {
         const result = reader.result as string;
@@ -306,6 +327,7 @@ export const StudyInfoManagement: React.FC = () => {
 
   const handleImageRemove = () => {
     setImagePreview(null);
+    setSelectedFile(null);
     setValue('image', '');
   };
 
@@ -338,18 +360,32 @@ export const StudyInfoManagement: React.FC = () => {
         );
       };
 
+      // 이미지가 선택된 경우 먼저 업로드
+      let newFileKey: string | undefined = undefined;
+      if (selectedFile) {
+        try {
+          newFileKey = await uploadPhotoWithPresignedUrl(selectedFile);
+        } catch (error) {
+          console.error('이미지 업로드 실패:', error);
+          toast.error('이미지 업로드에 실패했습니다.');
+          // 이미지 업로드 실패 시에도 스터디 정보 수정은 계속 진행
+          // 기존 file_key 유지
+        }
+      }
+
+      // 현재 폼 값과 기존 스터디 정보를 비교하여 변경된 필드만 포함
+      // 필수 필드는 항상 포함하고, 선택 필드는 값이 있을 때만 포함
       const updateData: UpdateStudyInfoRequest = {
-        title: typeof data.title === 'string' ? sanitizeString(data.title) : '',
+        // 필수 필드 - 항상 포함 (폼 값 또는 기존 값)
+        title:
+          typeof data.title === 'string' && data.title.trim()
+            ? sanitizeString(data.title)
+            : studyInfo?.study_name || '',
         description:
-          typeof data.shortDescription === 'string'
+          typeof data.shortDescription === 'string' &&
+          data.shortDescription.trim()
             ? sanitizeString(data.shortDescription)
-            : '',
-        detail_description:
-          typeof data.description === 'string'
-            ? sanitizeString(data.description)
-            : '',
-        // interests는 필수 필드이며 최소 1개 이상이어야 함
-        // 백엔드 Collection Merge 방식에 맞춰 항상 배열로 전송
+            : studyInfo?.description || '',
         interests:
           selectedCategories.length > 0
             ? selectedCategories
@@ -361,18 +397,37 @@ export const StudyInfoManagement: React.FC = () => {
                 ? [studyInfo.category]
                 : ['자율/기타'],
         region:
-          typeof data.region === 'string' ? sanitizeString(data.region) : '',
+          typeof data.region === 'string' && data.region.trim()
+            ? sanitizeString(data.region)
+            : studyInfo?.region || '',
+        max_members: (() => {
+          // 폼에서 온 값이 문자열일 수도 있으므로 숫자로 변환
+          const formValue =
+            typeof data.maxMembers === 'number'
+              ? data.maxMembers
+              : typeof data.maxMembers === 'string'
+                ? Number(data.maxMembers)
+                : undefined;
+          // 유효한 숫자이고 0보다 크면 사용, 아니면 기존 값 사용
+          return formValue && formValue > 0
+            ? formValue
+            : studyInfo?.max_members || 2;
+        })(),
+        // 선택 필드 - 값이 있을 때만 포함
+        detail_description:
+          typeof data.description === 'string' && data.description.trim()
+            ? sanitizeString(data.description)
+            : studyInfo?.detailed_description || undefined,
         study_time:
-          typeof data.schedule === 'string'
+          typeof data.schedule === 'string' && data.schedule.trim()
             ? sanitizeString(data.schedule)
-            : '',
-        max_members:
-          typeof data.maxMembers === 'number' ? data.maxMembers : undefined,
-        conditions: Array.isArray(data.conditions)
-          ? data.conditions.map((c: string) => String(c))
-          : [],
-        // file_key: 기존 스터디 정보의 file_key를 유지 (이미지 업로드가 없으면 기존 값 유지)
-        file_key: studyInfo?.file_key || undefined,
+            : studyInfo?.schedule || undefined,
+        conditions:
+          Array.isArray(data.conditions) && data.conditions.length > 0
+            ? data.conditions.map((c: string) => String(c))
+            : studyInfo?.conditions || [],
+        // file_key: 새로 업로드한 이미지가 있으면 새 file_key 사용, 없으면 기존 값 유지
+        file_key: newFileKey || studyInfo?.file_key || undefined,
       };
 
       // 조건 배열의 각 문자열을 안전하게 처리 (특수 문자 제거)
@@ -423,29 +478,39 @@ export const StudyInfoManagement: React.FC = () => {
 
       // 응답 처리
       if (response && (response.success || response.study)) {
-        const updatedStudyInfo = response.study || studyInfo;
-        if (updatedStudyInfo) {
-          setStudyInfo(updatedStudyInfo);
-          // 스터디 정보 새로고침
-          await fetchStudyInfo();
+        // 스터디 정보 새로고침 (최신 데이터 가져오기)
+        await fetchStudyInfo();
+
+        // 이미지 업로드 후 selectedFile 초기화
+        if (selectedFile) {
+          setSelectedFile(null);
         }
 
-        // 스터디 정보를 사용하는 모든 쿼리 캐시 무효화
+        // 스터디 정보를 사용하는 모든 쿼리 캐시 무효화 및 즉시 refetch
         // 1. 스터디 목록 (탐색 페이지의 스터디 카드 목록)
-        queryClient.invalidateQueries({
+        await queryClient.invalidateQueries({
           queryKey: studyKeys.all,
+          refetchType: 'active', // 활성 쿼리만 즉시 refetch
         });
-        // 2. 해당 스터디의 상세 정보 (상세 모달 등)
-        queryClient.invalidateQueries({
+        // 2. 탐색 페이지의 필터링 쿼리 (useStudyExplore에서 사용)
+        await queryClient.invalidateQueries({
+          queryKey: ['studies'],
+          refetchType: 'active',
+        });
+        // 3. 해당 스터디의 상세 정보 (상세 모달 등)
+        await queryClient.invalidateQueries({
           queryKey: studyKeys.detail(String(studyId)),
+          refetchType: 'active',
         });
-        // 3. 스터디 상세 범위 전체 (모든 스터디 상세 정보)
-        queryClient.invalidateQueries({
+        // 4. 스터디 상세 범위 전체 (모든 스터디 상세 정보)
+        await queryClient.invalidateQueries({
           queryKey: studyKeys.detailScope(),
+          refetchType: 'active',
         });
-        // 4. 내 스터디 목록 (홈 페이지 등)
-        queryClient.invalidateQueries({
+        // 5. 내 스터디 목록 (홈 페이지 등)
+        await queryClient.invalidateQueries({
           queryKey: studyKeys.me,
+          refetchType: 'active',
         });
 
         toast.success('스터디 정보가 수정되었습니다.');
@@ -453,18 +518,27 @@ export const StudyInfoManagement: React.FC = () => {
         // 응답이 없거나 성공 표시가 없어도 업데이트된 정보가 있을 수 있음
         await fetchStudyInfo();
 
-        // 스터디 정보를 사용하는 모든 쿼리 캐시 무효화
-        queryClient.invalidateQueries({
+        // 스터디 정보를 사용하는 모든 쿼리 캐시 무효화 및 즉시 refetch
+        await queryClient.invalidateQueries({
           queryKey: studyKeys.all,
+          refetchType: 'active', // 활성 쿼리만 즉시 refetch
         });
-        queryClient.invalidateQueries({
+        // 탐색 페이지의 필터링 쿼리 (useStudyExplore에서 사용)
+        await queryClient.invalidateQueries({
+          queryKey: ['studies'],
+          refetchType: 'active',
+        });
+        await queryClient.invalidateQueries({
           queryKey: studyKeys.detail(String(studyId)),
+          refetchType: 'active',
         });
-        queryClient.invalidateQueries({
+        await queryClient.invalidateQueries({
           queryKey: studyKeys.detailScope(),
+          refetchType: 'active',
         });
-        queryClient.invalidateQueries({
+        await queryClient.invalidateQueries({
           queryKey: studyKeys.me,
+          refetchType: 'active',
         });
 
         toast.success('스터디 정보가 수정되었습니다.');

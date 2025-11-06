@@ -281,7 +281,6 @@ export const useStudyExplore = (searchTerm: string) => {
     categories: CATEGORIES,
     isLoading,
     error,
-    isApplying: applyStudyMutation.isPending,
 
     // 핸들러
     handleApplyClick,
@@ -297,5 +296,6 @@ export const useStudyExplore = (searchTerm: string) => {
     applyStudy: (studyId: number, message: string) => {
       applyStudyMutation.mutate({ studyId, message });
     },
+    isApplying: applyStudyMutation.isPending,
   };
 };

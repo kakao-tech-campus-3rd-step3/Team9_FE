@@ -209,37 +209,57 @@ export const getStudyInfo = async (
 
 /**
  * 스터디 정보 수정 (API 스펙: PATCH /api/studies/{study_id})
+ * 필수 필드: title, description, interests, region, max_members
+ * 선택 필드: detail_description, study_time, conditions, file_key
  */
 export const updateStudyInfo = async (
   studyId: number,
   request: UpdateStudyInfoRequest,
 ): Promise<UpdateStudyInfoResponse> => {
   try {
-    // 방지 코드 패턴 적용: raw 객체 정의 후 undefined 제거
-    // API 스펙에 맞는 필드명과 타입 사용 (스네이크 케이스, 올바른 타입)
-    const raw: Record<string, unknown> = {
-      title: request.title,
-      description: request.description,
-      detail_description: request.detail_description,
-      interests: Array.isArray(request.interests)
-        ? request.interests
-        : undefined, // string[] (배열)
-      region: request.region, // string (Enum일 수도)
-      study_time: request.study_time, // string
+    // 필수 필드는 항상 포함 (빈 값이어도 포함)
+    const payload: Record<string, unknown> = {
+      // 필수 필드 - 항상 포함
+      title: request.title || '',
+      description: request.description || '',
+      interests:
+        Array.isArray(request.interests) && request.interests.length > 0
+          ? request.interests
+          : ['자율/기타'], // 최소 1개 보장
+      region: request.region || '',
       max_members:
-        request.max_members !== undefined && request.max_members !== null
-          ? Number(request.max_members) // 숫자 타입 명시적 변환
-          : undefined,
-      conditions: Array.isArray(request.conditions)
-        ? request.conditions // string[] (배열)
-        : undefined,
-      file_key: request.file_key, // string | undefined
+        request.max_members !== undefined &&
+        request.max_members !== null &&
+        Number(request.max_members) > 0
+          ? Number(request.max_members)
+          : 2, // 기본값 2
     };
 
-    // undefined 제거 (NOT NULL 컬럼에 undefined가 들어가면 500 에러)
-    const payload = Object.fromEntries(
-      Object.entries(raw).filter(([, v]) => v !== undefined),
-    );
+    // 선택 필드 - 값이 있을 때만 포함 (빈 문자열 제외)
+    if (
+      request.detail_description !== undefined &&
+      request.detail_description !== null &&
+      request.detail_description.trim() !== ''
+    ) {
+      payload.detail_description = request.detail_description;
+    }
+    if (
+      request.study_time !== undefined &&
+      request.study_time !== null &&
+      request.study_time.trim() !== ''
+    ) {
+      payload.study_time = request.study_time;
+    }
+    if (Array.isArray(request.conditions) && request.conditions.length > 0) {
+      payload.conditions = request.conditions;
+    }
+    if (
+      request.file_key !== undefined &&
+      request.file_key !== null &&
+      request.file_key !== ''
+    ) {
+      payload.file_key = request.file_key;
+    }
 
     const response = await apiClient.patch(
       API_ENDPOINTS.UPDATE_STUDY_INFO(studyId),

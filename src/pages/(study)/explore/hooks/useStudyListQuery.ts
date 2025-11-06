@@ -10,6 +10,7 @@ export const useStudyListQuery = () => {
   return useQuery({
     queryKey: studyKeys.all,
     queryFn: getStudyList,
-    staleTime: 1000 * 60 * 5, // 5분간 캐시 유지
+    staleTime: 0, // 캐시 무효화 시 즉시 refetch되도록 설정
+    refetchOnWindowFocus: true, // 윈도우 포커스 시 refetch
   });
 };

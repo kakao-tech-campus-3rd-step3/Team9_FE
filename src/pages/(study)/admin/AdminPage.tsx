@@ -10,6 +10,8 @@ import { AdminTabs } from './components/AdminTabs';
 interface AdminPageContextType {
   refreshMembers: () => void;
   setRefreshMembersFn: (fn: () => void) => void;
+  refreshStudyInfo: () => void;
+  setRefreshStudyInfoFn: (fn: () => void) => void;
 }
 
 // 컨텍스트 생성
@@ -26,6 +28,7 @@ export const useAdminPage = () => {
 
 const AdminPage: React.FC = () => {
   const refreshMembersRef = useRef<(() => void) | null>(null);
+  const refreshStudyInfoRef = useRef<(() => void) | null>(null);
 
   const refreshMembers = () => {
     if (refreshMembersRef.current) {
@@ -37,9 +40,21 @@ const AdminPage: React.FC = () => {
     refreshMembersRef.current = fn;
   };
 
+  const refreshStudyInfo = () => {
+    if (refreshStudyInfoRef.current) {
+      refreshStudyInfoRef.current();
+    }
+  };
+
+  const setRefreshStudyInfoFn = (fn: () => void) => {
+    refreshStudyInfoRef.current = fn;
+  };
+
   const contextValue: AdminPageContextType = {
     refreshMembers,
     setRefreshMembersFn,
+    refreshStudyInfo,
+    setRefreshStudyInfoFn,
   };
 
   return (

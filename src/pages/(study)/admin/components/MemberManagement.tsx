@@ -6,6 +6,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { AxiosError } from 'axios';
 import { toast } from 'react-toastify';
+import { useQueryClient } from '@tanstack/react-query';
 import { User, Crown, UserMinus, Loader2 } from 'lucide-react';
 import { getStudyMembers, removeMember, delegateLeadership } from '../services';
 import { useAdminPage } from '../AdminPage';
@@ -13,10 +14,12 @@ import type { StudyMember } from '../types';
 import { ROUTE_PARAMS } from '@/constants';
 import { useAuthStore } from '@/stores/auth';
 import { useCurrentStudy } from '@/hooks/study/useCurrentStudy';
+import { studyKeys } from '@/constants/queryKeys';
 import UserAvatar from '@/components/user/UserAvatar';
 
 export const MemberManagement: React.FC = () => {
-  const { setRefreshMembersFn } = useAdminPage();
+  const { setRefreshMembersFn, refreshStudyInfo } = useAdminPage();
+  const queryClient = useQueryClient();
   const params = useParams<{ [ROUTE_PARAMS.studyId]: string }>();
   const studyId = params[ROUTE_PARAMS.studyId]
     ? Number(params[ROUTE_PARAMS.studyId])
@@ -405,6 +408,22 @@ export const MemberManagement: React.FC = () => {
         setMembers((prev) =>
           prev.filter((member) => member.member_id !== memberId),
         );
+
+        // 스터디 정보 새로고침하여 current_members 업데이트
+        refreshStudyInfo();
+
+        // 탐색 페이지의 스터디 목록 쿼리도 무효화하여 current_members 반영
+        setTimeout(async () => {
+          await queryClient.invalidateQueries({
+            queryKey: studyKeys.all,
+            refetchType: 'active',
+          });
+          await queryClient.invalidateQueries({
+            queryKey: ['studies'],
+            refetchType: 'active',
+          });
+        }, 300);
+
         toast.success('스터디원이 탈퇴되었습니다.');
       } else {
         toast.error(response.message || '탈퇴 처리에 실패했습니다.');
