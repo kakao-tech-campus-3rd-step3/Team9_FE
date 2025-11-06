@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { Upload, Trash2 } from 'lucide-react';
+import { Upload, Trash2, ChevronDown } from 'lucide-react';
 import { cn } from '@/pages/(study)/dashboard/utils';
 import { formatFileSize } from '../utils';
 import type { MaterialFormData, UploadFileItem } from '../types';
@@ -9,6 +9,7 @@ import {
   MATERIAL_CATEGORY_OPTIONS,
   MATERIAL_CATEGORY_TO_API,
 } from '../constants';
+import { Dropdown } from '@/components/common';
 
 export interface MaterialFormProps {
   formData: MaterialFormData;
@@ -107,8 +108,24 @@ function MaterialForm({
             )}
           </div>
 
-          {/* 주차: 카테고리가 LEARNING일 때만 노출, 숫자 입력 */
-          /* 서버 규칙: LEARNING=숫자 필수, NOTICE/ASSIGNMENT=주차 숨김 */}
+          {/* 카테고리 (Dropdown) */}
+          <div>
+            <label className='block text-base font-semibold text-foreground mb-3'>
+              카테고리 <span className='text-destructive'>*</span>
+            </label>
+            {isLoading ? (
+              <div className='h-12 bg-muted animate-pulse rounded' />
+            ) : (
+              <CategoryDropdownInline
+                value={formData.category}
+                onChange={(val) =>
+                  onFormDataChange({ ...formData, category: val })
+                }
+              />
+            )}
+          </div>
+
+          {/* 주차: 카테고리가 LEARNING일 때만 노출, 숫자 입력 (서버 규칙: LEARNING=숫자 필수, NOTICE/ASSIGNMENT=주차 숨김) */}
           {MATERIAL_CATEGORY_TO_API[formData.category] === 'LEARNING' && (
             <div>
               <label className='block text-base font-semibold text-foreground mb-3'>
@@ -138,36 +155,6 @@ function MaterialForm({
               )}
             </div>
           )}
-
-          {/* 카테고리 */}
-          <div>
-            <label className='block text-base font-semibold text-foreground mb-3'>
-              카테고리 <span className='text-destructive'>*</span>
-            </label>
-            {isLoading ? (
-              <div className='h-12 bg-muted animate-pulse rounded' />
-            ) : (
-              <select
-                value={formData.category}
-                onChange={(e) =>
-                  onFormDataChange({ ...formData, category: e.target.value })
-                }
-                className={cn(
-                  'w-full px-4 py-3 border-2 border-border rounded-lg text-base',
-                  'bg-background text-foreground',
-                  'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary',
-                  'transition-all duration-200 hover:border-primary/50',
-                )}
-                required
-              >
-                {MATERIAL_CATEGORY_OPTIONS.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
 
           {/* 내용 */}
           <div>
@@ -283,3 +270,50 @@ function MaterialForm({
 }
 
 export default MaterialForm;
+
+/** 카테고리 드롭다운 (내부 전용) */
+function CategoryDropdownInline({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (val: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const selected = MATERIAL_CATEGORY_OPTIONS.find((o) => o.id === value);
+  return (
+    <Dropdown
+      isOpen={open}
+      onOpenChange={setOpen}
+      trigger={
+        <div
+          className={cn(
+            'w-full px-4 py-3 border-2 border-border rounded-lg text-base',
+            'bg-background text-foreground flex items-center justify-between',
+            'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary',
+            'transition-all duration-200 hover:border-primary/50',
+          )}
+        >
+          <span>{selected?.name ?? '카테고리를 선택하세요'}</span>
+          <ChevronDown className='w-4 h-4 text-muted-foreground' />
+        </div>
+      }
+    >
+      <div className='py-1'>
+        {MATERIAL_CATEGORY_OPTIONS.map((opt) => (
+          <button
+            key={opt.id}
+            type='button'
+            className='w-full text-left px-4 py-2 hover:bg-accent text-sm'
+            onClick={() => {
+              onChange(opt.id);
+              setOpen(false);
+            }}
+          >
+            {opt.name}
+          </button>
+        ))}
+      </div>
+    </Dropdown>
+  );
+}

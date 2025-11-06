@@ -1,43 +1,34 @@
-import { useMemo, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import BaseModal from '@/components/common/BaseModal';
 import { cn } from '@/pages/(study)/dashboard/utils';
-import type { Material, Attachment } from '../types';
+import type { Material } from '../types';
 
 interface QuizCreateModalProps {
   isOpen: boolean;
   onClose: () => void;
   materials: Material[];
-  onSubmit: (payload: {
-    title: string;
-    content: string;
-    attachmentIds: string[];
-  }) => void;
+  files?: { id: number; name: string; size?: number; type?: string }[];
+  isLoadingFiles?: boolean;
+  onSubmit: (payload: { title: string; fileIds: number[] }) => void;
 }
 
 const QuizCreateModal = ({
   isOpen,
   onClose,
   materials,
+  files = [],
+  isLoadingFiles = false,
   onSubmit,
 }: QuizCreateModalProps) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [selectedAttachmentIds, setSelectedAttachmentIds] = useState<string[]>(
-    [],
-  );
+  const [selectedFileIds, setSelectedFileIds] = useState<number[]>([]);
 
-  // 선택된 자료들의 첨부파일을 집계 (고유한 ID 부여)
-  const allAttachments = useMemo<Attachment[]>(() => {
-    return materials.flatMap((m) =>
-      (m.attachments || []).map((a) => ({
-        ...a,
-        id: `${m.id}:${a.id}`, // 자료ID:첨부ID 조합으로 고유성 보장
-      })),
-    );
-  }, [materials]);
+  // 파일 목록 (상위에서 전달되는 상세 files 기반)
+  const fileItems = files;
 
-  const toggleAttachment = useCallback((id: string) => {
-    setSelectedAttachmentIds((prev) =>
+  const toggleFile = useCallback((id: number) => {
+    setSelectedFileIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
   }, []);
@@ -48,11 +39,10 @@ const QuizCreateModal = ({
     if (!isValid) return;
     onSubmit({
       title: title.trim(),
-      content: content.trim(),
-      attachmentIds: selectedAttachmentIds,
+      fileIds: selectedFileIds,
     });
     onClose();
-  }, [isValid, onSubmit, selectedAttachmentIds, title, content, onClose]);
+  }, [isValid, onSubmit, selectedFileIds, title, onClose]);
 
   return (
     <BaseModal
@@ -103,50 +93,55 @@ const QuizCreateModal = ({
           />
         </div>
 
-        {/* 첨부 파일 선택 */}
+        {/* 파일 선택 (상세에서 가져온 files 기준) */}
         <div className='space-y-3'>
           <div className='flex items-center justify-between'>
             <label className='text-sm font-medium text-foreground'>
               첨부 파일 선택
             </label>
             <div className='text-xs text-muted-foreground'>
-              총 {allAttachments.length}개 / 선택 {selectedAttachmentIds.length}
-              개
+              총 {fileItems.length}개 / 선택 {selectedFileIds.length}개
             </div>
           </div>
           <div className='border border-border rounded-lg max-h-64 overflow-auto'>
-            {allAttachments.length === 0 ? (
+            {isLoadingFiles ? (
+              <div className='p-4 text-sm text-muted-foreground'>
+                불러오는 중...
+              </div>
+            ) : fileItems.length === 0 ? (
               <div className='p-4 text-sm text-muted-foreground'>
                 선택한 자료에 첨부 파일이 없습니다.
               </div>
             ) : (
               <ul className='divide-y divide-border'>
-                {allAttachments.map((a) => {
-                  const isSelected = selectedAttachmentIds.includes(
-                    String(a.id),
-                  );
+                {fileItems.map((f) => {
+                  const isSelected = selectedFileIds.includes(Number(f.id));
                   return (
                     <li
-                      key={String(a.id)}
+                      key={String(f.id)}
                       className={cn(
                         'flex items-center justify-between px-4 py-2',
                         isSelected && 'bg-primary/5',
                       )}
-                      onClick={() => toggleAttachment(String(a.id))}
+                      onClick={() => toggleFile(Number(f.id))}
                     >
                       <div className='min-w-0'>
                         <div className='text-sm font-medium text-foreground truncate'>
-                          {a.name}
+                          {f.name}
                         </div>
                         <div className='text-xs text-muted-foreground'>
-                          {a.type || 'file'} •{' '}
-                          {a.size ? `${Math.round(a.size / 1024)}KB` : ''}
+                          {f.type || 'file'} •{' '}
+                          {f.size ? `${Math.round(f.size / 1024)}KB` : ''}
                         </div>
                       </div>
                       <input
                         type='checkbox'
                         checked={isSelected}
-                        onChange={() => toggleAttachment(String(a.id))}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          toggleFile(Number(f.id));
+                        }}
                         className='w-4 h-4'
                       />
                     </li>

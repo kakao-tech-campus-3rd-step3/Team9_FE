@@ -12,3 +12,4 @@ export * from './studyEndpoints';
 export { STUDY_ENDPOINTS } from './studyEndpoints';
 export * from './progressEndpoints';
 export * from './reflectionEndpoints';
+export * from './dashboardEndpoints';

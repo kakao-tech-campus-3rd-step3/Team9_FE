@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Plus, FileText, Trash2, X } from 'lucide-react';
@@ -16,6 +16,8 @@ import {
 import { TOAST_MESSAGES } from './constants';
 import type { Material } from './types';
 import { EmptyState } from './components/common';
+import { QuizzesService } from './services/quizzes';
+import { MaterialsService } from './services/materials';
 
 /**
  * 문서 관리 페이지
@@ -31,6 +33,10 @@ const DocumentPage = () => {
   const [search, setSearch] = useState(''); // 검색어
   const [isConfirmOpen, setIsConfirmOpen] = useState(false); // 삭제 확인 다이얼로그 상태
   const [isQuizModalOpen, setIsQuizModalOpen] = useState(false); // 퀴즈 생성 모달 상태
+  const [quizFiles, setQuizFiles] = useState<
+    { id: number; name: string; size?: number; type?: string }[]
+  >([]);
+  const [isQuizFilesLoading, setIsQuizFilesLoading] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [page, setPage] = useState<number>(0);
   const [size] = useState<number>(10);
@@ -94,6 +100,54 @@ const DocumentPage = () => {
   const handleDeleteMaterials = () => {
     setIsConfirmOpen(true);
   };
+  // 퀴즈 모달 오픈 시 선택 문서들의 상세에서 파일 목록을 수집
+  useEffect(() => {
+    const load = async () => {
+      if (!isQuizModalOpen) return;
+      if (selectedMaterials.length === 0) {
+        setQuizFiles([]);
+        return;
+      }
+      setIsQuizFilesLoading(true);
+      try {
+        const details = await Promise.all(
+          selectedMaterials.map(async (id) => {
+            const num = Number(id);
+            if (!Number.isFinite(num)) return undefined as unknown as unknown;
+            try {
+              return await MaterialsService.detail(num);
+            } catch {
+              return undefined as unknown as unknown;
+            }
+          }),
+        );
+        type DetailFile = {
+          id: number | string;
+          name?: string;
+          key?: string;
+          size?: number | string;
+          file_type?: string;
+        };
+        type DetailResponse = { files?: DetailFile[] } | undefined;
+        const files = (details as DetailResponse[]).flatMap((d) => {
+          const arr = Array.isArray(d?.files) ? d!.files! : [];
+          return arr.map((f) => ({
+            id: Number(f.id),
+            name: String(f.name ?? ''),
+            size: Number(f.size ?? 0) || 0,
+            type: String(f.file_type ?? ''),
+          }));
+        });
+        const deduped = files.filter(
+          (f, idx, arr) => arr.findIndex((x) => x.id === f.id) === idx,
+        );
+        setQuizFiles(deduped);
+      } finally {
+        setIsQuizFilesLoading(false);
+      }
+    };
+    load();
+  }, [isQuizModalOpen, selectedMaterials]);
 
   const deleteMutation = useDeleteMaterialsMutation(Number(study_id));
   // 선택 삭제 확정: 삭제 → 토스트 → 선택 해제 → 첫 페이지로 이동
@@ -302,31 +356,35 @@ const DocumentPage = () => {
       />
 
       {/* 퀴즈 생성 모달 */}
-      <QuizCreateModal
-        isOpen={isQuizModalOpen}
-        onClose={() => setIsQuizModalOpen(false)}
-        materials={(
+      {(() => {
+        const materialsForModal = (
           (weekSourceQuery.data?.materials as Material[]) ?? materialsFromQuery
-        ).filter((m) => selectedMaterials.includes(m.id))}
-        onSubmit={() => {
-          // TODO: 실제 API 요청 연결 (주석 해제 시 동작)
-          // import { QuizzesService } from './services/quizzes';
-          // (async () => {
-          //   try {
-          //     const fileIds = attachmentIds.map((id) => Number(id)).filter((n) => Number.isFinite(n));
-          //     await QuizzesService.create(studyIdNum, { title, fileIds });
-          //     toast.success('퀴즈가 생성되었습니다.');
-          //   } catch (e) {
-          //     toast.error('퀴즈 생성 중 오류가 발생했습니다.');
-          //   }
-          // })();
-
-          // 현재는 토스트만 표시
-          toast.success(TOAST_MESSAGES.QUIZ_CREATE_SUCCESS);
-          setSelectedMaterials([]);
-          setIsQuizModalOpen(false);
-        }}
-      />
+        ).filter((m) => selectedMaterials.includes(m.id));
+        return (
+          <QuizCreateModal
+            isOpen={isQuizModalOpen}
+            onClose={() => setIsQuizModalOpen(false)}
+            materials={materialsForModal}
+            files={quizFiles}
+            isLoadingFiles={isQuizFilesLoading}
+            onSubmit={async ({ title, fileIds }) => {
+              try {
+                if (!fileIds || fileIds.length === 0) {
+                  toast.error('파일을 선택해주세요.');
+                  return;
+                }
+                await QuizzesService.create(studyIdNum, { title, fileIds });
+                toast.success(TOAST_MESSAGES.QUIZ_CREATE_SUCCESS);
+                setSelectedMaterials([]);
+                setIsQuizModalOpen(false);
+                setQuizFiles([]);
+              } catch {
+                toast.error('퀴즈 생성 중 오류가 발생했습니다.');
+              }
+            }}
+          />
+        );
+      })()}
     </div>
   );
 };

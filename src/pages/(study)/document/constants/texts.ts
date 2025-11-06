@@ -17,8 +17,8 @@ export const MATERIAL_CATEGORIES = [
 
 // 자료 카테고리 옵션(폼/API용): 공지 | 학습자료 | 과제
 export const MATERIAL_CATEGORY_OPTIONS = [
-  { id: '공지', name: '공지' },
   { id: '학습자료', name: '학습자료' },
+  { id: '공지', name: '공지' },
   { id: '과제', name: '과제' },
 ] as const;
 

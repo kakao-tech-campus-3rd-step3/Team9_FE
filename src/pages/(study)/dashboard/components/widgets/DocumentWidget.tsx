@@ -1,8 +1,7 @@
 import { FileText, User, HardDrive } from 'lucide-react';
-import { getIconByExtension } from '../utils';
-import { SectionCard } from './common';
+import { getIconByExtension } from '../../utils';
+import { SectionCard, DashboardEmpty } from '../common';
 import { ListItemSkeleton } from '@/components/common';
-import type { Document } from '../types';
 
 interface RecentMaterialItem {
   material_id: number;
@@ -12,21 +11,19 @@ interface RecentMaterialItem {
   total_file_size: number;
 }
 
-interface DocumentSectionProps {
-  documents?: Document[]; // 구 API (기존 목)
-  recent?: RecentMaterialItem[]; // 신 API (실데이터)
-  isLoading?: boolean; // 로딩 상태
-  onClick: () => void; // 섹션 전체 클릭 시 문서 페이지로 이동
-  onItemClick?: (materialId: number) => void; // 특정 아이템 클릭 시 상세 이동
+interface DocumentWidgetProps {
+  recent?: RecentMaterialItem[];
+  isLoading?: boolean;
+  onClick: () => void;
+  onItemClick?: (materialId: number) => void;
 }
 
-const DocumentSection = ({
-  documents = [],
+const DocumentWidget = ({
   recent,
   isLoading = false,
   onClick,
   onItemClick,
-}: DocumentSectionProps) => {
+}: DocumentWidgetProps) => {
   const getFileIcon = (title?: string) =>
     title ? (
       getIconByExtension(title)
@@ -34,7 +31,6 @@ const DocumentSection = ({
       <FileText className='w-4 h-4 text-muted-foreground' />
     );
 
-  // 렌더링용 정규화 데이터
   const normalized = (() => {
     if (recent && recent.length > 0) {
       return recent.map((r) => {
@@ -59,29 +55,27 @@ const DocumentSection = ({
         };
       });
     }
-    return documents.map((d) => ({
-      id: d.id,
-      title: d.title,
-      author: d.uploadedBy,
-      meta: d.size,
-      icon: getFileIcon(d.title),
-    }));
+    return [];
   })();
 
   return (
     <SectionCard icon={FileText} title='문서' onClick={onClick}>
       <div className='space-y-2'>
         {isLoading ? (
-          // 로딩 중일 때 스켈레톤 표시
           <>
             <ListItemSkeleton />
             <ListItemSkeleton />
             <ListItemSkeleton />
           </>
         ) : normalized.length === 0 ? (
-          <div className='p-4 text-xs text-muted-foreground bg-muted/30 rounded-lg border border-dashed border-border'>
-            최근 학습 자료가 없습니다.
-          </div>
+          <DashboardEmpty
+            icon={FileText}
+            title='자료 없음'
+            description='최근 학습 자료가 없습니다'
+            minHeightClass='min-h-[140px]'
+            iconClassName='text-primary'
+            iconWrapperClassName='bg-primary/20'
+          />
         ) : (
           normalized.map((item) => (
             <div
@@ -116,4 +110,4 @@ const DocumentSection = ({
   );
 };
 
-export default DocumentSection;
+export default DocumentWidget;
