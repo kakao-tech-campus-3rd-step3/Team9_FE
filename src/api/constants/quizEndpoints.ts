@@ -14,6 +14,9 @@ export const QUIZ_ENDPOINTS = {
     `/api/submissions/${submissionId}/complete`,
 
   RESULT: (submissionId: number) => `/api/submissions/${submissionId}/result`,
+
+  PATCH_ANSWER: (submissionId: number) =>
+    `/api/submissions/${submissionId}/answers`,
 } as const;
 
 export type QuizEndpointKey = keyof typeof QUIZ_ENDPOINTS;

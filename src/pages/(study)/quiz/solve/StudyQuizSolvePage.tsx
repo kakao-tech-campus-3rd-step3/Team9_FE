@@ -1,9 +1,11 @@
 import { SidebarHeader } from '../../components/layout/sidebar';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ROUTES, ROUTE_PARAMS } from '@/constants';
 import { useQuizStart } from './hooks/useQuizStart';
-import { useQuizComplete } from '../hooks/useQuizComplete';
+
+import { usePatchAnswer } from '../hooks/usePatchAnswer';
+import { useQuizComplete } from '../hooks/useQuizCompete';
 
 const StudyQuizSolvePage = () => {
   const params = useParams();
@@ -28,6 +30,20 @@ const StudyQuizSolvePage = () => {
   const { mutate: completeQuiz, isPending: isCompleting } = useQuizComplete({
     study_id: Number(studyId),
   });
+  const { mutate: patchAnswer } = usePatchAnswer({ study_id: Number(studyId) });
+
+  useEffect(() => {
+    return () => {
+      const answerPayload = quizData?.questions.map((question) => ({
+        question_id: question.question_id,
+        user_answer: answers[question.question_id] || '',
+      }));
+      patchAnswer({
+        submissionId: quizData?.submission_id ?? 0,
+        answers: answerPayload,
+      });
+    };
+  }, [patchAnswer, quizData?.submission_id, quizData?.questions, answers]);
 
   const goToQuestion = (qNumber: number) => {
     if (!studyId || !quizIdParam) return;
