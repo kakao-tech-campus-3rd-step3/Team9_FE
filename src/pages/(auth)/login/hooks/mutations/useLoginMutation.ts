@@ -5,6 +5,7 @@ import { ROUTES } from '@/constants';
 import { useAuthStore } from '@/stores/auth';
 import { loadAndCacheAuthUser } from '@/utils/authUserLoader';
 import { loginService } from '../../services';
+import { queryClient } from '@/libs/queryClient';
 
 /**
  * 로그인 뮤테이션 훅
@@ -19,6 +20,8 @@ export const useLoginMutation = () => {
   return useMutation({
     mutationFn: (payload: LoginPayload) => loginService(payload),
     onSuccess: async (result) => {
+      // 로그인 직전 잔존 캐시를 정리해 사용자 전환 시 데이터 섞임 방지
+      queryClient.clear();
       // 액세스 토큰을 메모리에 저장 (리프레시 토큰은 HttpOnly 쿠키로 자동 관리)
       if ((result as { accessToken?: string })?.accessToken) {
         const accessToken = (result as { accessToken: string }).accessToken;

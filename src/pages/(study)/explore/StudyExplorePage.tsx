@@ -11,7 +11,7 @@ import {
   StudyDetailModal,
   RegionSelectModal,
 } from '../components';
-import { SearchBar } from '@/components/common';
+import { SearchBar, LoadingSpinner } from '@/components/common';
 
 const StudyExplorePage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -26,6 +26,8 @@ const StudyExplorePage: React.FC = () => {
     selectedStudy,
     filteredStudies,
     categories,
+    isLoading,
+    error,
 
     // 핸들러
     handleApplyClick,
@@ -36,6 +38,10 @@ const StudyExplorePage: React.FC = () => {
     handleCategoryToggle,
     handleRegionToggle,
     setActiveModal,
+
+    // 신청 관련
+    applyStudy,
+    isApplying,
   } = useStudyExplore(searchTerm);
 
   // URL의 searchTerm이 변경될 때 inputValue 동기화
@@ -57,17 +63,42 @@ const StudyExplorePage: React.FC = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className='min-h-screen bg-background flex items-center justify-center'>
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='min-h-screen bg-background flex items-center justify-center'>
+        <div className='text-center'>
+          <p className='text-foreground text-lg mb-2'>
+            스터디 목록을 불러오는 중 오류가 발생했습니다.
+          </p>
+          <p className='text-muted-foreground text-sm'>
+            잠시 후 다시 시도해주세요.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className='min-h-screen bg-background'>
-      <div className='px-6 py-4 border-b border-border bg-background'>
-        <SearchBar
-          searchTerm={inputValue}
-          onSearchChange={handleSearchChange}
-          onSearch={handleSearch}
-          placeholder='스터디를 검색해보세요'
-        />
+      <div className='px-6 py-4 border-b border-border bg-background flex justify-end'>
+        <div className='w-80'>
+          <SearchBar
+            searchTerm={inputValue}
+            onSearchChange={handleSearchChange}
+            onSearch={handleSearch}
+            placeholder='스터디를 검색해보세요'
+          />
+        </div>
       </div>
-      <div className='flex h-[calc(100vh-8rem)]'>
+      <div className='flex relative'>
         {/* 사이드바 */}
         <StudyExploreSidebar
           categories={categories}
@@ -82,6 +113,9 @@ const StudyExplorePage: React.FC = () => {
           onCardClick={handleCardClick}
           onApplyClick={handleApplyClick}
           onRegionSelectClick={() => setActiveModal('region')}
+          isLoading={isLoading}
+          error={error}
+          onRetry={() => window.location.reload()}
         />
       </div>
 
@@ -90,6 +124,9 @@ const StudyExplorePage: React.FC = () => {
         isOpen={activeModal === 'apply'}
         onClose={handleModalClose}
         studyTitle={selectedStudy?.title || ''}
+        studyId={selectedStudy?.id}
+        onApply={applyStudy}
+        isApplying={isApplying}
       />
 
       {/* 스터디 상세 모달 */}

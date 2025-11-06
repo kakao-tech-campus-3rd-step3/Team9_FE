@@ -7,7 +7,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import type { SubmitHandler } from 'react-hook-form';
 import { useScheduleAddMutation } from '../hooks/useScheduleAddMutation';
 import dayjs from 'dayjs';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useTuneAdd } from '../hooks/useTuneAdd';
 
 type ScheduleFormValues = {
@@ -35,6 +35,7 @@ const ScheduleAddModal = ({ onClose }: ScheduleAddModalProps) => {
   const studyId = useParams<{ study_id: string }>().study_id;
   const [isOn, setIsOn] = useState(false);
   const addSchedule = useScheduleAddMutation();
+  const navigate = useNavigate();
   const { mutate: addTune } = useTuneAdd();
 
   const methods = useForm<ScheduleFormValues>({
@@ -49,15 +50,22 @@ const ScheduleAddModal = ({ onClose }: ScheduleAddModalProps) => {
   const onSubmit: SubmitHandler<ScheduleFormValues> = (values) => {
     if (isOn) {
       // 일정 조율 추가
-      addTune({
-        title: values.title,
-        content: values.description ?? '',
-        study_id: Number(studyId),
-        start_date: values.tune?.startDate || '',
-        end_date: values.tune?.endDate || '',
-        available_start_time: values.tune?.startTime || '',
-        available_end_time: values.tune?.endTime || '',
-      });
+      addTune(
+        {
+          title: values.title,
+          content: values.description ?? '',
+          study_id: Number(studyId),
+          start_date: values.tune?.startDate || '',
+          end_date: values.tune?.endDate || '',
+          available_start_time: values.tune?.startTime || '',
+          available_end_time: values.tune?.endTime || '',
+        },
+        {
+          onSuccess: () => {
+            navigate(`/study/${studyId}/schedule/tune`);
+          },
+        },
+      );
     } else {
       // 일정 추가
       const start_time = dayjs(

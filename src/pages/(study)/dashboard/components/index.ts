@@ -1,10 +1,9 @@
-export { default as NoticeSection } from './NoticeSection';
-export { default as DocumentSection } from './DocumentSection';
-export { default as ProgressSection } from './ProgressSection';
-export { default as ScheduleSection } from './ScheduleSection';
-export { default as RetrospectSection } from './RetrospectSection';
-export { default as QuizSection } from './QuizSection';
+export { default as NoticeWidget } from './widgets/NoticeWidget';
+export { default as DocumentWidget } from './widgets/DocumentWidget';
+export { default as ScheduleWidget } from './widgets/ScheduleWidget';
 export { default as TitleRankingSection } from './TitleRankingSection';
+export { default as RankingListModal } from './RankingListModal';
 export { default as DashboardGrid } from './layout/DashboardGrid';
 export { default as DashboardRow } from './layout/DashboardRow';
 export * from './common';
+export * from './widgets';

@@ -21,9 +21,22 @@ const ScheduleDropdown = ({
     (s) => s.schedule_id === selectedScheduleId,
   );
 
+  // 선택된 값이 null인지 확인 (명시적으로 "선택 안함"을 선택한 경우)
+  const isExplicitlyNull = selectedScheduleId === null && schedules.length > 0;
+
   const handleSelect = (scheduleId: number | null) => {
     onScheduleChange(scheduleId);
     setIsOpen(false);
+  };
+
+  const getDisplayText = () => {
+    if (selectedSchedule) {
+      return selectedSchedule.schedule_title;
+    }
+    if (isExplicitlyNull) {
+      return '선택 안함';
+    }
+    return placeholder;
   };
 
   return (
@@ -35,10 +48,12 @@ const ScheduleDropdown = ({
       >
         <span
           className={
-            selectedSchedule ? 'text-foreground' : 'text-muted-foreground'
+            selectedSchedule || isExplicitlyNull
+              ? 'text-foreground'
+              : 'text-muted-foreground'
           }
         >
-          {selectedSchedule ? selectedSchedule.schedule_title : placeholder}
+          {getDisplayText()}
         </span>
         <ChevronDown
           className={`w-4 h-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`}
@@ -50,10 +65,10 @@ const ScheduleDropdown = ({
           <button
             type='button'
             onClick={() => handleSelect(null)}
-            className={`w-full px-4 py-3 text-left hover:bg-accent transition-colors ${
+            className={`w-full px-4 py-3 text-left transition-colors ${
               selectedScheduleId === null
-                ? 'bg-primary text-primary-foreground'
-                : ''
+                ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                : 'hover:bg-accent'
             }`}
           >
             선택 안함
@@ -64,10 +79,10 @@ const ScheduleDropdown = ({
               key={schedule.schedule_id}
               type='button'
               onClick={() => handleSelect(schedule.schedule_id)}
-              className={`w-full px-4 py-3 text-left hover:bg-accent transition-colors ${
+              className={`w-full px-4 py-3 text-left transition-colors ${
                 selectedScheduleId === schedule.schedule_id
-                  ? 'bg-primary text-primary-foreground'
-                  : ''
+                  ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                  : 'hover:bg-accent'
               }`}
             >
               {schedule.schedule_title}

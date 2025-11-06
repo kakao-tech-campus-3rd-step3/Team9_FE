@@ -1,14 +1,18 @@
 import { Trophy } from 'lucide-react';
-import type { StudyInfo, MyRanking } from '../types';
+import type { MyRanking } from '../types';
 
 interface TitleRankingSectionProps {
-  studyInfo: StudyInfo;
-  myRanking: MyRanking;
+  studyTitle?: string;
+  myRanking?: MyRanking;
+  onOpenRanking?: () => void;
+  isLoading?: boolean;
 }
 
 const TitleRankingSection = ({
-  studyInfo,
+  studyTitle,
   myRanking,
+  onOpenRanking,
+  isLoading,
 }: TitleRankingSectionProps) => {
   const getRankDisplay = (rank: number) => {
     if (rank <= 3) {
@@ -70,45 +74,51 @@ const TitleRankingSection = ({
   };
 
   return (
-    <div className='flex items-center justify-between p-6 bg-card rounded-xl'>
+    <div className='flex items-center justify-between p-5 bg-card rounded-xl'>
       {/* 타이틀 섹션 */}
       <div className='flex-1'>
-        <div className='flex items-center gap-3 mb-3'>
-          <div className='w-2 h-8 bg-primary rounded-full'></div>
-          <h1 className='text-4xl font-bold text-foreground'>
-            {studyInfo.name}
-          </h1>
-        </div>
-        <div className='flex items-center gap-2 text-muted-foreground'>
-          <div className='w-2 h-2 bg-primary/30 rounded-full'></div>
-          <span className='text-sm font-medium'>스터디 대시보드</span>
-        </div>
-      </div>
-
-      {/* 내 랭킹 섹션 */}
-      <div className='flex items-center gap-6'>
         <div className='flex items-center gap-3'>
-          <div className='w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center shadow-md'>
-            <Trophy className='w-5 h-5 text-white' />
-          </div>
-          <div className='text-right'>
-            <div className='text-sm font-medium text-muted-foreground'>
-              내 랭킹
-            </div>
-            <div className='text-xs text-muted-foreground'>현재 순위</div>
-          </div>
-        </div>
-
-        <div className='flex items-center gap-3 px-4 py-3 bg-primary/5 rounded-xl border border-primary/20'>
-          {getRankDisplay(myRanking.rank)}
-          <div className='text-center'>
-            <div className='text-lg font-bold text-primary'>
-              {myRanking.score}점
-            </div>
-            <div className='text-xs text-muted-foreground'>획득 점수</div>
-          </div>
+          <div className='w-2 h-8 bg-primary rounded-full' />
+          {isLoading ? (
+            <div className='h-7 w-48 bg-accent/40 rounded-md animate-pulse' />
+          ) : (
+            <h1 className='text-3xl font-bold text-foreground tracking-tight'>
+              {studyTitle}
+            </h1>
+          )}
         </div>
       </div>
+
+      {/* 내 랭킹 박스: 클릭 시 순위 표 모달 오픈 */}
+      {myRanking && (
+        <div className='flex items-center gap-6'>
+          <div className='flex items-center gap-3'>
+            <div className='w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center shadow-md'>
+              <Trophy className='w-5 h-5 text-white' />
+            </div>
+            <div className='text-right'>
+              <div className='text-sm font-medium text-muted-foreground'>
+                내 랭킹
+              </div>
+              <div className='text-xs text-muted-foreground'>현재 순위</div>
+            </div>
+          </div>
+
+          <button
+            type='button'
+            onClick={onOpenRanking}
+            className='flex items-center gap-3 px-4 py-3 bg-primary/5 rounded-xl border border-primary/20 hover:bg-primary/10 focus:outline-none'
+          >
+            {getRankDisplay(myRanking.rank)}
+            <div className='text-center'>
+              <div className='text-lg font-bold text-primary'>
+                {myRanking.score}점
+              </div>
+              <div className='text-xs text-muted-foreground'>획득 점수</div>
+            </div>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

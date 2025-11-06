@@ -3,3 +3,4 @@
  */
 
 export { useStudyExplore } from './useStudyExplore';
+export { useStudyListQuery } from './useStudyListQuery';

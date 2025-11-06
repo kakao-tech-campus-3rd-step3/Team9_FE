@@ -8,9 +8,15 @@ export interface CreateQuizPayload {
 
 export const QuizzesService = {
   create: async (studyId: number, payload: CreateQuizPayload) => {
+    // 서버 스펙에 맞춰 snake_case로 변환하여 전송
+    const requestBody = {
+      title: payload.title,
+      file_ids: payload.fileIds,
+    } as const;
+
     const { data } = await apiClient.post(
       QUIZ_ENDPOINTS.CREATE(studyId),
-      payload,
+      requestBody,
     );
     return data;
   },

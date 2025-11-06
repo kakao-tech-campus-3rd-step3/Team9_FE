@@ -1,0 +1,158 @@
+import apiClient from '@/api';
+import { STUDY_ENDPOINTS } from '@/api/constants';
+import type { StudyListParams, StudyApplyRequest, Study } from '../types';
+
+// API 응답 타입 정의
+interface ApiStudyResponse {
+  id: number;
+  title: string;
+  description: string;
+  file_key?: string;
+  detail_description?: string;
+  interests?: string[];
+  region?: string;
+  study_time?: string;
+  conditions?: string[];
+  current_members?: number;
+  max_members?: number;
+}
+
+// API 응답을 프론트엔드 타입으로 변환하는 매퍼 함수
+const mapApiResponseToStudy = async (
+  apiStudy: ApiStudyResponse,
+): Promise<Study> => {
+  // file_key를 imageKey로 매핑
+  // StudyCard에서 imageKey를 사용하여 직접 presigned URL을 요청하므로
+  // 여기서는 imageKey만 저장하고, 실제 URL 요청은 StudyCard에서 처리
+  // 이렇게 하면 컴포넌트 레벨에서 이미지 로딩 상태를 관리할 수 있음
+
+  // 백엔드 데이터에서 description과 detail_description 중 어느 것이 짧은 설명인지 자동 판단
+  const desc = apiStudy.description || '';
+  const detailDesc = apiStudy.detail_description || '';
+
+  // 길이를 기준으로 짧은 설명과 긴 설명 결정
+  let shortDesc = desc;
+  let longDesc = detailDesc;
+
+  if (desc.length > detailDesc.length && detailDesc.length > 0) {
+    // description이 더 길면 바꿈
+    shortDesc = detailDesc;
+    longDesc = desc;
+  }
+
+  const mappedStudy = {
+    id: apiStudy.id,
+    title: apiStudy.title,
+    description: shortDesc, // 짧은 설명 → 카드에 표시
+    shortDescription: longDesc, // 긴 설명 → 상세 모달에 표시
+    category: apiStudy.interests?.[0] || '프로그래밍', // 첫 번째 interest를 카테고리로 사용 (호환성)
+    interests: apiStudy.interests || [], // interests 배열 그대로 전달
+    currentMembers: apiStudy.current_members ?? 1, // null/undefined 체크
+    maxMembers: apiStudy.max_members ?? 10, // null/undefined 체크
+    region: apiStudy.region || '전체',
+    imageKey: apiStudy.file_key, // file_key를 imageKey로 매핑 - StudyCard에서 presigned URL 요청에 사용
+    detailedDescription: longDesc, // 긴 설명
+    schedule: apiStudy.study_time,
+    requirements: apiStudy.conditions,
+  };
+
+  // 디버깅용 로그
+  console.log(`스터디 ${apiStudy.id} 매핑 결과:`, {
+    title: mappedStudy.title,
+    currentMembers: mappedStudy.currentMembers,
+    maxMembers: mappedStudy.maxMembers,
+    originalApi: {
+      current_members: apiStudy.current_members,
+      max_members: apiStudy.max_members,
+      description: apiStudy.description,
+      detail_description: apiStudy.detail_description,
+    },
+  });
+
+  return mappedStudy;
+};
+
+/**
+ * 스터디 탐색 서비스
+ * - 스터디 목록 조회 및 검색
+ * - 스터디 신청
+ * - 기존 API 에러 처리 구조 활용
+ */
+export const studyExploreService = {
+  // 스터디 목록 조회 및 검색
+  getStudies: async (params: StudyListParams = {}) => {
+    const { data } = await apiClient.get(STUDY_ENDPOINTS.STUDIES, {
+      params: {
+        page: params.page || 0,
+        size: params.size || 50, // 더 많은 스터디 요청
+        keyword: params.keyword,
+        interests: params.interests?.join(','),
+        locations: params.locations?.join(','),
+      },
+    });
+
+    // 각 스터디의 상세 정보를 병렬로 조회
+    const studiesWithDetails = await Promise.all(
+      data.studies.map(async (study: ApiStudyResponse) => {
+        try {
+          const detailResponse = await apiClient.get(
+            STUDY_ENDPOINTS.STUDY_DETAIL(study.id),
+          );
+          // 상세 정보와 기본 정보를 병합 (상세 정보가 우선)
+          const mergedStudy = {
+            ...study,
+            ...detailResponse.data,
+          } as ApiStudyResponse;
+
+          console.log(`스터디 ${study.id} 상세 정보 조회:`, {
+            basic: {
+              current_members: study.current_members,
+              max_members: study.max_members,
+            },
+            detail: {
+              current_members: detailResponse.data?.current_members,
+              max_members: detailResponse.data?.max_members,
+            },
+            merged: {
+              current_members: mergedStudy.current_members,
+              max_members: mergedStudy.max_members,
+            },
+          });
+
+          return mergedStudy;
+        } catch (error) {
+          console.warn(`Failed to fetch details for study ${study.id}:`, error);
+          // 상세 정보 조회 실패 시 기본 정보만 반환
+          console.log(`스터디 ${study.id} 기본 정보 사용:`, {
+            current_members: study.current_members,
+            max_members: study.max_members,
+          });
+          return study;
+        }
+      }),
+    );
+
+    // 각 스터디에 대해 이미지 URL을 포함한 완전한 데이터 생성
+    const studiesWithImages = await Promise.all(
+      studiesWithDetails.map(mapApiResponseToStudy),
+    );
+
+    return studiesWithImages;
+  },
+
+  // 스터디 상세 조회
+  getStudyDetail: async (id: number) => {
+    const { data } = await apiClient.get(STUDY_ENDPOINTS.STUDY_DETAIL(id));
+    return data;
+  },
+
+  // 스터디 신청
+  applyStudy: async (payload: StudyApplyRequest) => {
+    const { data } = await apiClient.post(
+      STUDY_ENDPOINTS.STUDY_APPLY(payload.study_id),
+      { message: payload.message },
+      { showToast: false }, // 신청은 별도 토스트 처리
+    );
+    return data;
+  },
+} as const;

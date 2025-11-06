@@ -14,6 +14,9 @@ export const MOCK_STUDIES: Study[] = [
     currentMembers: 2,
     maxMembers: 8,
     region: '서울',
+    imageUrl:
+      'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&h=300&fit=crop',
+    imageKey: 'studies/react-study-1.jpg', // API에서 사용할 이미지 키
   },
   {
     id: 102,
@@ -23,6 +26,9 @@ export const MOCK_STUDIES: Study[] = [
     currentMembers: 1,
     maxMembers: 6,
     region: '경기',
+    imageUrl:
+      'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=300&fit=crop',
+    imageKey: 'studies/toeic-study-1.jpg',
   },
   {
     id: 103,
@@ -32,6 +38,9 @@ export const MOCK_STUDIES: Study[] = [
     currentMembers: 3,
     maxMembers: 5,
     region: '대구',
+    imageUrl:
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop',
+    imageKey: 'studies/job-study-1.jpg',
   },
   {
     id: 104,
@@ -41,6 +50,9 @@ export const MOCK_STUDIES: Study[] = [
     currentMembers: 4,
     maxMembers: 8,
     region: '부산',
+    imageUrl:
+      'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=300&fit=crop',
+    imageKey: 'studies/exam-study-1.jpg',
   },
   {
     id: 105,
@@ -50,6 +62,9 @@ export const MOCK_STUDIES: Study[] = [
     currentMembers: 2,
     maxMembers: 10,
     region: '서울',
+    imageUrl:
+      'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=300&fit=crop',
+    imageKey: 'studies/reading-study-1.jpg',
   },
   {
     id: 106,
@@ -59,6 +74,18 @@ export const MOCK_STUDIES: Study[] = [
     currentMembers: 5,
     maxMembers: 7,
     region: '경기',
+    imageUrl:
+      'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&h=300&fit=crop',
+    imageKey: 'studies/algorithm-study-1.jpg',
+  },
+  {
+    id: 107,
+    title: '온라인 React 스터디',
+    description: '온라인으로 진행하는 React 기초 스터디',
+    category: '프로그래밍',
+    currentMembers: 3,
+    maxMembers: 8,
+    region: '온라인',
   },
 ];
 

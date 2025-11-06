@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { User, Settings, LogOut } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { useLogoutMutation } from '@/hooks';
 import { useAuthUserSuspense } from '@/hooks/useAuthUserSuspense';
 import { ROUTES } from '@/constants';
@@ -39,32 +39,8 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
     onMobileMenuClose?.();
   };
 
-  // 프로필 관리 핸들러
-  const handleProfileManage = () => {
-    // TODO: 마이페이지로 이동 라우팅 연결
-    setIsDropdownOpen(false);
-    onMobileMenuClose?.();
-  };
-
-  // 설정 이동 핸들러
-  const handleOpenSettings = () => {
-    // TODO: 설정 페이지로 이동 라우팅 연결
-    setIsDropdownOpen(false);
-    onMobileMenuClose?.();
-  };
-
-  // 드롭다운 메뉴 아이템 (마이페이지 / 설정 / 로그아웃)
+  // 드롭다운 메뉴 아이템 (로그아웃만)
   const menuItems = [
-    {
-      icon: <User className='w-4 h-4' />,
-      label: '마이페이지',
-      onClick: handleProfileManage,
-    },
-    {
-      icon: <Settings className='w-4 h-4' />,
-      label: '설정',
-      onClick: handleOpenSettings,
-    },
     {
       icon: <LogOut className='w-4 h-4' />,
       label: '로그아웃',
@@ -88,7 +64,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
     );
   }
 
-  // 통합된 프로필 버튼 컴포넌트
+  // 통합된 프로필 버튼 컴포넌트 (div로 변경하여 버튼 중첩 문제 해결)
   const ProfileTrigger = () => {
     const isHeader = variant === 'header';
     const avatarSize = isHeader ? 'w-8 h-8 text-sm' : 'w-10 h-10 text-sm';
@@ -107,12 +83,19 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
         : '';
 
     return (
-      <button
+      <div
         className={`${baseTrigger} ${triggerPadding} ${triggerBg} ${triggerOpenBg}`}
-        type='button'
+        role='button'
         aria-label='사용자 프로필 메뉴 열기'
         aria-expanded={isDropdownOpen}
         aria-haspopup='menu'
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setIsDropdownOpen(!isDropdownOpen);
+          }
+        }}
       >
         <div className='relative flex-shrink-0'>
           <UserAvatar
@@ -134,7 +117,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
             </span>
           )}
         </div>
-      </button>
+      </div>
     );
   };
 

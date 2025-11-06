@@ -1,16 +1,72 @@
-import { useState } from 'react';
-import { Outlet, useMatch } from 'react-router-dom';
+
 import { ROUTES, ROUTE_PARAMS } from '@/constants';
+import { useState, useEffect } from 'react';
+import { Outlet, useParams, useMatch } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import Sidebar from './sidebar/Sidebar';
+import { ChatWidget } from '@/components/chat';
+import { useChatConnection } from '@/components/chat/hooks';
+import { useAuthStore } from '@/stores/auth';
+import { ROUTE_PARAMS } from '@/constants';
+import { useCurrentStudy } from '@/hooks/study/useCurrentStudy';
 
 /**
  * (study) 도메인 전용 레이아웃
  * - 좌측: 도메인 사이드바
  * - 우측: 도메인 컨텐츠
+ * - 스터디 페이지 진입 시 웹소켓 연결 시작 (구독은 ChatWidget에서 관리)
  */
 function StudyLayout() {
   const [open, setOpen] = useState(false);
+  const { [ROUTE_PARAMS.studyId]: studyId } = useParams();
+  const { connectWebSocket } = useChatConnection();
+  const { accessToken, isInitialized, user } = useAuthStore();
+
+  // 스터디 진입 시 현재 스터디 정보 동기화 (역할/타이틀)
+  const numericStudyId = studyId ? Number(studyId) : undefined;
+  useCurrentStudy(
+    typeof numericStudyId === 'number' && !isNaN(numericStudyId)
+      ? numericStudyId
+      : undefined,
+  );
+
+  // 스터디 페이지 진입 시 웹소켓 연결 시작 (구독은 ChatWidget에서 관리)
+  // 인증 토큰이 준비된 후에만 연결 시도
+  useEffect(() => {
+    if (!studyId || !isInitialized) return;
+
+    // 인증 토큰이 없으면 연결 시도하지 않음
+    if (!accessToken) {
+      return;
+    }
+
+    // 현재 스터디 접근 권한(멤버십)이 확인된 뒤에만 연결
+    const currentStudyIdFromStore = user.currentStudy?.study_id;
+    if (
+      !currentStudyIdFromStore ||
+      String(currentStudyIdFromStore) !== studyId
+    ) {
+      return;
+    }
+
+    const initializeConnection = async () => {
+      try {
+        await connectWebSocket();
+      } catch (error) {
+        console.error('❌ [StudyLayout] 웹소켓 연결 실패:', error);
+      }
+    };
+
+    initializeConnection();
+
+    // 연결은 전역적으로 유지하고, 구독 해제는 ChatWidget에서 관리
+  }, [
+    studyId,
+    connectWebSocket,
+    accessToken,
+    isInitialized,
+    user.currentStudy?.study_id,
+  ]);
 
   // 퀴즈 풀이 페이지(`/study/:study_id/quiz/solve/:id`)에서는 사이드바를 숨김
   const isQuizSolve = useMatch(
@@ -77,6 +133,9 @@ function StudyLayout() {
       >
         <Outlet />
       </main>
+
+      {/* 스터디 채팅 위젯 */}
+      {studyId && <ChatWidget studyId={studyId} />}
     </div>
   );
 }

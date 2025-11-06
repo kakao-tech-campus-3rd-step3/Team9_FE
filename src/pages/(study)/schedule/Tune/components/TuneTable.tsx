@@ -1,8 +1,11 @@
 import React from 'react';
-import { tuneCheckData } from '../mock/tuneCheck';
 import { countOnes, getBgColor } from '../utils';
+import type { TuneDetailResponse } from '../services';
 
 type TuneTableProps = {
+  personalTune: number[][];
+  tuneDetailData: TuneDetailResponse;
+  participant_number: number;
   hourSlots: string[];
   grid: number[][];
   days: string[];
@@ -12,6 +15,9 @@ type TuneTableProps = {
 };
 
 const TuneTable = ({
+  personalTune,
+  participant_number,
+  tuneDetailData,
   hourSlots,
   grid,
   days,
@@ -54,8 +60,27 @@ const TuneTable = ({
                         </td>
                       )}
                       {grid.map((daySlots, colIdx) => {
-                        const value = daySlots[rowIdx];
-                        const people = countOnes(value);
+                        const value = daySlots[rowIdx] ?? 0;
+
+                        // If the current user has toggled this slot in personalTune (1),
+                        // visually include their participant bit even if the server grid
+                        // doesn't include it yet. This lets users preview their selection.
+                        let displayMask = value;
+
+                        // If personalTune explicitly toggles this slot, honor it:
+                        // - 1: include current user's bit
+                        // - 0: remove current user's bit
+                        const personalValue = Array.isArray(personalTune)
+                          ? personalTune[colIdx]?.[rowIdx]
+                          : undefined;
+
+                        if (personalValue === 1) {
+                          displayMask = value | participant_number;
+                        } else if (personalValue === 0) {
+                          displayMask = value & ~participant_number;
+                        }
+
+                        const people = countOnes(displayMask);
                         return (
                           <td
                             key={`${colIdx}-${rowIdx}`}
@@ -65,7 +90,7 @@ const TuneTable = ({
                             className={`border-r border-gray-800 px-2 py-1 ${getBgColor(
                               {
                                 count: people,
-                                maxCount: tuneCheckData.participants.length,
+                                maxCount: tuneDetailData.participants.length,
                               },
                             )} ${index === 1 ? 'border-b' : ''}`}
                           />
@@ -78,22 +103,22 @@ const TuneTable = ({
             })}
         </tbody>
       </table>
-      <div className='flex mt-4'>
+      <div className='flex mt-4 mb-6'>
         <div className='border-r border-gray-800 px-2 py-1 text-xs font-bold'>
           0명 참가
         </div>
         <div className='border-r border-y h-6 w-6 bg-white' />
-        {tuneCheckData.participants.map((participant, index) => (
+        {tuneDetailData.participants.map((participant, index) => (
           <div
             key={participant.id}
             className={`border-r border-y h-6 w-6 border-gray-800 ${getBgColor({
               count: index + 1,
-              maxCount: tuneCheckData.participants.length,
+              maxCount: tuneDetailData.participants.length,
             })}`}
           ></div>
         ))}
         <div className='px-2 py-1 text-xs font-bold'>
-          {tuneCheckData.participants.length}명 참가
+          {tuneDetailData.participants.length}명 참가
         </div>
       </div>
     </div>

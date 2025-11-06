@@ -18,7 +18,13 @@ import { useAuthStatus } from '@/hooks';
 
 // 인증 여부에 따른 루트 경로
 const RootIndexRoute: React.FC = () => {
-  const { isAuthenticated } = useAuthStatus();
+  const { isAuthenticated, isAuthLoading } = useAuthStatus();
+
+  // 인증 초기화 중이면 빈 화면 렌더링 (리다이렉트 방지)
+  if (isAuthLoading) {
+    return <></>;
+  }
+
   return isAuthenticated ? (
     <routes.Home />
   ) : (

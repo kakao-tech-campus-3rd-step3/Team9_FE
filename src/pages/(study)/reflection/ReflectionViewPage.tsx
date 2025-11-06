@@ -1,9 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ROUTES, ROUTE_BUILDERS, ROUTE_PARAMS } from '@/constants';
-import { ArrowLeft, Edit, Calendar, User } from 'lucide-react';
-import { mockReflectionDetails, mockSchedules } from './mock';
-import type { Reflection, Schedule } from './types';
+import { ArrowLeft, Edit, Calendar, User, Trash2 } from 'lucide-react';
+import {
+  useReflectionDetailQuery,
+  useDeleteReflectionMutation,
+  useReflectionsQuery,
+} from './hooks';
+import { LoadingSpinner } from '@/components/common';
+import { useAuthUserSuspense } from '@/hooks/useAuthUserSuspense';
+import ConfirmDialog from '@/pages/(study)/document/components/ConfirmDialog';
 
 /**
  * 회고 읽기 전용 상세보기 페이지
@@ -11,43 +17,47 @@ import type { Reflection, Schedule } from './types';
 const ReflectionViewPage = () => {
   const navigate = useNavigate();
   const { [ROUTE_PARAMS.reflectionId]: reflection_id, study_id } = useParams();
-  const [reflection, setReflection] = useState<Reflection | null>(null);
-  const [schedules] = useState<Schedule[]>(mockSchedules);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  // 현재 사용자 (실제로는 인증 상태에서 가져와야 함)
-  const currentUserId = 5; // 김경대 (첫 번째 회고 작성자)
+  const studyId = study_id ? Number(study_id) : 0;
+  const reflectionId = reflection_id ? Number(reflection_id) : 0;
 
-  useEffect(() => {
-    if (reflection_id) {
-      // 실제로는 API 호출로 데이터를 가져와야 함
-      const reflectionData = mockReflectionDetails.find(
-        (r) => r.id === parseInt(reflection_id),
-      );
-      setReflection(reflectionData || null);
-    }
-  }, [reflection_id]);
+  // API로 회고 상세 조회
+  const {
+    data: reflection,
+    isLoading,
+    error,
+  } = useReflectionDetailQuery(studyId, reflectionId);
 
-  if (!reflection) {
-    return <div>로딩 중...</div>;
-  }
+  // 목록 조회로 작성자 이름 가져오기 (캐시 활용)
+  const { data: reflectionsList } = useReflectionsQuery(studyId, {
+    page: 0,
+    size: 100, // 충분히 큰 수로 설정하여 해당 회고를 찾을 수 있도록
+  });
 
-  const isAuthor = reflection.study_member_id === currentUserId;
-  const selectedSchedule = schedules.find(
-    (s) => s.schedule_id === reflection.schedule_id,
-  );
+  // 작성자 이름 찾기
+  const authorName = useMemo(() => {
+    if (!reflectionsList?.reflections || !reflectionId) return null;
+    const found = reflectionsList.reflections.find(
+      (r) => r.id === reflectionId,
+    );
+    return found?.author || null;
+  }, [reflectionsList, reflectionId]);
 
-  // 작성자 이름 매핑
-  const getAuthorName = (studyMemberId: number) => {
-    const authorMap: { [key: number]: string } = {
-      5: '김경대',
-      6: '이영희',
-      7: '박민수',
-    };
-    return authorMap[studyMemberId] || '알 수 없음';
-  };
+  // 삭제 Mutation
+  const deleteMutation = useDeleteReflectionMutation(studyId);
+
+  // 현재 사용자 정보
+  const { user } = useAuthUserSuspense();
+
+  // 작성자 확인 (작성자 이름과 현재 사용자 닉네임 비교)
+  const isAuthor = useMemo(() => {
+    if (!authorName || !user?.nickname) return false;
+    return authorName === user.nickname;
+  }, [authorName, user?.nickname]);
 
   const handleEdit = () => {
-    if (!study_id) return;
+    if (!study_id || !reflection_id) return;
     navigate(
       `${ROUTE_BUILDERS.study.root(study_id)}/${ROUTES.STUDY.REFLECTION}/${reflection_id}/edit`,
     );
@@ -59,6 +69,43 @@ const ReflectionViewPage = () => {
       `${ROUTE_BUILDERS.study.root(study_id)}/${ROUTES.STUDY.REFLECTION}`,
     );
   };
+
+  const handleDelete = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = () => {
+    deleteMutation.mutate(reflectionId, {
+      onSuccess: () => {
+        setShowDeleteDialog(false);
+        handleBack();
+      },
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className='h-full flex items-center justify-center'>
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (error || !reflection) {
+    return (
+      <div className='h-full flex flex-col items-center justify-center'>
+        <div className='text-destructive'>
+          회고를 불러오는 중 오류가 발생했습니다.
+        </div>
+        <button
+          onClick={handleBack}
+          className='mt-4 px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary-hover transition-colors'
+        >
+          목록으로 돌아가기
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className='h-full flex flex-col bg-background'>
@@ -76,13 +123,23 @@ const ReflectionViewPage = () => {
           </div>
 
           {isAuthor && (
-            <button
-              onClick={handleEdit}
-              className='flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm hover:bg-primary-hover transition-colors font-semibold'
-            >
-              <Edit className='w-4 h-4' />
-              <span>수정</span>
-            </button>
+            <div className='flex items-center gap-2'>
+              <button
+                onClick={handleEdit}
+                className='flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm hover:bg-primary-hover transition-colors font-semibold'
+              >
+                <Edit className='w-4 h-4' />
+                <span>수정</span>
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleteMutation.isPending}
+                className='flex items-center gap-2 px-4 py-2.5 bg-destructive text-destructive-foreground rounded-lg text-sm hover:bg-destructive-hover transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed'
+              >
+                <Trash2 className='w-4 h-4' />
+                <span>삭제</span>
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -99,7 +156,9 @@ const ReflectionViewPage = () => {
             <div className='flex items-center gap-4 text-sm text-muted-foreground'>
               <div className='flex items-center gap-1'>
                 <User className='w-4 h-4' />
-                <span>작성자: {getAuthorName(reflection.study_member_id)}</span>
+                <span>
+                  작성자: {authorName || `ID: ${reflection.study_member_id}`}
+                </span>
               </div>
               <div className='flex items-center gap-1'>
                 <Calendar className='w-4 h-4' />
@@ -109,18 +168,6 @@ const ReflectionViewPage = () => {
               </div>
             </div>
           </div>
-
-          {/* 연관된 스터디 일정 */}
-          {selectedSchedule && (
-            <div className='bg-card rounded-lg border border-border p-6'>
-              <h3 className='text-lg font-semibold text-foreground mb-2'>
-                연관된 스터디 일정
-              </h3>
-              <p className='text-foreground'>
-                {selectedSchedule.schedule_title}
-              </p>
-            </div>
-          )}
 
           {/* 점수 평가 */}
           <div className='space-y-4'>
@@ -211,6 +258,20 @@ const ReflectionViewPage = () => {
           </div>
         </div>
       </div>
+
+      {/* 삭제 확인 다이얼로그 */}
+      {showDeleteDialog && (
+        <ConfirmDialog
+          isOpen={showDeleteDialog}
+          title='회고 삭제'
+          message='정말 이 회고를 삭제하시겠습니까? 삭제된 회고는 복구할 수 없습니다.'
+          confirmText='삭제'
+          cancelText='취소'
+          type='danger'
+          onConfirm={confirmDelete}
+          onCancel={() => setShowDeleteDialog(false)}
+        />
+      )}
     </div>
   );
 };

@@ -1,22 +1,18 @@
+import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  NoticeSection,
-  DocumentSection,
-  ProgressSection,
-  ScheduleSection,
-  RetrospectSection,
-  QuizSection,
+  NoticeWidget,
+  DocumentWidget,
+  ScheduleWidget,
   TitleRankingSection,
+  ProgressWidget,
+  RetrospectWidget,
+  QuizWidget,
+  RankingListModal,
 } from './components';
 import { DashboardGrid, DashboardRow } from './components/layout';
-import {
-  mockNotices,
-  mockDocuments,
-  mockSchedules,
-  mockStudyInfo,
-  mockMyRanking,
-} from './mock';
 import { ROUTES, ROUTE_BUILDERS } from '../../../constants';
+import { useDashboardQuery } from './hooks/useDashboard';
 import { useRecentMaterialsQuery } from '@/pages/(study)/document/hooks/useMaterials';
 
 /**
@@ -33,67 +29,115 @@ const DashboardPage = () => {
     navigate(`${ROUTE_BUILDERS.study.root(study_id)}/${path}`);
   };
 
-  const recentQuery = useRecentMaterialsQuery(Number(study_id));
-  const goToDocumentDetail = (materialId: number) =>
-    navigate(
-      `${ROUTE_BUILDERS.study.document.detail(String(study_id), materialId)}`,
-    );
+  const studyIdNum = Number(study_id);
+  const [isRankingOpen, setIsRankingOpen] = React.useState(false);
+
+  const {
+    dashboard: dashboardQuery,
+    progress: progressQuery,
+    retrospect: retrospectQuery,
+    myRanking: myRankingQuery,
+    rankingList: rankingListQuery,
+    quizzesRecent: quizzesRecentQuery,
+  } = useDashboardQuery(studyIdNum, { enableRankingList: isRankingOpen });
+  const studyTitle = dashboardQuery.data?.studyTitle;
+  const recentQuery = useRecentMaterialsQuery(studyIdNum);
 
   return (
     <div className='flex-1 overflow-y-auto bg-background'>
       <DashboardGrid>
-        {/* 타이틀 및 랭킹 섹션 */}
+        {/* 타이틀/랭킹 */}
         <TitleRankingSection
-          studyInfo={mockStudyInfo}
-          myRanking={mockMyRanking}
+          studyTitle={studyTitle}
+          myRanking={myRankingQuery.data}
+          onOpenRanking={() => setIsRankingOpen(true)}
+          isLoading={dashboardQuery.isLoading}
         />
 
-        {/* 공지사항 - 가로 쭉 */}
+        {/* 공지 - 가로 쭉 */}
         <DashboardRow cols={1}>
-          <NoticeSection
-            notices={mockNotices}
-            onClick={() => navigateToStudy(ROUTES.STUDY.ADMIN.ROOT)}
+          <NoticeWidget
+            notices={
+              dashboardQuery.data?.latestNotice
+                ? [dashboardQuery.data.latestNotice]
+                : []
+            }
+            isLoading={dashboardQuery.isLoading}
+            isError={dashboardQuery.isError}
+            onClick={() => navigateToStudy(ROUTES.STUDY.DOCUMENT.ROOT)}
+            onItemClick={(noticeId) =>
+              navigate(
+                `${ROUTE_BUILDERS.study.document.detail(
+                  String(study_id),
+                  noticeId,
+                )}`,
+              )
+            }
           />
         </DashboardRow>
 
-        {/* 문서, 진척도 - 한줄에 */}
+        {/* 문서, 진척도 */}
         <DashboardRow cols={2}>
-          <DocumentSection
+          <DocumentWidget
             recent={
               Array.isArray(recentQuery.data) ? recentQuery.data : undefined
             }
-            documents={
-              Array.isArray(recentQuery.data) && recentQuery.data.length > 0
-                ? []
-                : mockDocuments
-            }
             isLoading={recentQuery.isLoading}
             onClick={() => navigateToStudy(ROUTES.STUDY.DOCUMENT.ROOT)}
-            onItemClick={goToDocumentDetail}
+            onItemClick={(materialId) =>
+              navigate(
+                `${ROUTE_BUILDERS.study.document.detail(
+                  String(study_id),
+                  materialId,
+                )}`,
+              )
+            }
           />
-          <ProgressSection
+          <ProgressWidget
+            data={progressQuery.data}
+            isLoading={progressQuery.isLoading}
+            isError={progressQuery.isError}
             onClick={() => navigateToStudy(ROUTES.STUDY.PROGRESS)}
           />
         </DashboardRow>
 
-        {/* 일정 - 한줄에 */}
+        {/* 일정 */}
         <DashboardRow cols={1}>
-          <ScheduleSection
-            schedules={mockSchedules}
+          <ScheduleWidget
+            schedules={
+              dashboardQuery.data?.upcomingSchedule
+                ? [dashboardQuery.data.upcomingSchedule]
+                : []
+            }
+            isLoading={dashboardQuery.isLoading}
+            isError={dashboardQuery.isError}
             onClick={() => navigateToStudy(ROUTES.STUDY.SCHEDULE)}
           />
         </DashboardRow>
 
-        {/* 회고, 퀴즈 - 한줄에 */}
+        {/* 회고, 퀴즈 */}
         <DashboardRow cols={2}>
-          <RetrospectSection
+          <RetrospectWidget
+            data={retrospectQuery.data}
+            isLoading={retrospectQuery.isLoading}
+            isError={retrospectQuery.isError}
             onClick={() => navigateToStudy(ROUTES.STUDY.REFLECTION)}
           />
-          <QuizSection
+          <QuizWidget
+            data={quizzesRecentQuery.data}
+            isLoading={quizzesRecentQuery.isLoading}
             onClick={() => navigateToStudy(ROUTES.STUDY.QUIZ.ROOT)}
+            onItemClick={() => {
+              navigateToStudy(ROUTES.STUDY.QUIZ.ROOT);
+            }}
           />
         </DashboardRow>
       </DashboardGrid>
+      <RankingListModal
+        isOpen={isRankingOpen}
+        onClose={() => setIsRankingOpen(false)}
+        items={rankingListQuery.data ?? []}
+      />
     </div>
   );
 };
