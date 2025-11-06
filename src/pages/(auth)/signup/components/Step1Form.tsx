@@ -105,11 +105,6 @@ export const Step1Form: React.FC<Step1FormProps> = ({
           error={errors.email?.message}
           {...register('email')}
         />
-        {isCodeVerified && (
-          <span className='inline-flex items-center gap-1 px-2 py-1 rounded-md bg-green-100 text-green-700 text-xs'>
-            <ShieldCheck className='w-3 h-3' /> 인증 완료
-          </span>
-        )}
         <button
           type='button'
           onClick={handleSendCode}

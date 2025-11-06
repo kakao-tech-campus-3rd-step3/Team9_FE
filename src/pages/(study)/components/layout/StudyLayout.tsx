@@ -6,6 +6,7 @@ import { ChatWidget } from '@/components/chat';
 import { useChatConnection } from '@/components/chat/hooks';
 import { useAuthStore } from '@/stores/auth';
 import { ROUTE_PARAMS } from '@/constants';
+import { useCurrentStudy } from '@/hooks/study/useCurrentStudy';
 
 /**
  * (study) 도메인 전용 레이아웃
@@ -17,7 +18,15 @@ function StudyLayout() {
   const [open, setOpen] = useState(false);
   const { [ROUTE_PARAMS.studyId]: studyId } = useParams();
   const { connectWebSocket } = useChatConnection();
-  const { accessToken, isInitialized } = useAuthStore();
+  const { accessToken, isInitialized, user } = useAuthStore();
+
+  // 스터디 진입 시 현재 스터디 정보 동기화 (역할/타이틀)
+  const numericStudyId = studyId ? Number(studyId) : undefined;
+  useCurrentStudy(
+    typeof numericStudyId === 'number' && !isNaN(numericStudyId)
+      ? numericStudyId
+      : undefined,
+  );
 
   // 스터디 페이지 진입 시 웹소켓 연결 시작 (구독은 ChatWidget에서 관리)
   // 인증 토큰이 준비된 후에만 연결 시도
@@ -26,6 +35,15 @@ function StudyLayout() {
 
     // 인증 토큰이 없으면 연결 시도하지 않음
     if (!accessToken) {
+      return;
+    }
+
+    // 현재 스터디 접근 권한(멤버십)이 확인된 뒤에만 연결
+    const currentStudyIdFromStore = user.currentStudy?.study_id;
+    if (
+      !currentStudyIdFromStore ||
+      String(currentStudyIdFromStore) !== studyId
+    ) {
       return;
     }
 
@@ -40,7 +58,13 @@ function StudyLayout() {
     initializeConnection();
 
     // 연결은 전역적으로 유지하고, 구독 해제는 ChatWidget에서 관리
-  }, [studyId, connectWebSocket, accessToken, isInitialized]);
+  }, [
+    studyId,
+    connectWebSocket,
+    accessToken,
+    isInitialized,
+    user.currentStudy?.study_id,
+  ]);
 
   return (
     <div className='flex h-screen bg-background overflow-hidden'>

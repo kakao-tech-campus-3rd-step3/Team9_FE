@@ -1,15 +1,24 @@
 import { NavLink } from 'react-router-dom';
 import { STUDY_NAV_ITEMS } from '@/pages/(study)/constants';
+import { ROUTES } from '@/constants';
+import { useAuthStatus } from '@/hooks/auth/useAuthStatus';
 
 /**
  * 사이드바 네비게이션 컴포넌트
  * 스터디 관련 메뉴 항목들을 표시하고 활성 상태를 관리합니다.
  */
 function SidebarNav() {
+  const { isStudyLeader } = useAuthStatus();
+
+  // 리더가 아닌 경우 관리자 메뉴 항목 제외
+  const navItems = isStudyLeader
+    ? STUDY_NAV_ITEMS
+    : STUDY_NAV_ITEMS.filter((item) => item.to !== ROUTES.STUDY.ADMIN.ROOT);
+
   return (
     <nav className='p-4'>
       <ul className='space-y-1.5'>
-        {STUDY_NAV_ITEMS.map((item) => {
+        {navItems.map((item) => {
           return (
             <li key={item.to}>
               <NavLink
