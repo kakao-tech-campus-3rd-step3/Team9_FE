@@ -112,28 +112,45 @@ const StudyQuizSolvePage = () => {
               {current}. {currentQuestion?.question_text ?? ''}
             </p>
 
-            {currentQuestion?.choices && currentQuestion.choices.length > 0 && (
-              <div className='grid grid-cols-1 gap-2'>
-                {currentQuestion.choices.map((c, i) => {
-                  const selected =
-                    answers[currentQuestion.question_id] ===
-                    String(c.choice_id);
-                  return (
-                    <button
-                      key={c.choice_id}
-                      type='button'
-                      onClick={() =>
-                        setAnswers((s) => ({
-                          ...s,
-                          [currentQuestion.question_id]: String(c.choice_id),
-                        }))
-                      }
-                      className={`text-left font-medium p-3 rounded border border-primary ${selected ? 'bg-primary text-white' : 'bg-white'}`}
-                    >
-                      {i + 1}. {c.choice_text}
-                    </button>
-                  );
-                })}
+            {currentQuestion?.question_type === 'MULTIPLE_CHOICE' &&
+              currentQuestion?.choices &&
+              currentQuestion.choices.length > 0 && (
+                <div className='grid grid-cols-1 gap-2'>
+                  {currentQuestion.choices.map((c, i) => {
+                    const selected =
+                      answers[currentQuestion.question_id] ===
+                      String(c.choice_id);
+                    return (
+                      <button
+                        key={c.choice_id}
+                        type='button'
+                        onClick={() =>
+                          setAnswers((s) => ({
+                            ...s,
+                            [currentQuestion.question_id]: String(c.choice_id),
+                          }))
+                        }
+                        className={`text-left font-medium p-3 rounded border border-primary ${selected ? 'bg-primary text-white' : 'bg-white'}`}
+                      >
+                        {i + 1}. {c.choice_text}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            {currentQuestion?.question_type === 'SHORT_ANSWER' && (
+              <div>
+                <textarea
+                  className='w-full border border-border rounded p-3'
+                  rows={4}
+                  value={answers[currentQuestion.question_id] || ''}
+                  onChange={(e) =>
+                    setAnswers((s) => ({
+                      ...s,
+                      [currentQuestion.question_id]: e.target.value,
+                    }))
+                  }
+                />
               </div>
             )}
           </div>

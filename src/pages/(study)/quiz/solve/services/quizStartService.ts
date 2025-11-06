@@ -5,6 +5,8 @@ type QuizStartRequest = {
   quiz_id: number;
 };
 
+export type QuizAnswerType = 'MULTIPLE_CHOICE' | 'SHORT_ANSWER';
+
 export type QuizStartChoice = {
   choice_id: number;
   choice_text: string;
@@ -12,7 +14,7 @@ export type QuizStartChoice = {
 
 export type QuizStartQuestion = {
   question_id: number;
-  question_type: string;
+  question_type: QuizAnswerType;
   question_text: string;
   choices: QuizStartChoice[];
   user_answer?: string;
