@@ -1,9 +1,10 @@
 import type { Dayjs } from 'dayjs';
-import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useScheduleDelete } from '../hooks/useScheduleDelete';
 import { X } from 'lucide-react';
 import { useAuthStore } from '@/stores';
+import { useAttendanceMeQuery } from '../hooks/useAttendanceMeQuery';
+import { useAttendanceMeMutation } from '../hooks/useAttendanceMeMutation';
 
 type ScheduleManageCardProps = {
   event: {
@@ -18,10 +19,22 @@ type ScheduleManageCardProps = {
 const ScheduleManageCard = ({ event }: ScheduleManageCardProps) => {
   const { study_id } = useParams<{ study_id: string }>();
   const user = useAuthStore((s) => s.user);
-  const [attend, setAttend] = useState(false);
+  const { data: attendanceData, isPending } = useAttendanceMeQuery({
+    schedule_id: event.id,
+  });
+  const { mutate: attendanceMeMutate } = useAttendanceMeMutation({
+    study_id: Number(study_id),
+  });
   const { mutate: deleteSchedule } = useScheduleDelete({
     study_id: Number(study_id),
   });
+
+  const handleAttendanceChange = (status: boolean) => {
+    attendanceMeMutate({
+      schedule_id: event.id,
+      status,
+    });
+  };
 
   return (
     <div className='flex flex-col bg-blue-100 rounded-xl p-4'>
@@ -49,10 +62,11 @@ const ScheduleManageCard = ({ event }: ScheduleManageCardProps) => {
       <div className='flex justify-end mt-2'>
         <button
           type='button'
-          className={`text-white px-4 py-2 rounded-lg cursor-pointer transition ${attend ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}
-          onClick={() => setAttend(!attend)}
+          className={`text-white px-4 py-2 rounded-lg cursor-pointer transition ${attendanceData.status ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}
+          onClick={() => handleAttendanceChange(!attendanceData.status)}
+          disabled={isPending}
         >
-          {attend ? '참여' : '불참'}
+          {attendanceData.status ? '참여' : '불참'}
         </button>
       </div>
     </div>

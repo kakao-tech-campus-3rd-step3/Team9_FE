@@ -25,7 +25,7 @@ interface StudyListResponse {
 }
 
 /**
- * 스터디 목록 조회
+ * 스터디 목록 조회 (useStudyListQuery에서 사용)
  */
 export const getStudyList = async (): Promise<Study[]> => {
   try {
@@ -45,6 +45,7 @@ export const getStudyList = async (): Promise<Study[]> => {
         Array.isArray(study.interests) && study.interests.length > 0
           ? study.interests[0]
           : '',
+      interests: study.interests || [],
       currentMembers: study.current_members,
       maxMembers: study.max_members,
       region: study.region,
@@ -62,3 +63,6 @@ export const getStudyList = async (): Promise<Study[]> => {
     throw error;
   }
 };
+
+// develop 버전의 studyExploreService도 export
+export * from './studyExploreService';
