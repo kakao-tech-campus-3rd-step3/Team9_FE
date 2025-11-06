@@ -103,6 +103,14 @@ export const useCurrentStudySuspense = (studyId: number) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query.data, query.error, setCurrentStudy]);
 
+  // 에러가 발생해도 기본값을 반환하여 컴포넌트가 렌더링되도록 함
+  if (query.error) {
+    return {
+      data: { title: '스터디 정보를 불러올 수 없습니다', role: 'MEMBER' },
+      error: query.error,
+    } as const;
+  }
+
   return {
     data: query.data,
     error: query.error,
