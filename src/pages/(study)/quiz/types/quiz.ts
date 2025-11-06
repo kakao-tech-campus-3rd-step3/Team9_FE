@@ -1,13 +1,17 @@
-export type QuizType = 'CREATING' | 'READY' | 'FAILED' | 'COMPLETED';
+export type SubmissionStatus = 'NOT_TAKEN' | 'IN_PROGRESS' | 'COMPLETED';
+export type QuizType = 'ACTIVE' | 'GENERATING' | 'FAILED';
 
 export type Quiz = {
-  quizId: number;
+  quiz_id: number;
   title: string;
   description: string;
-  timeLimit: number;
-  status: QuizType;
+  created_by: string;
+  question_count: number;
+  time_limit_seconds: number;
+  quiz_status: QuizType;
+  submission_status: SubmissionStatus;
   score: number | null;
-  quizCount: number | null;
+  submission_id: number;
 };
 
 export type TotalCount = number;

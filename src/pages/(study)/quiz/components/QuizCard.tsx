@@ -1,5 +1,5 @@
 import { Calendar, Timer } from 'lucide-react';
-import type { QuizType } from '../types';
+import type { QuizType, SubmissionStatus } from '../types';
 import QuizCardReady from './QuizCardReady';
 import QuizCardCompleted from './QuizCardCompleted';
 import QuizCardCreating from './QuizCardCreating';
@@ -8,9 +8,9 @@ import QuizCardFailed from './QuizCardFailed';
 type QuizCardProps = {
   quizId: number;
   title: string;
-  description: string;
   timeLimit: number;
-  status: QuizType;
+  quiz_status: QuizType;
+  submissionStatus: SubmissionStatus;
   score: number | null;
   quizCount: number | null;
 };
@@ -18,16 +18,16 @@ type QuizCardProps = {
 const QuizCard = ({
   quizId,
   title,
-  description,
   timeLimit,
-  status,
+  quiz_status,
+  submissionStatus,
   score,
   quizCount,
 }: QuizCardProps) => {
-  if (status == 'CREATING') {
+  if (quiz_status == 'GENERATING') {
     return <QuizCardCreating title={title} />;
   }
-  if (status == 'FAILED') {
+  if (quiz_status == 'FAILED') {
     return <QuizCardFailed title={title} />;
   }
 
@@ -37,7 +37,6 @@ const QuizCard = ({
         <div className='flex flex-col gap-3'>
           <div className='flex flex-col gap-2'>
             <h3 className='text-2xl text-primary font-bold'>{title}</h3>
-            <p className='text-lg'>{description}</p>
           </div>
           <div className='flex gap-4'>
             <p className='flex gap-1 text-sm text-muted-foreground'>
@@ -52,14 +51,18 @@ const QuizCard = ({
         </div>
 
         <div className='flex items-center'>
-          {status === 'READY' && <QuizCardReady quizId={quizId.toString()} />}
-          {status === 'COMPLETED' && score !== null && quizCount !== null && (
-            <QuizCardCompleted
-              quizId={quizId}
-              score={score}
-              quizCount={quizCount}
-            />
+          {submissionStatus === 'NOT_TAKEN' && (
+            <QuizCardReady quizId={quizId.toString()} />
           )}
+          {submissionStatus === 'COMPLETED' &&
+            score !== null &&
+            quizCount !== null && (
+              <QuizCardCompleted
+                quizId={quizId}
+                score={score}
+                quizCount={quizCount}
+              />
+            )}
         </div>
       </div>
     </div>
