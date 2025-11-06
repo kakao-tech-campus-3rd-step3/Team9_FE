@@ -52,6 +52,38 @@ const Dropdown: React.FC<DropdownProps> = ({
       : `top-full ${offsetClass ?? defaultOffsetClass}`;
   const alignClass = align === 'left' ? 'left-0' : 'right-0';
 
+  // trigger가 클릭 가능한 요소인지 확인하고 onClick 핸들러 추가
+  const handleTriggerClick = () => {
+    onOpenChange(!isOpen);
+  };
+
+  // trigger가 이미 클릭 가능한 요소인 경우, div로 감싸고 클릭 이벤트 처리
+  const triggerElement = React.isValidElement(trigger) ? (
+    React.cloneElement(
+      trigger as React.ReactElement<{
+        onClick?: (e: React.MouseEvent) => void;
+      }>,
+      {
+        onClick: (e: React.MouseEvent) => {
+          // 기존 onClick 핸들러가 있다면 호출
+          const originalOnClick = (
+            trigger as React.ReactElement<{
+              onClick?: (e: React.MouseEvent) => void;
+            }>
+          ).props?.onClick;
+          if (originalOnClick) {
+            originalOnClick(e);
+          }
+          handleTriggerClick();
+        },
+      },
+    )
+  ) : (
+    <div onClick={handleTriggerClick} className='w-full cursor-pointer'>
+      {trigger}
+    </div>
+  );
+
   return (
     <div className='relative w-full' ref={dropdownRef}>
       <div
