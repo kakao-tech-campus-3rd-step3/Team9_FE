@@ -109,12 +109,8 @@ export const mapRankingList = (
   }));
 };
 
-// 최근 퀴즈 목록 → QuizWidget 표시용 개수 기반 데이터
+// 최근 퀴즈 목록 → QuizWidget 표시용 데이터 (목록 그대로 반환)
 export const mapRecentQuizzesToQuizData = (api?: RecentQuizzesApiResponse) => {
   const arr = Array.isArray(api) ? api : [];
-  const totalCount = arr.length;
-  const pendingCount = arr.filter(
-    (q) => q.submission_status === 'NOT_TAKEN',
-  ).length;
-  return { pendingCount, totalCount };
+  return arr;
 };

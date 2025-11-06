@@ -25,7 +25,11 @@ export const ROUTES = {
     },
     PROGRESS: 'progress',
     SCHEDULE: 'schedule',
-    QUIZ: 'quiz',
+    QUIZ: {
+      ROOT: 'quiz',
+      SOLVE: 'solve/:id',
+      EXPLAIN: 'explain/:id',
+    },
     REFLECTION: 'reflection',
     ADMIN: {
       ROOT: 'admin',
@@ -54,6 +58,10 @@ export const ROUTE_BUILDERS = {
         `/${ROUTES.STUDY.ROOT}/${studyId}/${ROUTES.STUDY.DOCUMENT.ROOT}/${materialId}`,
       edit: (studyId: string | number, materialId: string | number) =>
         `/${ROUTES.STUDY.ROOT}/${studyId}/${ROUTES.STUDY.DOCUMENT.ROOT}/${materialId}/edit`,
+    },
+    quiz: {
+      list: (studyId: string | number) =>
+        `/${ROUTES.STUDY.ROOT}/${studyId}/${ROUTES.STUDY.QUIZ.ROOT}`,
     },
   },
 } as const;
