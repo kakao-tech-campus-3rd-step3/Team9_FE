@@ -4,6 +4,7 @@
 
 import { AxiosError } from 'axios';
 import apiClient from '@/api';
+import { STUDY_ENDPOINTS } from '@/api/constants/studyEndpoints';
 import type {
   StudyMembersResponse,
   ChangeRoleRequest,
@@ -20,21 +21,6 @@ import type {
   DelegateLeadershipResponse,
 } from '../types';
 
-// API 엔드포인트 상수
-const API_ENDPOINTS = {
-  STUDY_MEMBERS: (studyId: number) => `/api/studies/${studyId}/members`,
-  CHANGE_MEMBER_ROLE: (studyId: number, memberId: number) =>
-    `/api/studies/${studyId}/members/${memberId}/role`,
-  REMOVE_MEMBER: (studyId: number, memberId: number) =>
-    `/api/studies/${studyId}/members/${memberId}`,
-  STUDY_APPLICATIONS: (studyId: number) => `/api/studies/${studyId}/applicants`,
-  CHANGE_APPLICATION_STATUS: (studyId: number, applicationId: number) =>
-    `/api/studies/${studyId}/applications/${applicationId}`,
-  STUDY_INFO: (studyId: number) => `/api/studies/${studyId}`,
-  UPDATE_STUDY_INFO: (studyId: number) => `/api/studies/${studyId}`,
-  DELEGATE_LEADERSHIP: (studyId: number) => `/api/studies/${studyId}/leader`,
-} as const;
-
 /**
  * 스터디원 목록 조회
  */
@@ -42,9 +28,12 @@ export const getStudyMembers = async (
   studyId: number,
 ): Promise<StudyMembersResponse> => {
   try {
-    const response = await apiClient.get(API_ENDPOINTS.STUDY_MEMBERS(studyId), {
-      showToast: false,
-    });
+    const response = await apiClient.get(
+      STUDY_ENDPOINTS.STUDY_MEMBERS(studyId),
+      {
+        showToast: false,
+      },
+    );
     return response.data;
   } catch (error) {
     console.error('스터디원 목록 조회 실패:', error);
@@ -61,7 +50,7 @@ export const changeMemberRole = async (
 ): Promise<ChangeRoleResponse> => {
   try {
     const response = await apiClient.patch(
-      API_ENDPOINTS.CHANGE_MEMBER_ROLE(studyId, request.member_id),
+      STUDY_ENDPOINTS.CHANGE_MEMBER_ROLE(studyId, request.member_id),
       { role: request.role },
       { showToast: false },
     );
@@ -82,14 +71,14 @@ export const removeMember = async (
 ): Promise<RemoveMemberResponse> => {
   try {
     console.log('[API 호출] 스터디원 탈퇴', {
-      url: API_ENDPOINTS.REMOVE_MEMBER(studyId, request.member_id),
+      url: STUDY_ENDPOINTS.REMOVE_MEMBER(studyId, request.member_id),
       method: 'DELETE',
       studyId,
       memberId: request.member_id,
     });
 
     const response = await apiClient.delete(
-      API_ENDPOINTS.REMOVE_MEMBER(studyId, request.member_id),
+      STUDY_ENDPOINTS.REMOVE_MEMBER(studyId, request.member_id),
       { showToast: false },
     );
 
@@ -130,7 +119,7 @@ export const getStudyApplications = async (
 ): Promise<StudyApplicationsResponse> => {
   try {
     const response = await apiClient.get(
-      API_ENDPOINTS.STUDY_APPLICATIONS(studyId),
+      STUDY_ENDPOINTS.STUDY_APPLICATIONS(studyId),
       { showToast: false },
     );
     return response.data;
@@ -148,7 +137,7 @@ export const changeApplicationStatus = async (
   request: ChangeApplicationStatusRequest,
 ): Promise<ChangeApplicationStatusResponse> => {
   try {
-    const url = API_ENDPOINTS.CHANGE_APPLICATION_STATUS(
+    const url = STUDY_ENDPOINTS.CHANGE_APPLICATION_STATUS(
       studyId,
       request.application_id,
     );
@@ -197,7 +186,7 @@ export const getStudyInfo = async (
   studyId: number,
 ): Promise<StudyInfoResponse> => {
   try {
-    const response = await apiClient.get(API_ENDPOINTS.STUDY_INFO(studyId), {
+    const response = await apiClient.get(STUDY_ENDPOINTS.STUDY_INFO(studyId), {
       showToast: false,
     });
     return response.data;
@@ -262,7 +251,7 @@ export const updateStudyInfo = async (
     }
 
     const response = await apiClient.patch(
-      API_ENDPOINTS.UPDATE_STUDY_INFO(studyId),
+      STUDY_ENDPOINTS.UPDATE_STUDY_INFO(studyId),
       payload,
       {
         showToast: false,
@@ -288,13 +277,13 @@ export const delegateLeadership = async (
 ): Promise<DelegateLeadershipResponse> => {
   try {
     console.log('[API 호출] 리더 위임', {
-      url: API_ENDPOINTS.DELEGATE_LEADERSHIP(studyId),
+      url: STUDY_ENDPOINTS.DELEGATE_LEADERSHIP(studyId),
       method: 'PUT',
       requestBody: { newLeaderMemberId: request.newLeaderMemberId },
     });
 
     const response = await apiClient.put(
-      API_ENDPOINTS.DELEGATE_LEADERSHIP(studyId),
+      STUDY_ENDPOINTS.DELEGATE_LEADERSHIP(studyId),
       { newLeaderMemberId: request.newLeaderMemberId },
       { showToast: false },
     );
