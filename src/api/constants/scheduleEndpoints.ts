@@ -15,4 +15,6 @@ export const SCHEDULE_ENDPOINTS = {
 
   TUNE_PARTICIPANT_ADD: (tune_id: number) =>
     `/api/schedule-tunes/${tune_id}/participants`,
+
+  TUNE_COMPLETE: (tune_id: number) => `/api/schedule-tunes/${tune_id}/complete`,
 } as const;

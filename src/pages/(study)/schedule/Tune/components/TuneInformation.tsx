@@ -12,6 +12,7 @@ import TuneAvailableList from './TuneAvailableList';
 import TuneParticipant from './TuneParticipant';
 import { useTuneDetail } from '../hooks/useTuneDetail';
 import { useAuthStore } from '@/stores';
+import TuneAddForm from './TuneAddForm';
 
 type TuneInformationProps = {
   tune_id: number;
@@ -19,6 +20,7 @@ type TuneInformationProps = {
 
 const TuneInformation = ({ tune_id }: TuneInformationProps) => {
   const { data: tuneDetailData } = useTuneDetail({ tune_id });
+  const currentStudy = useAuthStore((state) => state.user.currentStudy);
   const [hoverTable, setHoverTable] = useState<{
     col: number;
     row: number;
@@ -93,6 +95,16 @@ const TuneInformation = ({ tune_id }: TuneInformationProps) => {
           />
         </div>
       </div>
+      {currentStudy?.role !== 'MEMBER' && (
+        <div className='flex flex-col items-center'>
+          <h2 className='font-medium text-xl mb-4'>일정 추가</h2>
+          <TuneAddForm
+            tune_id={tune_id}
+            title={tuneDetailData.title}
+            content={tuneDetailData.description}
+          />
+        </div>
+      )}
     </div>
   );
 };
