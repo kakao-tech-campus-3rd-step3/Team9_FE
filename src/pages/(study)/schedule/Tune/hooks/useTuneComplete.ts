@@ -17,6 +17,10 @@ export const useTuneComplete = ({ study_id }: { study_id: number }) => {
         queryKey: scheduleKeys.tune(study_id),
         exact: true,
       });
+      queryClient.invalidateQueries({
+        queryKey: scheduleKeys.study(study_id),
+        exact: true,
+      });
 
       toast.success('일정이 성공적으로 추가되었습니다!');
     },
