@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { ArrowLeft, Plus } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { ROUTES, ROUTE_BUILDERS, ROUTE_PARAMS } from '@/constants';
 import { REFLECTION_TEXTS, SCORE_LABELS, SCORE_RANGE } from './constants';
 import { ScoreSlider, ScheduleDropdown } from './components';
@@ -26,23 +26,8 @@ const ReflectionDetailPage = () => {
   const reflectionId = reflection_id ? Number(reflection_id) : 0;
 
   // 회고 작성 가능한 과거 스터디 일정 조회
-  const {
-    data: schedules = [],
-    isLoading: isLoadingSchedules,
-    refetch: refetchSchedules,
-  } = useSchedulePastQuery(studyId);
-
-  const location = useLocation();
-
-  // 일정 관리 페이지에서 돌아올 때 일정 목록 새로고침
-  useEffect(() => {
-    const isReturningFromSchedule =
-      location.state?.from === 'schedule-manage' ||
-      document.referrer.includes('/schedule/manage');
-    if (isReturningFromSchedule) {
-      refetchSchedules();
-    }
-  }, [location, refetchSchedules]);
+  const { data: schedules = [], isLoading: isLoadingSchedules } =
+    useSchedulePastQuery(studyId);
 
   // 폼 상태 관리
   const {
@@ -171,25 +156,9 @@ const ReflectionDetailPage = () => {
 
           {/* 스케줄 선택 */}
           <div className='bg-card rounded-lg border border-border p-6'>
-            <div className='flex items-center justify-between mb-4'>
-              <h3 className='text-lg font-semibold text-foreground'>
-                연관된 스터디 일정
-              </h3>
-              <button
-                type='button'
-                onClick={() => {
-                  if (!study_id) return;
-                  navigate(
-                    `/${ROUTES.STUDY.ROOT}/${study_id}/${ROUTES.STUDY.SCHEDULE}/${ROUTES.SCHEDULE.MANAGE}`,
-                    { state: { returnTo: 'reflection' } },
-                  );
-                }}
-                className='flex items-center gap-1.5 px-3 py-1.5 text-sm bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary-hover transition-colors'
-              >
-                <Plus className='w-4 h-4' />
-                <span>일정 추가</span>
-              </button>
-            </div>
+            <h3 className='text-lg font-semibold text-foreground mb-4'>
+              연관된 스터디 일정
+            </h3>
             <ScheduleDropdown
               schedules={schedules}
               selectedScheduleId={formValues.schedule_id ?? null}
