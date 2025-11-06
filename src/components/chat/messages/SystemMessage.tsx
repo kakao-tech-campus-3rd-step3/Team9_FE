@@ -4,7 +4,7 @@ import type { ChatMessage } from '../types';
 
 interface SystemMessageProps {
   message: ChatMessage;
-  type: 'notice' | 'schedule';
+  type: 'notice' | 'schedule' | 'quiz';
 }
 
 // 시스템 메시지 타입별 설정
@@ -33,6 +33,19 @@ const messageConfig = {
       badge: 'bg-blue-200 text-blue-800',
       secondary: 'text-blue-600',
       hover: 'hover:bg-blue-100',
+    },
+  },
+  quiz: {
+    label: '퀴즈',
+    icon: '🧠',
+    linkText: '퀴즈 풀러가기',
+    colors: {
+      bg: 'bg-purple-50',
+      text: 'text-purple-800',
+      border: 'border-purple-200',
+      badge: 'bg-purple-200 text-purple-800',
+      secondary: 'text-purple-600',
+      hover: 'hover:bg-purple-100',
     },
   },
 } as const;
