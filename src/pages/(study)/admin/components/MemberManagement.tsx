@@ -5,6 +5,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { AxiosError } from 'axios';
+import { toast } from 'react-toastify';
 import { User, Crown, UserMinus, Loader2 } from 'lucide-react';
 import { getStudyMembers, removeMember, delegateLeadership } from '../services';
 import { useAdminPage } from '../AdminPage';
@@ -258,18 +259,18 @@ export const MemberManagement: React.FC = () => {
   // 리더 위임 처리 (PUT /api/studies/{study_id}/leader API 사용)
   const handleDelegateLeadership = async (memberId: number) => {
     if (!studyId) {
-      alert('스터디 ID가 없습니다.');
+      toast.error('스터디 ID가 없습니다.');
       return;
     }
 
     if (!memberId) {
-      alert('멤버 ID가 없습니다.');
+      toast.error('멤버 ID가 없습니다.');
       return;
     }
 
     const targetMember = members.find((m) => m.member_id === memberId);
     if (!targetMember) {
-      alert('멤버를 찾을 수 없습니다.');
+      toast.error('멤버를 찾을 수 없습니다.');
       return;
     }
 
@@ -322,7 +323,7 @@ export const MemberManagement: React.FC = () => {
         // 멤버 목록 먼저 새로고침 (리더 역할이 변경됨)
         await fetchMembers();
 
-        alert('리더 권한이 위임되었습니다.');
+        toast.success('리더 권한이 위임되었습니다.');
 
         // 리더 권한이 변경되었으므로 현재 사용자가 리더가 아니면 관리자 페이지 접근 불가
         // 페이지를 새로고침하여 권한 상태를 업데이트
@@ -334,7 +335,7 @@ export const MemberManagement: React.FC = () => {
           response && typeof response === 'object' && 'message' in response
             ? (response as { message: string }).message
             : '리더 위임에 실패했습니다.';
-        alert(errorMessage);
+        toast.error(errorMessage);
       }
     } catch (error) {
       console.error('[리더 위임 실패]', error);
@@ -357,19 +358,19 @@ export const MemberManagement: React.FC = () => {
         });
 
         if (statusCode === 403) {
-          alert(
+          toast.error(
             '리더 권한이 없습니다. 스터디 리더만 리더를 위임할 수 있습니다.',
           );
         } else if (statusCode === 404) {
-          alert('스터디 또는 멤버를 찾을 수 없습니다.');
+          toast.error('스터디 또는 멤버를 찾을 수 없습니다.');
         } else {
-          alert(
+          toast.error(
             errorData?.message ||
               '리더 위임에 실패했습니다. 잠시 후 다시 시도해주세요.',
           );
         }
       } else {
-        alert('리더 위임에 실패했습니다. 잠시 후 다시 시도해주세요.');
+        toast.error('리더 위임에 실패했습니다. 잠시 후 다시 시도해주세요.');
       }
     } finally {
       setActionLoading((prev) => ({ ...prev, [actionKey]: false }));
@@ -379,11 +380,11 @@ export const MemberManagement: React.FC = () => {
   // 스터디원 탈퇴 처리
   const handleRemoveMember = async (memberId: number, memberName: string) => {
     if (!memberId) {
-      alert('멤버 ID가 없습니다.');
+      toast.error('멤버 ID가 없습니다.');
       return;
     }
     if (!studyId) {
-      alert('스터디 ID가 없습니다.');
+      toast.error('스터디 ID가 없습니다.');
       return;
     }
 
@@ -404,13 +405,13 @@ export const MemberManagement: React.FC = () => {
         setMembers((prev) =>
           prev.filter((member) => member.member_id !== memberId),
         );
-        alert('스터디원이 탈퇴되었습니다.');
+        toast.success('스터디원이 탈퇴되었습니다.');
       } else {
-        alert(response.message || '탈퇴 처리에 실패했습니다.');
+        toast.error(response.message || '탈퇴 처리에 실패했습니다.');
       }
     } catch (error) {
       console.error('탈퇴 처리 실패:', error);
-      alert('탈퇴 처리에 실패했습니다.');
+      toast.error('탈퇴 처리에 실패했습니다.');
     } finally {
       setActionLoading((prev) => ({ ...prev, [actionKey]: false }));
     }

@@ -47,50 +47,6 @@ apiClient.interceptors.request.use(
     // showToast 옵션을 헤더로 변환 (기본값: true, 명시적으로 false일 때만 숨김)
     config.headers['x-show-toast'] = config.showToast === false ? '0' : '1';
 
-    // PATCH /api/studies/{id} 요청 디버깅
-    if (config.method === 'patch' && config.url?.includes('/api/studies/')) {
-      // 실제 전송되는 데이터 확인
-      let actualDataString = '';
-      if (typeof config.data === 'string') {
-        actualDataString = config.data;
-      } else if (typeof config.data === 'object' && config.data !== null) {
-        actualDataString = JSON.stringify(config.data);
-      }
-
-      console.log('[Axios 요청 인터셉터] 스터디 정보 수정', {
-        url: config.url,
-        method: config.method,
-        data: config.data,
-        dataType: typeof config.data,
-        dataKeys:
-          config.data && typeof config.data === 'object'
-            ? Object.keys(config.data)
-            : [],
-        dataStringified: actualDataString,
-        dataStringified길이: actualDataString.length,
-        dataStringified전체: actualDataString, // 전체 JSON 문자열 확인
-        headers: config.headers,
-      });
-
-      // JSON 문자열이 잘렸는지 확인
-      if (actualDataString.length > 0) {
-        try {
-          const parsed = JSON.parse(actualDataString);
-          console.log('[Axios 인터셉터 - JSON 파싱 검증]', {
-            파싱성공: true,
-            파싱된필드수: Object.keys(parsed).length,
-            파싱된필드: Object.keys(parsed),
-            파싱된데이터: parsed,
-          });
-        } catch (parseError) {
-          console.error('[Axios 인터셉터 - JSON 파싱 실패]', {
-            JSON문자열: actualDataString,
-            에러: parseError,
-          });
-        }
-      }
-    }
-
     return config;
   },
   (error) => {

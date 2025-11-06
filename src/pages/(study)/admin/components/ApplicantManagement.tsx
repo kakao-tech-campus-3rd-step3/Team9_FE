@@ -5,6 +5,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { AxiosError } from 'axios';
+import { toast } from 'react-toastify';
 import { User, Loader2, Check, X } from 'lucide-react';
 import {
   getStudyApplications,
@@ -91,7 +92,7 @@ export const ApplicantManagement: React.FC = () => {
     status: 'APPROVED' | 'REJECTED',
   ) => {
     if (!studyId) {
-      alert('스터디 ID가 없습니다.');
+      toast.error('스터디 ID가 없습니다.');
       return;
     }
 
@@ -109,9 +110,7 @@ export const ApplicantManagement: React.FC = () => {
     );
 
     if (!targetApplication) {
-      alert(
-        '해당 신청자를 찾을 수 없습니다.\n이미 처리되었거나 목록에서 제거되었을 수 있습니다.\n목록을 새로고침하겠습니다.',
-      );
+      toast.error('해당 신청자를 찾을 수 없습니다. 목록을 새로고침합니다.');
       fetchApplications();
       return;
     }
@@ -152,7 +151,7 @@ export const ApplicantManagement: React.FC = () => {
         // 명시적으로 실패인 경우만 처리
         console.error('[신청 상태 변경 실패] 응답 success가 false:', response);
         const errorMessage = (response as { message?: string })?.message || '';
-        alert(`${actionText} 처리에 실패했습니다. ${errorMessage}`);
+        toast.error(`${actionText} 처리에 실패했습니다. ${errorMessage}`);
 
         // 실패 시 신청자 목록 새로고침
         setTimeout(() => {
@@ -165,7 +164,7 @@ export const ApplicantManagement: React.FC = () => {
       console.log('[신청 상태 변경 성공]', response);
 
       // 성공 알림 표시
-      alert(`신청이 ${actionText}되었습니다.`);
+      toast.success(`신청이 ${actionText}되었습니다.`);
 
       // 성공하면:
       // 1. 신청자 목록에서 제거됨 → 목록 새로고침
@@ -320,59 +319,9 @@ export const ApplicantManagement: React.FC = () => {
 
           // 사용자에게 명확한 안내
           if (isInvalidStateChange) {
-            let additionalInfo = '';
-
-            // 승인 시도였다면 스터디 인원 정보 추가
-            if (status === 'APPROVED') {
-              try {
-                const studyInfoResponse = await getStudyInfo(studyId);
-                const rawStudyInfo =
-                  studyInfoResponse?.study || studyInfoResponse;
-                if (rawStudyInfo && typeof rawStudyInfo === 'object') {
-                  const rawData = rawStudyInfo as unknown as Record<
-                    string,
-                    unknown
-                  >;
-                  const currentMembers =
-                    typeof rawData?.current_members === 'number'
-                      ? rawData.current_members
-                      : typeof rawData?.currentMembers === 'number'
-                        ? rawData.currentMembers
-                        : null;
-                  const maxMembers =
-                    typeof rawData?.max_members === 'number'
-                      ? rawData.max_members
-                      : typeof rawData?.maxMembers === 'number'
-                        ? rawData.maxMembers
-                        : null;
-
-                  if (currentMembers !== null && maxMembers !== null) {
-                    additionalInfo = `\n\n현재 스터디 인원: ${currentMembers}/${maxMembers}`;
-
-                    // 인원이 충분한데도 에러가 발생하는 경우
-                    if (currentMembers < maxMembers) {
-                      additionalInfo += `\n⚠️ 인원이 충분한데도 승인이 실패했습니다.`;
-                      additionalInfo += `\n이는 백엔드 로직 문제일 가능성이 높습니다.`;
-                    }
-                  }
-                }
-              } catch (err) {
-                console.error('[스터디 정보 조회 실패]', err);
-              }
-            }
-
-            // 백엔드가 status 필드를 제공하지 않는 문제 명시
-            const statusInfo = targetApplication
-              ? `\n\n⚠️ 참고: 백엔드 API가 신청자의 현재 상태(status) 정보를 제공하지 않아, 프론트엔드에서 상태를 확인할 수 없습니다.`
-              : '';
-
-            alert(
-              `${actionText} 요청이 거부되었습니다.\n\n이유: ${errorMessage}${additionalInfo}${statusInfo}\n\n이 신청은 이미 처리되었거나 처리할 수 없는 상태일 수 있습니다.\n\n가능한 원인:\n• 다른 관리자가 이미 처리함\n• 스터디 인원이 가득 참\n• 신청 상태가 변경 불가능한 상태\n• 백엔드 검증 로직 문제\n\n신청자 목록을 자동으로 새로고침합니다.`,
-            );
+            toast.error(`${actionText} 요청이 거부되었습니다. ${errorMessage}`);
           } else {
-            alert(
-              `${actionText} 처리 중 문제가 발생했습니다.\n\n${errorMessage}\n\n신청자 목록을 확인해주세요.`,
-            );
+            toast.error(`${actionText} 처리 중 문제가 발생했습니다.`);
           }
         } else {
           const errorMessage =
@@ -388,7 +337,7 @@ export const ApplicantManagement: React.FC = () => {
             }
           }, 500);
 
-          alert(`${actionText} 처리에 실패했습니다.\n\n${errorMessage}`);
+          toast.error(`${actionText} 처리에 실패했습니다. ${errorMessage}`);
         }
       } else {
         // 알 수 없는 에러도 목록 새로고침
@@ -398,7 +347,7 @@ export const ApplicantManagement: React.FC = () => {
             refreshMembers();
           }
         }, 500);
-        alert(`${actionText} 처리에 실패했습니다.`);
+        toast.error(`${actionText} 처리에 실패했습니다.`);
       }
     } finally {
       setActionLoading((prev) => ({ ...prev, [actionKey]: false }));
@@ -411,7 +360,7 @@ export const ApplicantManagement: React.FC = () => {
     applicantName: string,
   ) => {
     if (!studyId) {
-      alert('스터디 ID가 없습니다.');
+      toast.error('스터디 ID가 없습니다.');
       return;
     }
 
@@ -475,8 +424,8 @@ export const ApplicantManagement: React.FC = () => {
 
       // 최대 인원이 1명이거나 현재 인원이 이미 최대 인원에 도달한 경우
       if (maxMembers <= 1) {
-        alert(
-          `현재 최대 인원이 ${maxMembers}명으로 설정되어 있습니다.\n\n${applicantName}님을 승인하려면 스터디 정보 관리 페이지에서 최대 인원을 ${maxMembers + 1}명 이상으로 늘려주세요.`,
+        toast.error(
+          `최대 인원이 ${maxMembers}명입니다. 스터디 정보 관리에서 최대 인원을 늘려주세요.`,
         );
         return;
       }
@@ -488,7 +437,9 @@ export const ApplicantManagement: React.FC = () => {
 
         if (shouldIncreaseMaxMembers) {
           // 최대 인원 증가는 스터디 정보 관리 페이지에서 해야 하므로 안내
-          alert('스터디 정보 관리 페이지에서 최대 인원을 먼저 늘려주세요.');
+          toast.error(
+            '스터디 정보 관리 페이지에서 최대 인원을 먼저 늘려주세요.',
+          );
           return;
         }
         return;
