@@ -8,6 +8,7 @@ import {
   useReflectionsQuery,
 } from './hooks';
 import { LoadingSpinner } from '@/components/common';
+import { useAuthUserSuspense } from '@/hooks/useAuthUserSuspense';
 import ConfirmDialog from '@/pages/(study)/document/components/ConfirmDialog';
 
 /**
@@ -46,9 +47,14 @@ const ReflectionViewPage = () => {
   // 삭제 Mutation
   const deleteMutation = useDeleteReflectionMutation(studyId);
 
-  // 작성자 확인 (현재는 studyMemberId 비교만 가능, 추후 사용자 정보 연동 필요)
-  // TODO: 현재 사용자의 studyMemberId를 가져와서 비교
-  const isAuthor = false; // 임시로 false, 추후 사용자 정보 연동 필요
+  // 현재 사용자 정보
+  const { user } = useAuthUserSuspense();
+
+  // 작성자 확인 (작성자 이름과 현재 사용자 닉네임 비교)
+  const isAuthor = useMemo(() => {
+    if (!authorName || !user?.nickname) return false;
+    return authorName === user.nickname;
+  }, [authorName, user?.nickname]);
 
   const handleEdit = () => {
     if (!study_id || !reflection_id) return;

@@ -92,7 +92,11 @@ const ReflectionPage = () => {
             }`}
           >
             <Filter className='w-4 h-4' />
-            <span>{REFLECTION_TEXTS.MY_REFLECTIONS_ONLY}</span>
+            <span>
+              {showMyReflectionsOnly
+                ? '모든 회고 보기'
+                : REFLECTION_TEXTS.MY_REFLECTIONS_ONLY}
+            </span>
           </button>
 
           <button
@@ -121,41 +125,47 @@ const ReflectionPage = () => {
           </div>
         ) : (
           <div className='space-y-4'>
-            {allReflections.map((reflection) => (
-              <div
-                key={reflection.id}
-                onClick={() => handleReflectionClick(reflection.id)}
-                className='bg-card rounded-lg border border-border p-6 cursor-pointer hover:shadow-md transition-shadow'
-              >
-                <div className='flex items-start justify-between'>
-                  <div className='flex-1'>
-                    <h3 className='text-lg font-semibold text-foreground mb-2'>
-                      {reflection.title}
-                    </h3>
-
-                    <div className='flex items-center gap-4 text-sm text-muted-foreground'>
-                      <div className='flex items-center gap-1'>
-                        <span>작성자: {reflection.author}</span>
+            {allReflections.map((reflection) => {
+              return (
+                <div
+                  key={reflection.id}
+                  className='bg-card rounded-lg border border-border p-6 hover:shadow-md transition-shadow'
+                >
+                  <div className='flex items-start justify-between'>
+                    <div className='flex-1'>
+                      <div
+                        className='cursor-pointer'
+                        onClick={() => handleReflectionClick(reflection.id)}
+                      >
+                        <h3 className='text-lg font-semibold text-foreground mb-2'>
+                          {reflection.title}
+                        </h3>
                       </div>
 
-                      {reflection.schedule_title && (
+                      <div className='flex items-center gap-4 text-sm text-muted-foreground mt-2'>
                         <div className='flex items-center gap-1'>
-                          <span>
-                            연관된 스터디: {reflection.schedule_title}
-                          </span>
+                          <span>작성자: {reflection.author}</span>
                         </div>
+
+                        {reflection.schedule_title && (
+                          <div className='flex items-center gap-1'>
+                            <span>
+                              연관된 스터디: {reflection.schedule_title}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className='text-sm text-muted-foreground'>
+                      {new Date(reflection.updated_at).toLocaleDateString(
+                        'ko-KR',
                       )}
                     </div>
                   </div>
-
-                  <div className='text-sm text-muted-foreground'>
-                    {new Date(reflection.updated_at).toLocaleDateString(
-                      'ko-KR',
-                    )}
-                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             {/* 더보기 버튼 */}
             {hasNext && (
@@ -172,14 +182,6 @@ const ReflectionPage = () => {
           </div>
         )}
       </div>
-
-      {/* 플로팅 액션 버튼 */}
-      <button
-        onClick={handleWriteReflection}
-        className='fixed bottom-6 right-6 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg hover:bg-primary-hover transition-colors flex items-center justify-center'
-      >
-        <Plus className='w-6 h-6' />
-      </button>
     </div>
   );
 };

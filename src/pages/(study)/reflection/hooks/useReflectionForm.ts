@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -63,13 +64,16 @@ export const useReflectionForm = (
     });
   };
 
-  // 폼 리셋
-  const resetForm = (newData?: Partial<ReflectionFormData>) => {
-    reset({
-      ...DEFAULT_REFLECTION_FORM_VALUES,
-      ...newData,
-    });
-  };
+  // 폼 리셋 (useCallback으로 메모이제이션하여 무한 렌더링 방지)
+  const resetForm = useCallback(
+    (newData?: Partial<ReflectionFormData>) => {
+      reset({
+        ...DEFAULT_REFLECTION_FORM_VALUES,
+        ...newData,
+      });
+    },
+    [reset],
+  );
 
   return {
     // React Hook Form

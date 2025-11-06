@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { ROUTES, ROUTE_BUILDERS, ROUTE_PARAMS } from '@/constants';
 import { REFLECTION_TEXTS, SCORE_LABELS, SCORE_RANGE } from './constants';
-import { mockSchedules } from './mock';
 import { ScoreSlider, ScheduleDropdown } from './components';
 import {
   useReflectionForm,
@@ -10,8 +10,8 @@ import {
   useCreateReflectionMutation,
   useUpdateReflectionMutation,
 } from './hooks';
+import { useSchedulePastQuery } from './hooks/useSchedulePastQuery';
 import { LoadingSpinner } from '@/components/common';
-import type { Schedule } from './types';
 import type { ReflectionFormData } from './schemas';
 
 /**
@@ -25,8 +25,9 @@ const ReflectionDetailPage = () => {
   const studyId = study_id ? Number(study_id) : 0;
   const reflectionId = reflection_id ? Number(reflection_id) : 0;
 
-  // 스케줄 목록 (TODO: 추후 스케줄 API 연동)
-  const [schedules] = useState<Schedule[]>(mockSchedules);
+  // 회고 작성 가능한 과거 스터디 일정 조회
+  const { data: schedules = [], isLoading: isLoadingSchedules } =
+    useSchedulePastQuery(studyId);
 
   // 폼 상태 관리
   const {
@@ -99,8 +100,8 @@ const ReflectionDetailPage = () => {
   const isLoading = isEdit && isLoadingDetail;
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
-  // 수정 모드에서 데이터 로딩 중
-  if (isLoading) {
+  // 수정 모드에서 데이터 로딩 중 또는 스케줄 로딩 중
+  if (isLoading || isLoadingSchedules) {
     return (
       <div className='h-full flex items-center justify-center'>
         <LoadingSpinner />
@@ -112,9 +113,17 @@ const ReflectionDetailPage = () => {
     <div className='h-full flex flex-col bg-background'>
       {/* 헤더 */}
       <div className='px-6 py-6 border-b border-border bg-background'>
-        <h1 className='text-2xl font-bold text-primary'>
-          {isEdit ? '회고 수정' : REFLECTION_TEXTS.DETAIL_TITLE}
-        </h1>
+        <div className='flex items-center gap-3'>
+          <button
+            onClick={handleCancel}
+            className='p-2 hover:bg-accent rounded-lg transition-colors'
+          >
+            <ArrowLeft className='w-5 h-5 text-foreground' />
+          </button>
+          <h1 className='text-2xl font-bold text-primary'>
+            {isEdit ? '회고 수정' : REFLECTION_TEXTS.DETAIL_TITLE}
+          </h1>
+        </div>
       </div>
 
       {/* 메인 컨텐츠 */}

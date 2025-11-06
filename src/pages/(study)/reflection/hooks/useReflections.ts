@@ -53,9 +53,9 @@ export const useCreateReflectionMutation = (studyId: number) => {
     mutationFn: (payload: ReflectionFormData) =>
       reflectionService.createReflection(studyId, payload),
     onSuccess: () => {
-      // 목록 캐시 무효화
+      // 목록 캐시 무효화 (모든 파라미터 조합에 대해)
       queryClient.invalidateQueries({
-        queryKey: reflectionKeys.list(studyId),
+        queryKey: ['reflection-list', studyId],
       });
       toast.success('회고가 작성되었습니다.');
     },
@@ -79,12 +79,12 @@ export const useUpdateReflectionMutation = (
     mutationFn: (payload: ReflectionFormData) =>
       reflectionService.updateReflection(studyId, reflectionId, payload),
     onSuccess: () => {
-      // 상세 및 목록 캐시 무효화
+      // 상세 및 목록 캐시 무효화 (모든 파라미터 조합에 대해)
       queryClient.invalidateQueries({
         queryKey: reflectionKeys.detail(studyId, reflectionId),
       });
       queryClient.invalidateQueries({
-        queryKey: reflectionKeys.list(studyId),
+        queryKey: ['reflection-list', studyId],
       });
       toast.success('회고가 수정되었습니다.');
     },
@@ -105,9 +105,9 @@ export const useDeleteReflectionMutation = (studyId: number) => {
     mutationFn: (reflectionId: number) =>
       reflectionService.deleteReflection(studyId, reflectionId),
     onSuccess: () => {
-      // 목록 캐시 무효화
+      // 목록 캐시 무효화 (모든 파라미터 조합에 대해)
       queryClient.invalidateQueries({
-        queryKey: reflectionKeys.list(studyId),
+        queryKey: ['reflection-list', studyId],
       });
       toast.success('회고가 삭제되었습니다.');
     },
