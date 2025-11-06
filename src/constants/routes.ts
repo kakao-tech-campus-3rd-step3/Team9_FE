@@ -29,8 +29,7 @@ export const ROUTES = {
     QUIZ: {
       ROOT: 'quiz',
       SOLVE: 'solve/:id',
-      EXPLAIN: 'explain/:id',
-      RESULT: 'result/:submission_id',
+      EXPLAIN: 'explain/:submission_id',
     },
     RETRO: 'retro',
     REFLECTION: 'reflection',

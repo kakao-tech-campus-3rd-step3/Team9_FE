@@ -13,6 +13,7 @@ type QuizCardProps = {
   submissionStatus: SubmissionStatus;
   score: number | null;
   quizCount: number | null;
+  submissionId: number | null;
 };
 
 const QuizCard = ({
@@ -23,6 +24,7 @@ const QuizCard = ({
   submissionStatus,
   score,
   quizCount,
+  submissionId,
 }: QuizCardProps) => {
   if (quiz_status == 'GENERATING') {
     return <QuizCardCreating title={title} />;
@@ -62,6 +64,7 @@ const QuizCard = ({
                 quizId={quizId}
                 score={score}
                 quizCount={quizCount}
+                submissionId={submissionId}
               />
             )}
         </div>

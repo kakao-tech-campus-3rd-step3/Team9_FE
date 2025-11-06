@@ -34,6 +34,7 @@ const StudyQuizPage = () => {
               submissionStatus={quiz.submission_status}
               score={quiz.score}
               quizCount={quiz.question_count}
+              submissionId={quiz.submission_id}
             />
           ))
         ) : (

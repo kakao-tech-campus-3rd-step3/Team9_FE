@@ -1,5 +1,6 @@
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import { ROUTES, ROUTE_PARAMS } from '@/constants';
+import { useQuizResult } from './hooks/useQuizResult';
 
 type ChoiceResult = {
   choice_id: number;
@@ -56,12 +57,19 @@ const StudyQuizExplainPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const studyId = params[ROUTE_PARAMS.studyId] as string | undefined;
-  const submissionId = params[ROUTE_PARAMS.submissionId] as string | undefined;
+  // route may provide submission id under different param names depending on route config
+  const submissionParam = params[ROUTE_PARAMS.submissionId] ?? params['id'];
+  const submissionId = submissionParam as string | undefined;
+  const { data: submission } = useQuizResult({
+    submission_id: Number(submissionId),
+  });
 
   const payload =
+    (submission as Submission) ||
     ((location.state &&
       (location.state as unknown as { submission?: Submission })
-        .submission) as Submission) || sample;
+        .submission) as Submission) ||
+    sample;
 
   return (
     <div className='h-full flex flex-col bg-background'>
@@ -84,56 +92,54 @@ const StudyQuizExplainPage = () => {
       </div>
 
       <div className='p-6'>
-        <div className='mb-4'>
-          <strong>제출 ID:</strong> {submissionId ?? payload.submission_id}
-        </div>
-        <div className='mb-4'>
+        <div className='mb-4 text-right'>
           <strong>점수:</strong> {payload.score} / {payload.total_questions}
         </div>
 
-        <div className='space-y-4'>
-          {payload.results.map((r: QuestionResult) => (
+        <div className='space-y-4 '>
+          {payload.results.map((r: QuestionResult, i: number) => (
             <div
               key={r.question_id}
-              className='p-4 border border-border rounded bg-white'
+              className='p-6 border border-border rounded bg-white'
             >
               <div className='flex items-center justify-between'>
-                <h3 className='text-lg font-medium text-primary'>
-                  문제 {r.question_id}
-                </h3>
+                <div>
+                  <h3 className='text-lg font-medium'>
+                    문제 {i + 1}. {r.question_text}
+                  </h3>
+                </div>
                 <span
                   className={`text-sm font-medium ${r.is_correct ? 'text-green-600' : 'text-red-600'}`}
                 >
                   {r.is_correct ? '정답' : '오답'}
                 </span>
               </div>
-              <p className='mt-2 text-sm'>{r.question_text}</p>
 
               {r.choices && r.choices.length > 0 && (
                 <ul className='mt-3 grid grid-cols-1 gap-2'>
-                  {r.choices.map((c: ChoiceResult) => (
-                    <li
-                      key={c.choice_id}
-                      className={`p-2 rounded border ${c.is_correct_answer ? 'border-green-400 bg-green-50' : 'border-border bg-white'}`}
-                    >
-                      <div className='flex items-center justify-between'>
-                        <span className='text-sm'>{c.choice_text}</span>
-                        <span className='text-xs text-muted'>
-                          {c.was_user_choice ? '선택됨' : ''}
-                        </span>
-                      </div>
-                    </li>
-                  ))}
+                  {r.choices.map((c: ChoiceResult, ci: number) => {
+                    const isUserWrong =
+                      c.was_user_choice && !c.is_correct_answer;
+                    const liClass = `p-3 rounded border ${c.is_correct_answer ? 'border-green-400 bg-green-50' : isUserWrong ? 'border-red-400 bg-red-50' : 'border-border bg-white'}`;
+                    const badgeClass = `text-sm ${c.was_user_choice ? (c.is_correct_answer ? 'text-green-600' : 'text-red-600') : 'text-muted'}`;
+
+                    return (
+                      <li key={c.choice_id} className={liClass}>
+                        <div className='flex items-center justify-between'>
+                          <span className='text-sm'>
+                            {ci + 1}. {c.choice_text}
+                          </span>
+                          <span className={badgeClass}>
+                            {c.was_user_choice ? '내 답안' : ''}
+                          </span>
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
 
               <div className='mt-3 text-sm'>
-                <div>
-                  <strong>사용자 응답:</strong> {r.user_answer || '-'}
-                </div>
-                <div>
-                  <strong>정답:</strong> {r.correct_answer ?? '-'}
-                </div>
                 {r.explanation && (
                   <div className='mt-2 text-sm'>
                     <strong>해설:</strong> {r.explanation}

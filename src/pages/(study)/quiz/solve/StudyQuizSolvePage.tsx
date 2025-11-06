@@ -3,6 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useState } from 'react';
 import { ROUTES, ROUTE_PARAMS } from '@/constants';
 import { useQuizStart } from './hooks/useQuizStart';
+import { useQuizComplete } from '../hooks/useQuizComplete';
 
 const StudyQuizSolvePage = () => {
   const params = useParams();
@@ -24,6 +25,10 @@ const StudyQuizSolvePage = () => {
 
   const currentQuestion = quizData?.questions?.[current - 1];
 
+  const { mutate: completeQuiz, isPending: isCompleting } = useQuizComplete({
+    study_id: Number(studyId),
+  });
+
   const goToQuestion = (qNumber: number) => {
     if (!studyId || !quizIdParam) return;
     // update query param 'quiz' with replace to avoid stacking history
@@ -32,11 +37,33 @@ const StudyQuizSolvePage = () => {
 
   const handleSubmit = () => {
     if (!studyId) return;
-    // TODO: collect answers from form state and call submission API
-    // For now navigate back to quiz main
-    navigate(`/${ROUTES.STUDY.ROOT}/${studyId}/${ROUTES.STUDY.QUIZ.ROOT}`, {
-      replace: true,
-    });
+    const submission_id = quizData?.submission_id;
+    if (!submission_id) {
+      alert('제출 정보를 찾을 수 없습니다. 다시 시도해주세요.');
+      return;
+    }
+
+    const answerPayload = quizData?.questions.map((question) => ({
+      question_id: question.question_id,
+      user_answer: answers[question.question_id] || '',
+    }));
+
+    completeQuiz(
+      {
+        submission_id,
+        answers: answerPayload,
+      },
+      {
+        onSuccess: () => {
+          navigate(
+            `/${ROUTES.STUDY.ROOT}/${studyId}/${ROUTES.STUDY.QUIZ.ROOT}`,
+            {
+              replace: true,
+            },
+          );
+        },
+      },
+    );
   };
 
   return (
@@ -80,8 +107,11 @@ const StudyQuizSolvePage = () => {
             <div className=' flex items-center justify-center m-4'>
               <button
                 type='button'
-                className='w-full cursor-pointer font-medium px-4 py-2 bg-primary text-white rounded-lg'
+                className={`w-full cursor-pointer font-medium px-4 py-2 bg-primary text-white rounded-lg ${
+                  isCompleting ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
                 onClick={handleSubmit}
+                disabled={isCompleting}
               >
                 제출
               </button>

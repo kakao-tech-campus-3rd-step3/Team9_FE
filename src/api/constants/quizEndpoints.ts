@@ -9,6 +9,11 @@ export const QUIZ_ENDPOINTS = {
   REGENERATE: (quizId: number) => `/api/quizzes/${quizId}/regenerate`,
 
   START: (quizId: number) => `/api/quizzes/${quizId}`,
+
+  COMPLETE: (submissionId: number) =>
+    `/api/submissions/${submissionId}/complete`,
+
+  RESULT: (submissionId: number) => `/api/submissions/${submissionId}/result`,
 } as const;
 
 export type QuizEndpointKey = keyof typeof QUIZ_ENDPOINTS;

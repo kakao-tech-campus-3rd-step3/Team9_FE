@@ -6,16 +6,23 @@ type QuizCardCompletedProps = {
   quizId: number;
   score: number;
   quizCount: number;
+  submissionId: number | null;
 };
 
 const QuizCardCompleted = ({
-  quizId,
   score,
   quizCount,
+  submissionId,
 }: QuizCardCompletedProps) => {
   const navigate = useNavigate();
   const gotoExplain = () => {
-    navigate(ROUTES.STUDY.QUIZ.EXPLAIN.replace(':id', quizId.toString()));
+    if (submissionId == null) return;
+    navigate(
+      ROUTES.STUDY.QUIZ.EXPLAIN.replace(
+        ':submission_id',
+        submissionId.toString(),
+      ),
+    );
   };
 
   return (
