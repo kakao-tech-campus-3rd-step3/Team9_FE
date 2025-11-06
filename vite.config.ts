@@ -5,10 +5,16 @@ import tailwindcss from '@tailwindcss/vite';
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  define: {
+    global: 'window',
+  },
   resolve: {
     alias: {
       '@': '/src',
     },
+  },
+  optimizeDeps: {
+    include: ['sockjs-client', '@stomp/stompjs'],
   },
   server: {
     port: 3000,
@@ -42,6 +48,8 @@ export default defineConfig({
             '@fullcalendar/daygrid',
             '@fullcalendar/interaction',
           ],
+          // WebSocket 관련 라이브러리
+          'ws-vendor': ['@stomp/stompjs', 'sockjs-client'],
         },
       },
     },
