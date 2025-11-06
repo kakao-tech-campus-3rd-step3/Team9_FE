@@ -44,6 +44,14 @@ const TuneAddForm = ({ tune_id, title, content }: TuneAddFormProps) => {
       if (minute !== '00') {
         const normalized = `${hour.padStart(2, '0')}:00`;
         methods.setValue(name, normalized, { shouldDirty: true });
+        // re-run validation for related fields so any existing error messages
+        // (which might be attached to endDate or endTime) are updated/cleared.
+        methods.trigger([
+          'tune.startDate',
+          'tune.startTime',
+          'tune.endDate',
+          'tune.endTime',
+        ]);
       }
     };
 
@@ -101,6 +109,13 @@ const TuneAddForm = ({ tune_id, title, content }: TuneAddFormProps) => {
                     // 시작 변경 시 종료 필드 재검증
                     methods.trigger(['tune.endDate', 'tune.endTime']);
                   },
+                  validate: () =>
+                    validateManageTime({
+                      startDate: methods.getValues('tune.startDate'),
+                      startTime: methods.getValues('tune.startTime'),
+                      endDate: methods.getValues('tune.endDate'),
+                      endTime: methods.getValues('tune.endTime'),
+                    }),
                 })}
               />
               <input
@@ -113,6 +128,13 @@ const TuneAddForm = ({ tune_id, title, content }: TuneAddFormProps) => {
                     forceHour('tune.startTime')(e);
                     methods.trigger(['tune.endDate', 'tune.endTime']);
                   },
+                  validate: () =>
+                    validateManageTime({
+                      startDate: methods.getValues('tune.startDate'),
+                      startTime: methods.getValues('tune.startTime'),
+                      endDate: methods.getValues('tune.endDate'),
+                      endTime: methods.getValues('tune.endTime'),
+                    }),
                 })}
               />
             </div>
@@ -122,6 +144,10 @@ const TuneAddForm = ({ tune_id, title, content }: TuneAddFormProps) => {
                 type='date'
                 className='border border-gray-300 rounded-lg p-2'
                 {...methods.register('tune.endDate', {
+                  onChange: () => {
+                    // 종료 변경 시 시작 필드 재검증
+                    methods.trigger(['tune.startDate', 'tune.startTime']);
+                  },
                   validate: () =>
                     validateManageTime({
                       startDate: methods.getValues('tune.startDate'),
@@ -136,7 +162,10 @@ const TuneAddForm = ({ tune_id, title, content }: TuneAddFormProps) => {
                 step='3600'
                 className='border border-gray-300 rounded-lg p-2'
                 {...methods.register('tune.endTime', {
-                  onChange: forceHour('tune.endTime'),
+                  onChange: (e) => {
+                    forceHour('tune.endTime')(e);
+                    methods.trigger(['tune.startDate', 'tune.startTime']);
+                  },
                   validate: () =>
                     validateManageTime({
                       startDate: methods.getValues('tune.startDate'),
