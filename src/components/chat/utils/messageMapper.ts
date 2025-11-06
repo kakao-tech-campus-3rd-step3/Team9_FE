@@ -31,7 +31,7 @@ export function mapServerMessageToChatMessage(
     id: (parsed.id as string) || String(Date.now()),
     messageId: (parsed.messageId as number) || Date.now(),
     messageType:
-      (parsed.messageType as 'CHAT' | 'NOTICE' | 'SCHEDULE') || 'CHAT',
+      (parsed.messageType as 'CHAT' | 'NOTICE' | 'SCHEDULE' | 'QUIZ') || 'CHAT',
     content: (parsed.content as string) || '',
     senderId: senderIdString,
     senderName: (parsed.senderName as string) || '알 수 없음',

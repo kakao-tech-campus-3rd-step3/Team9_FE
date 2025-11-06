@@ -12,6 +12,8 @@ export function MessageRenderer({ message }: MessageRendererProps) {
       return <SystemMessage message={message} type='notice' />;
     case 'SCHEDULE':
       return <SystemMessage message={message} type='schedule' />;
+    case 'QUIZ':
+      return <SystemMessage message={message} type='quiz' />;
     case 'CHAT':
     default:
       return <ChatMessageComponent message={message} />;

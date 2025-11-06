@@ -1,5 +1,5 @@
 // 채팅 메시지 타입 정의
-export type MessageType = 'CHAT' | 'NOTICE' | 'SCHEDULE';
+export type MessageType = 'CHAT' | 'NOTICE' | 'SCHEDULE' | 'QUIZ';
 
 // 클라이언트에서 사용하는 채팅 메시지 타입
 export interface ChatMessage {
