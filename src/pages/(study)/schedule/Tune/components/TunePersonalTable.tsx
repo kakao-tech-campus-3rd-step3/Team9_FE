@@ -12,6 +12,8 @@ type TunePersonalTableProps = {
   title: string;
   content: string;
   tune_id: number;
+  complete: boolean;
+  setComplete: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const TunePersonalTable = ({
@@ -22,11 +24,12 @@ const TunePersonalTable = ({
   title,
   content,
   tune_id,
+  complete,
+  setComplete,
 }: TunePersonalTableProps) => {
   const { handleMouseDown, handleMouseEnter, handleMouseUp, isCellSelected } =
     useDrag({ personalTune, setPersonalTune });
   const { mutate: saveTune } = useTuneParticipantAdd();
-  const [complete, setComplete] = React.useState<boolean>(false);
   const currentStudy = useAuthStore((state) => state.user.currentStudy);
 
   const handleSaveClick = () => {

@@ -46,6 +46,7 @@ const TuneInformation = ({ tune_id }: TuneInformationProps) => {
     startTime: tuneDetailData.available_start_time,
     endTime: tuneDetailData.available_end_time,
   });
+  const [complete, setComplete] = useState<boolean>(false);
 
   const availablePerson =
     hoverTable != null
@@ -77,6 +78,8 @@ const TuneInformation = ({ tune_id }: TuneInformationProps) => {
               title={tuneDetailData.title}
               content={tuneDetailData.description}
               tune_id={tune_id}
+              complete={complete}
+              setComplete={setComplete}
             />
           )}
         </div>
