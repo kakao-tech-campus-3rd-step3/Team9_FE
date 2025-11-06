@@ -24,6 +24,21 @@ const StudyQuizSolvePage = () => {
 
   const totalQuestions = quizData?.questions?.length ?? 0;
   const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [remainingTime, setRemainingTime] = useState<number>(() => {
+    return quizData?.remaining_seconds ?? quizData?.time_limit_seconds ?? 0;
+  });
+
+  useEffect(() => {
+    const initial =
+      quizData?.remaining_seconds ?? quizData?.time_limit_seconds ?? 0;
+    setRemainingTime(initial);
+
+    const id = setInterval(() => {
+      setRemainingTime((time) => (time > 0 ? time - 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(id);
+  }, [quizData?.remaining_seconds, quizData?.time_limit_seconds]);
 
   const currentQuestion = quizData?.questions?.[current - 1];
 
@@ -144,13 +159,7 @@ const StudyQuizSolvePage = () => {
             <p className='text-lg font-semibold'>
               {quizData?.quiz_title ?? '퀴즈'}
             </p>
-            <p className='text-sm'>
-              남은 시간:{' '}
-              {quizData?.remaining_seconds ??
-                quizData?.time_limit_seconds ??
-                '-'}
-              초
-            </p>
+            <p className='text-sm'>남은 시간: {remainingTime}초</p>
           </div>
 
           <div className='border border-border rounded mt-8 p-4 bg-white'>
