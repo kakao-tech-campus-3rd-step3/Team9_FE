@@ -67,7 +67,9 @@ export class ChatService {
   }
 
   private createClient() {
-    const wsUrl = `${CHAT_SERVICE_CONFIG.API_BASE_URL}${CHAT_SERVICE_CONFIG.WEBSOCKET_PATH}`;
+    const base = CHAT_SERVICE_CONFIG.API_BASE_URL.replace(/\/+$/, '');
+    const path = `/${String(CHAT_SERVICE_CONFIG.WEBSOCKET_PATH).replace(/^\/+/, '')}`;
+    const wsUrl = `${base}${path}`;
     const socket = new SockJS(wsUrl);
 
     this.client = new Client({
@@ -238,6 +240,8 @@ export class ChatService {
     this.messageSubscribers.clear();
     this.connectionStateListeners.clear();
     this.reconnectAttempts = 0;
+    // 다음 연결 시 새로운 SockJS/STOMP 클라이언트를 생성하도록 초기화
+    this.client = null;
   }
 }
 

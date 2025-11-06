@@ -6,6 +6,7 @@ import { AUTH_ENDPOINTS } from '@/api/constants';
 import { useAuthStore } from '@/stores/auth';
 import { ROUTES } from '@/constants';
 import { queryClient } from '@/libs/queryClient';
+import { chatService } from '@/components/chat/chatService';
 
 /**
  * 로그아웃 뮤테이션 훅
@@ -21,6 +22,16 @@ export const useLogoutMutation = () => {
     onMutate: () => {
       // React Query 캐시를 먼저 정리하여 이전 계정 데이터 잔존 방지
       queryClient.clear();
+      // 실시간 연결 해제하여 이전 토큰/세션으로 송신되는 문제 방지
+      try {
+        chatService.disconnect();
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          // 로그아웃 시점에 이미 해제된 상태일 수 있으므로 경고만 남김
+          // eslint-disable-next-line no-console
+          console.warn('[logout] chatService.disconnect() 실패', error);
+        }
+      }
       reset();
       // 초기화 완료 상태를 유지하여 게스트 UI가 즉시 렌더링되도록 보장
       setIsInitialized(true);

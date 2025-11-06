@@ -5,6 +5,7 @@ import { useChatMessages, useChatConnection, useSendMessage } from './hooks';
 import { chatService } from './chatService';
 import { getCurrentKoreanTime } from './utils/timeUtils';
 import type { ChatMessage } from './types';
+import { useAuthStore } from '@/stores/auth';
 
 interface ChatWidgetProps {
   studyId: string;
@@ -30,6 +31,7 @@ export function ChatWidget({ studyId }: ChatWidgetProps) {
   } = useChatMessages(studyId);
   const { connectionState } = useChatConnection();
   const sendMessageMutation = useSendMessage();
+  const { accessToken } = useAuthStore();
 
   // WebSocket을 통한 실시간 메시지 수신 핸들러
   const handleNewMessage = useCallback(
@@ -54,7 +56,9 @@ export function ChatWidget({ studyId }: ChatWidgetProps) {
       // 연결이 되어있으면 바로 구독
       if (chatService.isConnected) {
         chatService.subscribeToChat(studyId, handleNewMessage);
-        loadChatHistory();
+        if (accessToken) {
+          loadChatHistory();
+        }
       } else {
         // 연결 상태 변화 감지하여 연결 완료 시 구독 시작
         const targetStudyId = studyId; // 클로저에서 studyId 고정
@@ -63,7 +67,9 @@ export function ChatWidget({ studyId }: ChatWidgetProps) {
             // 연결 완료 시 해당 스터디에 구독
             if (state.isConnected) {
               chatService.subscribeToChat(targetStudyId, handleNewMessage);
-              loadChatHistory();
+              if (accessToken) {
+                loadChatHistory();
+              }
             }
           },
         );
@@ -83,7 +89,7 @@ export function ChatWidget({ studyId }: ChatWidgetProps) {
       // 현재 스터디의 채팅 구독 해제
       chatService.unsubscribeFromChat(studyId);
     };
-  }, [studyId, handleNewMessage, loadChatHistory]);
+  }, [studyId, handleNewMessage, loadChatHistory, accessToken]);
 
   // 위젯 열림 시 채팅 기록만 로드 (구독은 이미 되어있음)
   const initializeChat = useCallback(async () => {
@@ -91,10 +97,10 @@ export function ChatWidget({ studyId }: ChatWidgetProps) {
   }, [loadChatHistory]);
 
   useEffect(() => {
-    if (isOpen && studyId) {
+    if (isOpen && studyId && accessToken) {
       initializeChat();
     }
-  }, [isOpen, studyId, initializeChat]);
+  }, [isOpen, studyId, initializeChat, accessToken]);
 
   // 텍스트 메시지 전송(엔터/버튼) 및 전송 중/실패 처리
   // 낙관적 업데이트로 즉시 UI에 표시하고 서버로 전송
