@@ -1,69 +1,42 @@
 import { SidebarHeader } from '../../components/layout/sidebar';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
 import { ROUTES, ROUTE_PARAMS } from '@/constants';
-// import type {
-//   QuestionResult,
-//   QuizSubmissionPayload,
-// } from '../types/submission';
-
-const TOTAL_QUESTIONS = 20;
+import { useQuizStart } from './hooks/useQuizStart';
 
 const StudyQuizSolvePage = () => {
   const params = useParams();
   const navigate = useNavigate();
-  const studyId = params[ROUTE_PARAMS.studyId] as string | undefined;
-  const rawId = params['id'];
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  // URL 파라미터 id가 없으면 초기값 1로 리다이렉트(대체)
-  const current = rawId ? Number(rawId) || 1 : 1;
+  // params.id is treated as quiz_id (not question number)
+  const quizIdParam = params['id'];
+  const quizId = quizIdParam ? Number(quizIdParam) : undefined;
+
+  const { data: quizData } = useQuizStart({ quiz_id: quizId ?? 0 });
+  const studyId = params[ROUTE_PARAMS.studyId] as string | undefined;
+
+  const qParam = searchParams.get('quiz');
+  const current = qParam ? Number(qParam) || 1 : 1;
+
+  const totalQuestions = quizData?.questions?.length ?? 0;
+  const [answers, setAnswers] = useState<Record<number, string>>({});
+
+  const currentQuestion = quizData?.questions?.[current - 1];
 
   const goToQuestion = (qNumber: number) => {
-    if (!studyId) return;
-    // replace: true로 history 쌓이지 않게 함
-    navigate(
-      `/${ROUTES.STUDY.ROOT}/${studyId}/${ROUTES.STUDY.QUIZ.ROOT}/solve/${qNumber}`,
-      { replace: true },
-    );
+    if (!studyId || !quizIdParam) return;
+    // update query param 'quiz' with replace to avoid stacking history
+    setSearchParams({ quiz: String(qNumber) }, { replace: true });
   };
 
   const handleSubmit = () => {
     if (!studyId) return;
-
-    // TODO: replace this with real answers collected from form state
-    // const results: QuestionResult[] = Array.from({
-    //   length: TOTAL_QUESTIONS,
-    // }).map((_, idx) => ({
-    //   question_id: idx + 1,
-    //   question_type: 'SHORT_ANSWER',
-    //   question_text: `문제 ${idx + 1}`,
-    //   is_correct: false,
-    //   user_answer: '',
-    //   correct_answer: undefined,
-    //   explanation: undefined,
-    //   choices: [],
-    // }));
-
-    // const payload: QuizSubmissionPayload = {
-    //   // submission_id는 서버에서 발급될 수 있으므로 선택적
-    //   score: 0,
-    //   total_questions: TOTAL_QUESTIONS,
-    //   results,
-    // };
-
-    // // NOTE: quizId is not present in current route structure; using '1' as placeholder.
-    // // Adjust to actual quiz id if you have it in route or state.
-    // submitMutation.mutate(
-    //   { studyId, quizId: '1', payload },
-    //   {
-    //     onSuccess: () => {
-    //       // 제출 후 메인 퀴즈 페이지로 이동
-    //       navigate(
-    //         `/${ROUTES.STUDY.ROOT}/${studyId}/${ROUTES.STUDY.QUIZ.ROOT}`,
-    //         { replace: true },
-    //       );
-    //     },
-    //   },
-    // );
+    // TODO: collect answers from form state and call submission API
+    // For now navigate back to quiz main
+    navigate(`/${ROUTES.STUDY.ROOT}/${studyId}/${ROUTES.STUDY.QUIZ.ROOT}`, {
+      replace: true,
+    });
   };
 
   return (
@@ -74,7 +47,7 @@ const StudyQuizSolvePage = () => {
             <div className='flex-1 overflow-y-auto'>
               <SidebarHeader />
               <div className='p-4 grid grid-cols-5 gap-2 mt-8'>
-                {Array.from({ length: TOTAL_QUESTIONS }).map((_, index) => {
+                {Array.from({ length: totalQuestions || 1 }).map((_, index) => {
                   const num = index + 1;
                   const isActive = num === current;
                   return (
@@ -112,9 +85,48 @@ const StudyQuizSolvePage = () => {
           <h1 className='text-2xl font-bold text-primary'>퀴즈</h1>
         </div>
         <div className='p-6'>
-          <p className='mb-4'>현재 문제: {current}번</p>
-          <div className='border border-border rounded p-4 bg-white'>
-            <p>여기에 {current}번 문제 내용을 렌더하세요.</p>
+          <div className='flex items-center justify-between mb-4'>
+            <p className='text-lg font-semibold'>
+              {quizData?.quiz_title ?? '퀴즈'}
+            </p>
+            <p className='text-sm'>
+              남은 시간:{' '}
+              {quizData?.remaining_seconds ??
+                quizData?.time_limit_seconds ??
+                '-'}
+              초
+            </p>
+          </div>
+
+          <div className='border border-border rounded mt-8 p-4 bg-white'>
+            <p className='mb-4 font-bold'>
+              {current}. {currentQuestion?.question_text ?? ''}
+            </p>
+
+            {currentQuestion?.choices && currentQuestion.choices.length > 0 && (
+              <div className='grid grid-cols-1 gap-2'>
+                {currentQuestion.choices.map((c, i) => {
+                  const selected =
+                    answers[currentQuestion.question_id] ===
+                    String(c.choice_id);
+                  return (
+                    <button
+                      key={c.choice_id}
+                      type='button'
+                      onClick={() =>
+                        setAnswers((s) => ({
+                          ...s,
+                          [currentQuestion.question_id]: String(c.choice_id),
+                        }))
+                      }
+                      className={`text-left font-medium p-3 rounded border border-primary ${selected ? 'bg-primary text-white' : 'bg-white'}`}
+                    >
+                      {i + 1}. {c.choice_text}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>

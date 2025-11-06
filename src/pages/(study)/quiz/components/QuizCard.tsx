@@ -51,9 +51,10 @@ const QuizCard = ({
         </div>
 
         <div className='flex items-center'>
-          {submissionStatus === 'NOT_TAKEN' && (
-            <QuizCardReady quizId={quizId.toString()} />
-          )}
+          {submissionStatus === 'NOT_TAKEN' ||
+            (submissionStatus === 'IN_PROGRESS' && (
+              <QuizCardReady quizId={quizId.toString()} />
+            ))}
           {submissionStatus === 'COMPLETED' &&
             score !== null &&
             quizCount !== null && (
