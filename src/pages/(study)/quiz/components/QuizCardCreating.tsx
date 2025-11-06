@@ -1,10 +1,16 @@
+import { quizKeys } from '@/constants/queryKeys';
+import { useQueryClient } from '@tanstack/react-query';
 import { RefreshCcw } from 'lucide-react';
+import { useParams } from 'react-router-dom';
 
 type QuizCardCreatingProps = {
   title: string;
 };
 
 const QuizCardCreating = ({ title }: QuizCardCreatingProps) => {
+  const { study_id } = useParams<{ study_id: string }>();
+  const queryClient = useQueryClient();
+
   return (
     <div className='w-full p-4'>
       <div className='flex justify-between px-6 py-4 border border-primary rounded-lg  gap-3 bg-white'>
@@ -15,10 +21,18 @@ const QuizCardCreating = ({ title }: QuizCardCreatingProps) => {
           </div>
         </div>
         <div className='flex items-center'>
-          <div className='flex gap-2 px-4 py-5 border border-yellow-400 rounded-lg cursor-pointer hover:text-yellow-400'>
+          <button
+            className='flex gap-2 px-4 py-5 border border-yellow-400 rounded-lg cursor-pointer hover:text-yellow-400'
+            onClick={() => {
+              queryClient.invalidateQueries({
+                queryKey: quizKeys.list(Number(study_id)),
+                exact: false,
+              });
+            }}
+          >
             <RefreshCcw size={24} />
             <p className='text-inherit font-medium'>다시 불러오기</p>
-          </div>
+          </button>
         </div>
       </div>
     </div>
