@@ -39,6 +39,9 @@ export const ProgressService = {
     const { data } = await apiClient.post(
       PROGRESS_ENDPOINTS.ADD_CHAPTER(studyId),
       payload,
+      {
+        showToast: false, // mutation의 onSuccess에서 toast 처리
+      },
     );
     return data;
   },
@@ -48,17 +51,28 @@ export const ProgressService = {
     await apiClient.patch(
       PROGRESS_ENDPOINTS.UPDATE_CHAPTER(chapterId),
       payload,
+      {
+        showToast: false, // mutation의 onSuccess에서 toast 처리
+      },
     );
   },
 
   // 로드맵 차시 완료 처리
   completeChapter: async (chapterId: number) => {
-    await apiClient.post(PROGRESS_ENDPOINTS.COMPLETE_CHAPTER(chapterId));
+    await apiClient.post(
+      PROGRESS_ENDPOINTS.COMPLETE_CHAPTER(chapterId),
+      {},
+      {
+        showToast: false, // mutation의 onSuccess에서 toast 처리
+      },
+    );
   },
 
   // 로드맵 차시 삭제
   deleteChapter: async (chapterId: number) => {
-    await apiClient.delete(PROGRESS_ENDPOINTS.DELETE_CHAPTER(chapterId));
+    await apiClient.delete(PROGRESS_ENDPOINTS.DELETE_CHAPTER(chapterId), {
+      showToast: false, // mutation의 onSuccess에서 toast 처리
+    });
   },
 };
 

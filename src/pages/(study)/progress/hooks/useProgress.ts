@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import { progressKeys } from '@/constants/queryKeys';
@@ -55,6 +56,8 @@ export const useAddChapterMutation = (studyId: number) => {
 // 차시 수정 뮤테이션
 export const useUpdateChapterMutation = (studyId: number) => {
   const queryClient = useQueryClient();
+  const lastToastIdRef = useRef<string | number | null>(null);
+
   return useMutation({
     mutationFn: ({
       chapterId,
@@ -67,10 +70,19 @@ export const useUpdateChapterMutation = (studyId: number) => {
       queryClient.invalidateQueries({
         queryKey: progressKeys.roadmap(studyId),
       });
-      toast.success('차시가 수정되었습니다.');
+      // 기존 toast가 있으면 닫기
+      if (lastToastIdRef.current !== null) {
+        toast.dismiss(lastToastIdRef.current);
+      }
+      // 새 toast 표시
+      lastToastIdRef.current = toast.success('차시가 수정되었습니다.');
+      setTimeout(() => {
+        lastToastIdRef.current = null;
+      }, 3000);
     },
     onError: () => {
       toast.error('차시 수정 중 오류가 발생했습니다.');
+      lastToastIdRef.current = null;
     },
   });
 };

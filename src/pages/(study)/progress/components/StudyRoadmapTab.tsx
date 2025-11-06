@@ -108,7 +108,14 @@ export const StudyRoadmapTab = ({ studyId }: StudyRoadmapTabProps) => {
   };
 
   const handleSaveEdit = async () => {
-    if (editingChapterId && editingContent.trim() && isLeader) {
+    if (
+      editingChapterId &&
+      editingContent.trim() &&
+      isLeader &&
+      !updateChapterMutation.isPending &&
+      !isSubmitting
+    ) {
+      setIsSubmitting(true);
       try {
         await updateChapterMutation.mutateAsync({
           chapterId: editingChapterId,
@@ -118,6 +125,8 @@ export const StudyRoadmapTab = ({ studyId }: StudyRoadmapTabProps) => {
         setEditingContent('');
       } catch {
         // 에러는 mutation에서 토스트 처리
+      } finally {
+        setIsSubmitting(false);
       }
     }
   };
