@@ -9,6 +9,8 @@ export const useSchedulePastQuery = (studyId: number) => {
     queryKey: ['schedule-past', studyId],
     queryFn: () => schedulePastService(studyId),
     enabled: Number.isFinite(studyId) && studyId > 0,
-    staleTime: 5 * 60 * 1000, // 5분
+    staleTime: 0, // 즉시 stale로 처리하여 항상 최신 데이터 가져오기
+    refetchOnMount: true, // 컴포넌트 마운트 시 자동 refetch
+    refetchOnWindowFocus: true, // 창 포커스 시 자동 refetch
   });
 };

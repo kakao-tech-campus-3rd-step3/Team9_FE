@@ -129,18 +129,14 @@ const ReflectionPage = () => {
               return (
                 <div
                   key={reflection.id}
-                  className='bg-card rounded-lg border border-border p-6 hover:shadow-md transition-shadow'
+                  onClick={() => handleReflectionClick(reflection.id)}
+                  className='bg-card rounded-lg border border-border p-6 hover:shadow-md transition-shadow cursor-pointer'
                 >
                   <div className='flex items-start justify-between'>
                     <div className='flex-1'>
-                      <div
-                        className='cursor-pointer'
-                        onClick={() => handleReflectionClick(reflection.id)}
-                      >
-                        <h3 className='text-lg font-semibold text-foreground mb-2'>
-                          {reflection.title}
-                        </h3>
-                      </div>
+                      <h3 className='text-lg font-semibold text-foreground mb-2'>
+                        {reflection.title}
+                      </h3>
 
                       <div className='flex items-center gap-4 text-sm text-muted-foreground mt-2'>
                         <div className='flex items-center gap-1'>
