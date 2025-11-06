@@ -11,11 +11,11 @@ export type QuizRegenerateRequest = {
 export const quizRegenerateService = async ({
   quiz_id,
 }: QuizRegenerateRequest) => {
-  const { data } = await apiClient.post(QUIZ_ENDPOINTS.REGENERATE(quiz_id));
+  const response = await apiClient.post(QUIZ_ENDPOINTS.REGENERATE(quiz_id));
 
-  if (!data) {
+  if (response.status < 200 || response.status >= 300) {
     throw new Error('스터디 퀴즈 재생성에 실패했습니다.');
   }
 
-  return data;
+  return response.data;
 };

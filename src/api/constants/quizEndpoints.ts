@@ -2,6 +2,8 @@
 export const QUIZ_ENDPOINTS = {
   CREATE: (studyId: number) => `/api/studies/${studyId}/quizzes`,
 
+  DELETE: (quizId: number) => `/api/quizzes/${quizId}`,
+
   LIST: (studyId: number) => `/api/studies/${studyId}/quizzes`,
 
   REGENERATE: (quizId: number) => `/api/quizzes/${quizId}/regenerate`,
