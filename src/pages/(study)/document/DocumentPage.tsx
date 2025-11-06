@@ -18,12 +18,15 @@ import type { Material } from './types';
 import { EmptyState } from './components/common';
 import { QuizzesService } from './services/quizzes';
 import { MaterialsService } from './services/materials';
+import { useQueryClient } from '@tanstack/react-query';
+import { quizKeys } from '@/constants/queryKeys';
 
 /**
  * 문서 관리 페이지
  */
 const DocumentPage = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   // 상태 관리 (서버 필터만 사용, 로컬 목록 상태 없음)
   const { study_id } = useParams<{ study_id: string }>();
@@ -374,6 +377,10 @@ const DocumentPage = () => {
                   return;
                 }
                 await QuizzesService.create(studyIdNum, { title, fileIds });
+                queryClient.invalidateQueries({
+                  queryKey: quizKeys.list(studyIdNum),
+                  exact: true,
+                });
                 toast.success(TOAST_MESSAGES.QUIZ_CREATE_SUCCESS);
                 setSelectedMaterials([]);
                 setIsQuizModalOpen(false);
