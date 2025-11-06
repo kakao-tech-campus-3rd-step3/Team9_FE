@@ -1,15 +1,46 @@
-import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Outlet, useParams } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import Sidebar from './sidebar/Sidebar';
+import { ChatWidget } from '@/components/chat';
+import { useChatConnection } from '@/components/chat/hooks';
+import { useAuthStore } from '@/stores/auth';
+import { ROUTE_PARAMS } from '@/constants';
 
 /**
  * (study) 도메인 전용 레이아웃
  * - 좌측: 도메인 사이드바
  * - 우측: 도메인 컨텐츠
+ * - 스터디 페이지 진입 시 웹소켓 연결 시작 (구독은 ChatWidget에서 관리)
  */
 function StudyLayout() {
   const [open, setOpen] = useState(false);
+  const { [ROUTE_PARAMS.studyId]: studyId } = useParams();
+  const { connectWebSocket } = useChatConnection();
+  const { accessToken, isInitialized } = useAuthStore();
+
+  // 스터디 페이지 진입 시 웹소켓 연결 시작 (구독은 ChatWidget에서 관리)
+  // 인증 토큰이 준비된 후에만 연결 시도
+  useEffect(() => {
+    if (!studyId || !isInitialized) return;
+
+    // 인증 토큰이 없으면 연결 시도하지 않음
+    if (!accessToken) {
+      return;
+    }
+
+    const initializeConnection = async () => {
+      try {
+        await connectWebSocket();
+      } catch (error) {
+        console.error('❌ [StudyLayout] 웹소켓 연결 실패:', error);
+      }
+    };
+
+    initializeConnection();
+
+    // 연결은 전역적으로 유지하고, 구독 해제는 ChatWidget에서 관리
+  }, [studyId, connectWebSocket, accessToken, isInitialized]);
 
   return (
     <div className='flex h-screen bg-background overflow-hidden'>
@@ -65,6 +96,9 @@ function StudyLayout() {
       <main className='flex-1 min-w-0 flex flex-col min-h-0 overflow-auto'>
         <Outlet />
       </main>
+
+      {/* 스터디 채팅 위젯 */}
+      {studyId && <ChatWidget studyId={studyId} />}
     </div>
   );
 }
