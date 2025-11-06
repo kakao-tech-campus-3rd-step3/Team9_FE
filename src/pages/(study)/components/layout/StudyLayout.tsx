@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useMatch } from 'react-router-dom';
+import { ROUTES, ROUTE_PARAMS } from '@/constants';
 import { Menu, X } from 'lucide-react';
 import Sidebar from './sidebar/Sidebar';
 
@@ -11,15 +12,22 @@ import Sidebar from './sidebar/Sidebar';
 function StudyLayout() {
   const [open, setOpen] = useState(false);
 
+  // 퀴즈 풀이 페이지(`/study/:study_id/quiz/solve/:id`)에서는 사이드바를 숨김
+  const isQuizSolve = useMatch(
+    `/${ROUTES.STUDY.ROOT}/:${ROUTE_PARAMS.studyId}/${ROUTES.STUDY.QUIZ.ROOT}/${ROUTES.STUDY.QUIZ.SOLVE}`,
+  );
+
   return (
     <div className='flex h-screen bg-background overflow-hidden'>
-      {/* 데스크톱 사이드바 */}
-      <aside className='hidden md:block w-64 shrink-0 h-full bg-card border-r border-border overflow-y-auto'>
-        <Sidebar />
-      </aside>
+      {/* 데스크톱 사이드바 (퀴즈 풀이 중이면 숨김) */}
+      {!isQuizSolve && (
+        <aside className='hidden md:block w-64 shrink-0 h-full bg-card border-r border-border overflow-y-auto'>
+          <Sidebar />
+        </aside>
+      )}
 
       {/* 모바일: 플로팅 햄버거 버튼 */}
-      {!open && (
+      {!isQuizSolve && !open && (
         <button
           type='button'
           className='md:hidden fixed right-3 top-3 z-20 p-3 rounded-xl bg-background/95 border border-border shadow-lg hover:bg-accent text-foreground backdrop-blur'
@@ -31,7 +39,7 @@ function StudyLayout() {
       )}
 
       {/* 모바일 사이드바 오버레이 */}
-      {open && (
+      {!isQuizSolve && open && (
         <div
           className='md:hidden fixed inset-0 bg-black/50 z-40'
           onClick={() => setOpen(false)}
@@ -40,18 +48,20 @@ function StudyLayout() {
       )}
 
       {/* 모바일 사이드바 슬라이드 */}
-      <aside
-        className={`md:hidden fixed top-0 bottom-0 left-0 w-64 bg-background border-r border-border z-50 shadow-xl transform transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'}`}
-        role='dialog'
-        aria-modal='true'
-      >
-        <div className='h-full overflow-y-auto'>
-          <Sidebar />
-        </div>
-      </aside>
+      {!isQuizSolve && (
+        <aside
+          className={`md:hidden fixed top-0 bottom-0 left-0 w-64 bg-background border-r border-border z-50 shadow-xl transform transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'}`}
+          role='dialog'
+          aria-modal='true'
+        >
+          <div className='h-full overflow-y-auto'>
+            <Sidebar />
+          </div>
+        </aside>
+      )}
 
       {/* 모바일: 플로팅 닫기 버튼 (사이드바 열렸을 때만) */}
-      {open && (
+      {!isQuizSolve && open && (
         <button
           type='button'
           className='md:hidden fixed right-3 top-3 z-[60] p-3 rounded-xl bg-background/95 border border-border shadow-lg hover:bg-accent text-foreground backdrop-blur'
@@ -62,7 +72,9 @@ function StudyLayout() {
         </button>
       )}
 
-      <main className='flex-1 min-w-0 flex flex-col min-h-0 overflow-auto'>
+      <main
+        className={`flex-1 min-w-0 flex flex-col min-h-0 overflow-auto ${isQuizSolve ? 'px-0' : ''}`}
+      >
         <Outlet />
       </main>
     </div>

@@ -1,9 +1,15 @@
 import { Outlet, useMatch } from 'react-router-dom';
+import { ROUTES, ROUTE_PARAMS } from '@/constants';
 import { QuizCard } from './components';
 import { quizzes } from './mock/quizzes';
 
 const StudyQuizPage = () => {
-  if (!useMatch('/study/quiz')) {
+  // 현재 경로가 스터디 내부의 퀴즈 루트(`/study/:study_id/quiz`)인지 확인
+  const isQuizRoot = useMatch(
+    `/${ROUTES.STUDY.ROOT}/:${ROUTE_PARAMS.studyId}/${ROUTES.STUDY.QUIZ.ROOT}`,
+  );
+
+  if (!isQuizRoot) {
     return <Outlet />;
   }
 
