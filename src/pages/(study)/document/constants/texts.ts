@@ -34,7 +34,7 @@ export const TOAST_MESSAGES = {
   EDIT_SUCCESS: '자료가 성공적으로 수정되었습니다.',
   DELETE_SUCCESS: '자료가 삭제되었습니다.',
   DELETE_MULTIPLE_SUCCESS: '선택된 자료가 삭제되었습니다.',
-  QUIZ_CREATE_SUCCESS: '선택된 자료로 퀴즈가 생성되었습니다.',
+  QUIZ_CREATE_SUCCESS: '선택된 자료로 퀴즈 생성이 요청되었습니다.',
 } as const;
 
 // 네비게이션 딜레이 (ms)
