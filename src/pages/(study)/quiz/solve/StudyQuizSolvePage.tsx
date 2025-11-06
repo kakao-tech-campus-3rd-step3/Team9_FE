@@ -8,6 +8,7 @@ import { usePatchAnswer } from '../hooks/usePatchAnswer';
 import { useQuizComplete } from '../hooks/useQuizCompete';
 
 const StudyQuizSolvePage = () => {
+  const [off, setOff] = useState(false);
   const params = useParams();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -55,10 +56,13 @@ const StudyQuizSolvePage = () => {
   const { mutate: completeQuiz, isPending: isCompleting } = useQuizComplete({
     study_id: Number(studyId),
   });
-  const { mutate: patchAnswer } = usePatchAnswer({ study_id: Number(studyId) });
+  const { mutate: patchAnswer } = usePatchAnswer({
+    quiz_id: quizId ?? 0,
+  });
 
   useEffect(() => {
     return () => {
+      if (off) return;
       const answerPayload =
         quizData?.questions
           .filter((question) => {
@@ -70,14 +74,21 @@ const StudyQuizSolvePage = () => {
             user_answer: String(answers[question.question_id] ?? ''),
           })) ?? [];
 
-      if (answerPayload.length > 0) {
+      if (answerPayload.length > 0 && !isCompleting) {
         patchAnswer({
           submissionId: quizData?.submission_id ?? 0,
           answers: answerPayload,
         });
       }
     };
-  }, [patchAnswer, quizData?.submission_id, quizData?.questions, answers]);
+  }, [
+    patchAnswer,
+    quizData?.submission_id,
+    quizData?.questions,
+    answers,
+    off,
+    isCompleting,
+  ]);
 
   const goToQuestion = (qNumber: number) => {
     if (!studyId || !quizIdParam) return;
@@ -86,6 +97,8 @@ const StudyQuizSolvePage = () => {
   };
 
   const handleSubmit = useCallback(() => {
+    if (off) return;
+    setOff(true);
     if (!studyId) return;
     const submission_id = quizData?.submission_id;
     if (!submission_id) {
@@ -114,7 +127,16 @@ const StudyQuizSolvePage = () => {
         },
       },
     );
-  }, [completeQuiz, quizData, answers, studyId, navigate]);
+  }, [
+    answers,
+    completeQuiz,
+    navigate,
+    quizData?.submission_id,
+    quizData.questions,
+    studyId,
+    off,
+    setOff,
+  ]);
 
   useEffect(() => {
     if (remainingTime === 0) {

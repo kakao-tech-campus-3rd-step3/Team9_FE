@@ -5,17 +5,24 @@ import {
   type QuizPatchAnswerRequest,
 } from '../services/quizPatchAnswerService';
 
-export const usePatchAnswer = ({ study_id }: { study_id: number }) => {
+export const usePatchAnswer = ({ quiz_id }: { quiz_id: number }) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (params: QuizPatchAnswerRequest) =>
       quizPatchAnswerService(params),
 
+    onMutate: () => {
+      queryClient.invalidateQueries({
+        queryKey: quizKeys.start(quiz_id),
+        exact: true,
+      });
+    },
+
     onSuccess: () => {
       // 퀴즈 삭제 성공 시 해당 스터디의 퀴즈 목록 쿼리 무효화
       queryClient.invalidateQueries({
-        queryKey: quizKeys.list(study_id),
+        queryKey: quizKeys.start(quiz_id),
         exact: true,
       });
     },
