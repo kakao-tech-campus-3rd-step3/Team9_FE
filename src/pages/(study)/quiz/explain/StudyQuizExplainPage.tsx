@@ -109,7 +109,7 @@ const StudyQuizExplainPage = () => {
                   </h3>
                 </div>
                 <span
-                  className={`text-sm font-medium ${r.is_correct ? 'text-green-600' : 'text-red-600'}`}
+                  className={`shrink-0 text-sm font-medium ${r.is_correct ? 'text-green-600' : 'text-red-600'}`}
                 >
                   {r.is_correct ? '정답' : '오답'}
                 </span>
