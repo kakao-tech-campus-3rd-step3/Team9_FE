@@ -140,6 +140,17 @@ const StudyQuizExplainPage = () => {
               )}
 
               <div className='mt-3 text-sm'>
+                {r.question_type === 'SHORT_ANSWER' && (
+                  <div>
+                    <p>
+                      <strong>내 답안:</strong> {r.user_answer}
+                    </p>
+                    <p>
+                      <strong>정답:</strong>{' '}
+                      {r.correct_answer ? r.correct_answer : '없음'}
+                    </p>
+                  </div>
+                )}
                 {r.explanation && (
                   <div className='mt-2 text-sm'>
                     <strong>해설:</strong> {r.explanation}
