@@ -5,3 +5,4 @@ export * from './schedule';
 export * from './attendance';
 export * from './chat';
 export * from './progress';
+export * from './reflection';
