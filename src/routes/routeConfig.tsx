@@ -21,6 +21,9 @@ import {
   MemberManagement,
   ApplicantManagement,
   StudyInfoManagement,
+  StudyQuizPage,
+  StudyQuizSolvePage,
+  StudyQuizExplainPage,
 } from '@/pages/(study)';
 import {
   ReflectionPage,
@@ -77,6 +80,11 @@ export const routes = {
   StudyReflection: auth(ReflectionPage),
   StudyReflectionDetail: auth(ReflectionDetailPage),
   StudyReflectionView: auth(ReflectionViewPage),
+
+  // 퀴즈 페이지 (모든 로그인 사용자 접근)
+  StudyQuiz: auth(StudyQuizPage),
+  StudyQuizSolve: auth(StudyQuizSolvePage),
+  StudyQuizExplain: auth(StudyQuizExplainPage),
 } as const;
 
 export default routes;

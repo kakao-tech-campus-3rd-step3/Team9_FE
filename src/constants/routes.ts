@@ -3,6 +3,7 @@ export const ROUTE_PARAMS = {
   studyId: 'study_id',
   materialId: 'document_id',
   reflectionId: 'reflection_id',
+  submissionId: 'submission_id',
 } as const;
 
 // 애플리케이션 라우트 경로 상수
@@ -28,8 +29,9 @@ export const ROUTES = {
     QUIZ: {
       ROOT: 'quiz',
       SOLVE: 'solve/:id',
-      EXPLAIN: 'explain/:id',
+      EXPLAIN: 'explain/:submission_id',
     },
+    RETRO: 'retro',
     REFLECTION: 'reflection',
     ADMIN: {
       ROOT: 'admin',

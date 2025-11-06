@@ -145,7 +145,21 @@ const router = createBrowserRouter([
               },
             ],
           },
-          { path: ROUTES.STUDY.QUIZ.ROOT, element: <routes.Example /> },
+          {
+            path: ROUTES.STUDY.QUIZ.ROOT,
+            element: <routes.StudyQuiz />,
+            children: [
+              {
+                path: ROUTES.STUDY.QUIZ.SOLVE,
+                element: <routes.StudyQuizSolve />,
+              },
+              {
+                path: ROUTES.STUDY.QUIZ.EXPLAIN,
+                element: <routes.StudyQuizExplain />,
+              },
+            ],
+          },
+          { path: ROUTES.STUDY.RETRO, element: <routes.Example /> },
           {
             path: ROUTES.STUDY.REFLECTION,
             element: <routes.StudyReflection />,
