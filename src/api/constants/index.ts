@@ -5,6 +5,7 @@ export * from './materialEndpoints';
 export * from './quizEndpoints';
 export * from './scheduleEndpoints';
 export * from './attendanceEndpoints';
+export * from './chatEndpoints';
 export * from './studyEndpoints';
 
 // 명시적 export (Vite 캐시 문제 방지)
