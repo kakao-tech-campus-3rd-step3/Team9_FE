@@ -1,4 +1,3 @@
-
 import { ROUTES, ROUTE_PARAMS } from '@/constants';
 import { useState, useEffect } from 'react';
 import { Outlet, useParams, useMatch } from 'react-router-dom';
@@ -7,7 +6,6 @@ import Sidebar from './sidebar/Sidebar';
 import { ChatWidget } from '@/components/chat';
 import { useChatConnection } from '@/components/chat/hooks';
 import { useAuthStore } from '@/stores/auth';
-import { ROUTE_PARAMS } from '@/constants';
 import { useCurrentStudy } from '@/hooks/study/useCurrentStudy';
 
 /**
