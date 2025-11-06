@@ -1,6 +1,7 @@
 import { ROUTES } from '@/constants';
-import { NotebookPen } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { CircleX, NotebookPen } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useQuizDelete } from '../hooks/useQuizDelete';
 
 type QuizCardCompletedProps = {
   quizId: number;
@@ -10,10 +11,13 @@ type QuizCardCompletedProps = {
 };
 
 const QuizCardCompleted = ({
+  quizId,
   score,
   quizCount,
   submissionId,
 }: QuizCardCompletedProps) => {
+  const study_id = useParams<{ study_id: string }>().study_id;
+  const { mutate: deleteQuiz } = useQuizDelete({ study_id: Number(study_id) });
   const navigate = useNavigate();
   const gotoExplain = () => {
     if (submissionId == null) return;
@@ -39,6 +43,13 @@ const QuizCardCompleted = ({
         <NotebookPen size={24} />
         <p className='text-inherit font-medium'>해설 보기</p>
       </div>
+      <button
+        className='flex gap-2 px-4 py-5 border border-destructive rounded-lg cursor-pointer hover:text-destructive'
+        onClick={() => deleteQuiz({ quiz_id: Number(quizId) })}
+      >
+        <CircleX size={24} />
+        <p className='text-inherit font-medium'>삭제</p>
+      </button>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import { SidebarHeader } from '../../components/layout/sidebar';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ROUTES, ROUTE_PARAMS } from '@/constants';
 import { useQuizStart } from './hooks/useQuizStart';
 
@@ -23,7 +23,17 @@ const StudyQuizSolvePage = () => {
   const current = qParam ? Number(qParam) || 1 : 1;
 
   const totalQuestions = quizData?.questions?.length ?? 0;
-  const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [answers, setAnswers] = useState<Record<number, string | undefined>>(
+    () => {
+      return quizData?.questions.reduce(
+        (acc, question) => {
+          acc[question.question_id] = question.user_answer || undefined;
+          return acc;
+        },
+        {} as Record<number, string | undefined>,
+      );
+    },
+  );
   const [remainingTime, setRemainingTime] = useState<number>(() => {
     return quizData?.remaining_seconds ?? quizData?.time_limit_seconds ?? 0;
   });
@@ -49,14 +59,23 @@ const StudyQuizSolvePage = () => {
 
   useEffect(() => {
     return () => {
-      const answerPayload = quizData?.questions.map((question) => ({
-        question_id: question.question_id,
-        user_answer: answers[question.question_id] || '',
-      }));
-      patchAnswer({
-        submissionId: quizData?.submission_id ?? 0,
-        answers: answerPayload,
-      });
+      const answerPayload =
+        quizData?.questions
+          .filter((question) => {
+            const a = answers[question.question_id];
+            return a != null && String(a).trim() !== '';
+          })
+          .map((question) => ({
+            question_id: question.question_id,
+            user_answer: String(answers[question.question_id] ?? ''),
+          })) ?? [];
+
+      if (answerPayload.length > 0) {
+        patchAnswer({
+          submissionId: quizData?.submission_id ?? 0,
+          answers: answerPayload,
+        });
+      }
     };
   }, [patchAnswer, quizData?.submission_id, quizData?.questions, answers]);
 
@@ -66,7 +85,7 @@ const StudyQuizSolvePage = () => {
     setSearchParams({ quiz: String(qNumber) }, { replace: true });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     if (!studyId) return;
     const submission_id = quizData?.submission_id;
     if (!submission_id) {
@@ -95,7 +114,13 @@ const StudyQuizSolvePage = () => {
         },
       },
     );
-  };
+  }, [completeQuiz, quizData, answers, studyId, navigate]);
+
+  useEffect(() => {
+    if (remainingTime === 0) {
+      handleSubmit();
+    }
+  }, [remainingTime, handleSubmit]);
 
   return (
     <div className='flex h-full'>
